@@ -13,7 +13,7 @@ interface Comment {
 interface CommentSectionProps {
     designId: string
     initialComments: Comment[]
-    user?: { id: string, email: string } | null
+    user?: { id: string, email?: string | null } | null
 }
 
 export function CommentSection({ designId, initialComments, user }: CommentSectionProps) {

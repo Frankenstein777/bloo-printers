@@ -76,8 +76,9 @@ export default async function DesignDetailPage({ params }: { params: { id: strin
     }
 
     // Access Logic
-    const isSubscriber = session?.user.subscriptionStatus === 'PREMIUM' || session?.user.role === 'ADMIN'
-    const isAdmin = session?.user.role === 'ADMIN'
+    // Access Logic
+    const isSubscriber = (session?.user as any)?.subscriptionStatus === 'PREMIUM' || (session?.user as any)?.role === 'ADMIN'
+    const isAdmin = (session?.user as any)?.role === 'ADMIN'
 
     // Check for individual purchase
     const purchase = session ? await prisma.purchase.findFirst({
