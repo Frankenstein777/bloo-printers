@@ -1,0 +1,172 @@
+'use client'
+
+import { useState } from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { SocialActions } from './social-actions'
+import { getCommentsAction, postCommentAction } from '@/app/actions'
+import { ChatBubbleLeftIcon } from '@heroicons/react/24/outline'
+import { WatermarkOverlay } from './WatermarkOverlay'
+
+interface Design {
+    id: string
+    title: string
+    description: string
+    previewImages: string[]
+    tier: string
+    bedrooms: number
+    floors: number
+    price: number | null
+    priceRender?: number
+    priceDwg?: number
+    pricePdf?: number
+    priceElec?: number
+    priceMech?: number
+    priceStruct?: number
+}
+
+interface DesignCardProps {
+    design: Design
+    initialLikes: number
+    isLiked: boolean
+    userEmail?: string
+}
+
+export default function DesignCard({ design, initialLikes, isLiked, userEmail }: DesignCardProps) {
+    const [showComments, setShowComments] = useState(false)
+    const [comments, setComments] = useState<any[]>([])
+    const [isLoadingComments, setIsLoadingComments] = useState(false)
+    const [newComment, setNewComment] = useState('')
+    const [isPosting, setIsPosting] = useState(false)
+
+    const handleToggleComments = async () => {
+        if (!showComments) {
+            setIsLoadingComments(true)
+            const fetched = await getCommentsAction(design.id)
+            setComments(fetched)
+            setIsLoadingComments(false)
+        }
+        setShowComments(!showComments)
+    }
+
+    const handlePostComment = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!newComment.trim()) return
+
+        setIsPosting(true)
+        await postCommentAction(design.id, newComment)
+
+        // Refresh comments
+        const fetched = await getCommentsAction(design.id)
+        setComments(fetched)
+        setNewComment('')
+        setIsPosting(false)
+    }
+
+    return (
+        <div className="group relative bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-[#00f2ff] hover:shadow-[0_0_15px_rgba(0,242,255,0.3)] transition-all duration-300 overflow-hidden flex flex-col">
+            <div
+                className="w-full min-h-60 bg-gray-200 relative aspect-w-1 aspect-h-1 group-hover:opacity-90 transition-opacity"
+                onContextMenu={(e) => e.preventDefault()}
+            >
+                <WatermarkOverlay />
+                <Image
+                    src={design.previewImages[0]}
+                    alt={design.title}
+                    fill
+                    unoptimized
+                    className="object-cover object-center w-full h-full pointer-events-none select-none"
+                    draggable={false}
+                />
+                <div className="absolute top-2 right-2 z-30">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 text-xs font-medium uppercase tracking-wider ${design.tier === 'FREE' ? 'bg-green-100 text-green-800' :
+                        design.tier === 'PREMIUM' ? 'bg-purple-100 text-purple-800' :
+                            'bg-yellow-100 text-yellow-800'
+                        }`}>
+                        {design.tier}
+                    </span>
+                </div>
+            </div>
+
+            <div className="p-4 flex-1 flex flex-col justify-between">
+                <div>
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-[#f8fafc] font-mono tracking-tight">
+                        <Link href={`/designs/${design.id}`}>
+                            <span aria-hidden="true" className="absolute inset-0 z-0" />
+                            {design.title}
+                        </Link>
+                    </h3>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{design.description}</p>
+                </div>
+
+                <div className="mt-4">
+                    <div className="flex justify-between items-center mb-2">
+                        <div className="text-sm text-gray-500 dark:text-gray-400 font-mono">
+                            {design.bedrooms} Beds • {design.floors} Floors
+                        </div>
+                        <p className="text-lg font-medium text-[#00a3ad] dark:text-[#00f2ff] font-mono">
+                            {design.tier === 'PREMIUM'
+                                ? 'Subscribers Only'
+                                : design.price
+                                    ? `₦${design.price.toLocaleString()}`
+                                    : 'FREE'}
+                        </p>
+                    </div>
+
+                    <div className="relative z-10 border-t border-gray-100 dark:border-gray-800 pt-2 flex items-center justify-between">
+                        <SocialActions
+                            designId={design.id}
+                            initialLikes={initialLikes}
+                            isLiked={isLiked}
+                        />
+                        <button
+                            onClick={handleToggleComments}
+                            className="flex items-center space-x-1 text-gray-500 hover:text-[#00f2ff] transition-colors font-mono text-xs uppercase tracking-wide"
+                        >
+                            <ChatBubbleLeftIcon className="h-5 w-5" />
+                            <span>Comment</span>
+                        </button>
+                    </div>
+
+                    {showComments && (
+                        <div className="relative z-20 mt-4 border-t border-gray-100 dark:border-gray-700 pt-4">
+                            <div className="max-h-60 overflow-y-auto space-y-3 mb-4 pr-1 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-700">
+                                {isLoadingComments ? (
+                                    <p className="text-sm text-gray-500 text-center">Loading comments...</p>
+                                ) : comments.length === 0 ? (
+                                    <p className="text-sm text-gray-500 text-center">No comments yet.</p>
+                                ) : (
+                                    comments.map((c: any) => (
+                                        <div key={c.id} className="bg-gray-50 dark:bg-gray-700/50 p-2 rounded text-sm">
+                                            <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+                                                <span className="font-medium">{c.userEmail?.split('@')[0]}</span>
+                                                <span>{new Date(c.createdAt).toLocaleDateString()}</span>
+                                            </div>
+                                            <p className="text-gray-800 dark:text-gray-200">{c.content}</p>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+
+                            {userEmail ? (
+                                <form onSubmit={handlePostComment} className="relative">
+                                    <input
+                                        type="text"
+                                        placeholder="Write a comment..."
+                                        className="w-full text-sm border-gray-300 dark:border-gray-600 rounded-full px-4 py-2 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-indigo-500 focus:border-indigo-500"
+                                        value={newComment}
+                                        onChange={(e) => setNewComment(e.target.value)}
+                                        disabled={isPosting}
+                                    />
+                                    {isPosting && <span className="absolute right-3 top-2.5 text-xs text-indigo-500">...</span>}
+                                </form>
+                            ) : (
+                                <p className="text-xs text-center text-gray-500">Log in to comment</p>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    )
+}

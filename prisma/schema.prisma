@@ -1,0 +1,252 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum SubscriptionTier {
+  FREE
+  PREMIUM
+}
+
+enum DesignTier {
+  FREE
+  PREMIUM
+  EXCLUSIVE
+}
+
+model User {
+  id                String            @id @default(cuid())
+  email             String            @unique
+  emailVerified     DateTime?         // NextAuth
+  passwordHash      String?           // Optional for OAuth
+  name              String?
+  phone             String?
+  image             String?           // NextAuth standard for avatar
+  avatarUrl         String?           // Legacy, keep for now or migrate
+  bio               String?
+  role              Role              @default(USER)
+  subscriptionStatus SubscriptionTier @default(FREE)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  accounts          Account[]         // NextAuth
+  sessions          Session[]         // NextAuth
+  purchases         Purchase[]
+  downloads         Download[]
+  subscriptions     Subscription[]
+  aiRenders         AIRender[]
+  likes             Like[]
+  comments          Comment[]
+  collections       Collection[]
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+ 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+ 
+  @@id([identifier, token])
+}
+
+model Design {
+  id              String      @id @default(cuid())
+  title           String
+  description     String
+  floors          Int
+  bedrooms        Int
+  plotSize        String
+  price           Decimal?    // Legacy/Bundle price
+  
+  // Modular Pricing (Defaults in Logic, optional overrides in DB)
+  priceRender     Decimal   @default(10000)
+  priceDwg        Decimal   @default(70000)
+  pricePdf        Decimal   @default(40000)
+  priceElec       Decimal   @default(10000)
+  priceMech       Decimal   @default(10000)
+  priceStruct     Decimal   @default(30000)
+
+  // Residential Details
+  bathrooms       Int       @default(0)
+  toilets         Int       @default(0)
+  livingRooms     Int       @default(1)
+  stairs          Int       @default(0)
+  exits           Int       @default(0)
+  
+  // Features
+  hasFamilyLounge Boolean   @default(false)
+  hasPenthouse    Boolean   @default(false)
+  hasStudy        Boolean   @default(false)
+  hasLaundry      Boolean   @default(false)
+  hasStore        Boolean   @default(false)
+  hasAnteRoom     Boolean   @default(false)
+  hasBQ           Boolean   @default(false)
+
+  // Plot Details
+  // plotSize already defined above at line 50
+  plotArea        Float     @default(0)
+  
+  // Plot Fitter Data
+  buildingFootprint Json    @default("[]") // Array of {x, y} points relative to center
+
+  tier            DesignTier  @default(FREE)
+  isFeatured      Boolean     @default(false)
+  
+  dwgUrl          String      // S3 URL
+  pdfUrl          String?     // PDF implementation
+  rvtUrl          String?     // Revit
+  plnUrl          String?     // ArchiCAD
+  skpUrl          String?     // SketchUp
+  electricalUrl   String?     // ZIP
+  mechanicalUrl   String?     // ZIP
+  structuralUrl   String?     // ZIP
+  
+  fileTypes       String[]    // e.g. ["REVIT", "SKETCHUP", "PDF"]
+  
+  previewImages   String[]    // Array of S3 URLs
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  purchases       Purchase[]
+  downloads       Download[]
+  likes           Like[]
+  comments        Comment[]
+  collectionItems CollectionItem[]
+}
+
+model Purchase {
+  id        String    @id @default(cuid())
+  userId    String
+  designId  String
+  amount    Decimal
+  status    String    // e.g., "succeeded", "pending"
+  provider  String    @default("PAYSTACK") // "PAYSTACK", "STRIPE"
+  reference String    @unique // Payment reference
+  items     Json?     // Array of selected strings e.g. ["DWG", "Electrical"]
+  createdAt DateTime  @default(now())
+  
+  user      User      @relation(fields: [userId], references: [id])
+  design    Design    @relation(fields: [designId], references: [id])
+}
+
+model Subscription {
+  id                String    @id @default(cuid())
+  userId            String
+  stripeSubscriptionId String?
+  paystackSubscriptionCode String?
+  status            String    // e.g., "active", "canceled"
+  currentPeriodEnd  DateTime
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  user              User      @relation(fields: [userId], references: [id])
+}
+
+model Download {
+  id        String    @id @default(cuid())
+  userId    String
+  designId  String
+  claimedAt DateTime  @default(now())
+  
+  user      User      @relation(fields: [userId], references: [id])
+  design    Design    @relation(fields: [designId], references: [id])
+}
+
+model AIRender {
+  id        String    @id @default(cuid())
+  userId    String
+  prompt    String
+  imageUrl  String
+  createdAt DateTime  @default(now())
+  
+  user      User      @relation(fields: [userId], references: [id])
+}
+
+model Like {
+  id        String    @id @default(cuid())
+  userId    String
+  designId  String
+  createdAt DateTime  @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  design    Design    @relation(fields: [designId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, designId])
+}
+
+model Comment {
+  id        String    @id @default(cuid())
+  userId    String
+  designId  String
+  content   String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  design    Design    @relation(fields: [designId], references: [id], onDelete: Cascade)
+}
+
+model Collection {
+  id          String           @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  isPublic    Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items       CollectionItem[]
+}
+
+model CollectionItem {
+  id           String      @id @default(cuid())
+  collectionId String
+  designId     String
+  createdAt    DateTime    @default(now())
+
+  collection   Collection  @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  design       Design      @relation(fields: [designId], references: [id], onDelete: Cascade)
+
+  @@unique([collectionId, designId])
+}

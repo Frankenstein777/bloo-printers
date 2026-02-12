@@ -1,0 +1,76 @@
+@import "tailwindcss" source(none);
+@source "../**/*.{js,ts,jsx,tsx}";
+
+:root {
+  --background: #f8fafc;
+  --foreground: #0a192f;
+  
+  /* Primary: Dark Navy */
+  --primary: #0a192f;
+  
+  /* Accent: Cyan 500 equivalent */
+  --accent: #00bcd4;
+  
+  /* Muted: Gray 100 */
+  --muted: #f3f4f6;
+  
+  /* Card: White */
+  --card: #ffffff;
+  
+  /* Border: Gray 200 */
+  --border: #e5e7eb;
+}
+
+.dark {
+  /* Navy Blue Theme */
+  --background: #0a192f;  /* Dark Navy */
+  --foreground: #e6f1ff;  /* Lightest Slate */
+  
+  /* Primary: Teal/Cyan Accent */
+  --primary: #64ffda;
+  
+  /* Accent: Same as Primary */
+  --accent: #64ffda;
+  
+  /* Muted: Light Navy */
+  --muted: #112240;
+  
+  /* Card: Light Navy */
+  --card: #112240;
+  
+  /* Border: Lightest Navy */
+  --border: #233554;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-accent: var(--accent);
+  --color-muted: var(--muted);
+  --color-card: var(--card);
+  --color-border: var(--border);
+  
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: transparent;
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+  transition: color 0.3s ease;
+  min-height: 100vh;
+  cursor: none;
+}
+
+a,
+button,
+[role="button"] {
+  cursor: none;
+}
+
+input,
+textarea {
+  cursor: text;
+}
