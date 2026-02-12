@@ -44,7 +44,7 @@ export default async function CheckoutPage({ params }: { params: { id: string } 
                 priceStruct: Number(design.priceStruct || 0),
             }}
             prices={prices}
-            userEmail={session.user.email}
+            userEmail={session.user.email || undefined}
         />
     )
 }

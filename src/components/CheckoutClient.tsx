@@ -19,7 +19,7 @@ interface CheckoutClientProps {
         mech: number
         struct: number
     }
-    userEmail: string
+    userEmail?: string | null
 }
 
 export default function CheckoutClient({ design, prices, userEmail }: CheckoutClientProps) {
@@ -51,7 +51,7 @@ export default function CheckoutClient({ design, prices, userEmail }: CheckoutCl
                     id: ref,
                     date: new Date(),
                     user: {
-                        email: userEmail,
+                        email: userEmail || '',
                         name: cardholderName // Pass actual name
                     },
                     items: selectedItems.map(item => ({
