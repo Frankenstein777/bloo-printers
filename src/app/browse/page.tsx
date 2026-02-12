@@ -130,7 +130,7 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
                                         }}
                                         initialLikes={likeCounts[design.id] || 0}
                                         isLiked={!!likesMap[design.id]}
-                                        userEmail={session?.user.email}
+                                        userEmail={session?.user.email || undefined}
                                     />
                                 ))}
                             </div>
