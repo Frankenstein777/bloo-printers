@@ -121,7 +121,7 @@ export default function DesignCard({ design, initialLikes, isLiked, userEmail }:
                         />
                         <button
                             onClick={handleToggleComments}
-                            className="flex items-center space-x-1 text-gray-500 hover:text-[#00f2ff] transition-colors font-mono text-xs uppercase tracking-wide"
+                            className="tour-comment-button flex items-center space-x-1 text-gray-500 hover:text-red-500 hover:text-[#00f2ff] transition-colors font-mono text-xs uppercase tracking-wide"
                         >
                             <ChatBubbleLeftIcon className="h-5 w-5" />
                             <span>Comment</span>

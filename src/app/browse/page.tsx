@@ -84,6 +84,13 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
     })
 
 
+    // Randomize designs for freshness (Fisher-Yates Shuffle)
+    const shuffledDesigns = [...designs]
+    for (let i = shuffledDesigns.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffledDesigns[i], shuffledDesigns[j]] = [shuffledDesigns[j], shuffledDesigns[i]];
+    }
+
     return (
         <div className="min-h-screen pt-20 pb-20 px-4 sm:px-6 lg:px-8 relative z-10 pointer-events-auto">
             <div className="max-w-7xl mx-auto">
@@ -108,14 +115,14 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
 
                     {/* Results Grid */}
                     <div className="flex-1">
-                        {designs.length === 0 ? (
+                        {shuffledDesigns.length === 0 ? (
                             <div className="text-center py-20 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">
                                 <p className="text-xl text-gray-500 font-mono">NO_DATA_FOUND</p>
                                 <p className="text-sm text-gray-400 mt-2">Try adjusting your filters or search terms.</p>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 gap-y-10 sm:grid-cols-2 gap-x-6 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
-                                {designs.map((design) => (
+                            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
+                                {shuffledDesigns.map((design) => (
                                     <DesignCard
                                         key={design.id}
                                         design={{

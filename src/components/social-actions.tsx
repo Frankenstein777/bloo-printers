@@ -37,7 +37,7 @@ export function SocialActions({ designId, initialLikes, isLiked: initialIsLiked 
         <div className="flex space-x-4 py-4">
             <button
                 onClick={handleLike}
-                className="flex items-center space-x-1 text-gray-500 hover:text-red-500 transition-colors"
+                className="tour-like-button flex items-center space-x-1 text-gray-500 hover:text-red-500 transition-colors"
                 aria-label="Like"
             >
                 {isLiked ? (
@@ -50,7 +50,7 @@ export function SocialActions({ designId, initialLikes, isLiked: initialIsLiked 
 
             <button
                 onClick={handleSave}
-                className="flex items-center space-x-1 text-gray-500 hover:text-indigo-500 transition-colors"
+                className="tour-save-button flex items-center space-x-1 text-gray-500 hover:text-indigo-500 transition-colors"
                 aria-label="Save"
             >
                 {isSaved ? (

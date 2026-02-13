@@ -34,6 +34,21 @@ export function OnboardingTour() {
             target: "nav a[href='/browse']"
         },
         {
+            title: "Like & Save",
+            content: "Found something you love? Use the Heart icon to like it, or the Bookmark icon to save it for later.",
+            target: ".tour-like-button" // Targets first like button found
+        },
+        {
+            title: "Interact",
+            content: "Leave comments and discuss designs with the community.",
+            target: ".tour-comment-button"
+        },
+        {
+            title: "Site Visualizer",
+            content: "Click on any design to open the visualizer tool where you can check if it fits your plot.",
+            target: ".tour-comment-button" // Fallback target, just pointing to card area broadly
+        },
+        {
             title: "Secure Your Account",
             content: "Login or Sign Up to access your purchased designs and dashboard.",
             target: "nav a[href='/login']"
