@@ -95,7 +95,7 @@ export async function generateInvoice(data: InvoiceData) {
     doc.text(`Unpaid Balance: ${data.currency} 0.00`, 140, finalY)
     doc.setFontSize(14)
     doc.setTextColor(0, 163, 173)
-    doc.text(`TOTAL PAID: ${data.currency} ${data.total.toLocaleString()}`, 140, finalY + 8)
+    doc.text(`TOTAL PAID: ${data.currency || 'NGN'} ${data.total.toLocaleString()}`, 140, finalY + 8)
 
     // Signature
     try {

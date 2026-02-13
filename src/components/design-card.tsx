@@ -108,7 +108,7 @@ export default function DesignCard({ design, initialLikes, isLiked, userEmail }:
                             {design.tier === 'PREMIUM'
                                 ? 'Subscribers Only'
                                 : design.price
-                                    ? `₦${design.price.toLocaleString()}`
+                                    ? `₦${(Number(design.price)).toLocaleString()}`
                                     : 'FREE'}
                         </p>
                     </div>

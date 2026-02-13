@@ -125,6 +125,8 @@ export default async function DesignDetailPage({ params }: { params: { id: strin
                             <SocialActions designId={design.id} initialLikes={initialLikes} isLiked={isLiked} />
                         </div>
 
+                        {/* AI Visualization Removed as per user request */}
+                        {/* 
                         {(design.tier === 'FREE' || canDownload) && (
                             <div className="mt-10 border-t border-gray-200 dark:border-gray-700 pt-10">
                                 <h3 className="text-lg font-medium text-gray-900 dark:text-white">AI Visualization</h3>
@@ -133,7 +135,8 @@ export default async function DesignDetailPage({ params }: { params: { id: strin
                                 </p>
                                 <AIRenderGenerator designId={design.id} />
                             </div>
-                        )}
+                        )} 
+                        */}
 
                         <CommentSection designId={design.id} initialComments={comments} user={session?.user} />
                     </div>
@@ -144,7 +147,9 @@ export default async function DesignDetailPage({ params }: { params: { id: strin
 
                         <div className="mt-3">
                             <h2 className="sr-only">Product information</h2>
-                            <p className="text-3xl text-gray-900 dark:text-white">{design.price ? `$${design.price.toString()}` : design.tier}</p>
+                            <p className="text-3xl text-gray-900 dark:text-white text-[#00a3ad] dark:text-[#00f2ff] font-mono">
+                                {design.price ? `₦${Number(design.price).toLocaleString()}` : design.tier}
+                            </p>
                         </div>
 
                         <div className="mt-6">
@@ -194,7 +199,7 @@ export default async function DesignDetailPage({ params }: { params: { id: strin
                                                 <div className="flex-grow border-t border-gray-400"></div>
                                             </div>
                                             <Link href={`/checkout/${design.id}`} className="w-full bg-[#00a3ad] dark:bg-[#00f2ff] text-black font-bold py-3 px-8 rounded-md flex items-center justify-center hover:shadow-[0_0_20px_rgba(0,242,255,0.5)] transition-all uppercase tracking-widest">
-                                                Buy One-Off (NGN {(design.price || 2000).toLocaleString()})
+                                                Buy One-Off (₦{(Number(design.price) || 2000).toLocaleString()})
                                             </Link>
                                             <p className="text-center text-xs text-gray-500">Buy just this design</p>
                                         </div>

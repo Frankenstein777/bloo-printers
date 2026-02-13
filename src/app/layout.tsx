@@ -17,6 +17,8 @@ export const metadata: Metadata = {
 
 import { Providers } from "@/components/providers"
 
+import { OnboardingTour } from "@/components/OnboardingTour"
+
 export default function RootLayout({
     children,
 }: {
@@ -38,6 +40,7 @@ export default function RootLayout({
                         <GlobalProtection />
                         <AmbientAudio />
                         <Navbar />
+                        <OnboardingTour />
                         {children}
                     </ThemeProvider>
                 </Providers>
