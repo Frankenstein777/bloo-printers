@@ -1,7 +1,7 @@
+// @ts-nocheck
+const { PrismaClient: PrismaClientConstructor } = require('@prisma/client')
 
-const { PrismaClient } = require('@prisma/client')
-
-const prisma = new PrismaClient()
+const db = new PrismaClientConstructor()
 
 const designTypes = [
     { type: 'Modern', adj: ['Sleek', 'Minimalist', 'Contemporary', 'Urban'] },
@@ -14,14 +14,14 @@ const designTypes = [
 async function main() {
     // Clean up
     console.log('Cleaning up database...')
-    await prisma.download.deleteMany()
-    await prisma.purchase.deleteMany()
-    await prisma.design.deleteMany()
-    await prisma.user.deleteMany()
+    await db.download.deleteMany()
+    await db.purchase.deleteMany()
+    await db.design.deleteMany()
+    await db.user.deleteMany()
 
     // Create Users
     console.log('Creating users...')
-    const admin = await prisma.user.create({
+    const admin = await db.user.create({
         data: {
             email: 'admin@bloo.com',
             passwordHash: 'hashedpassword',
@@ -29,7 +29,7 @@ async function main() {
         },
     })
 
-    const subscriber = await prisma.user.create({
+    const subscriber = await db.user.create({
         data: {
             email: 'subscriber@bloo.com',
             passwordHash: 'hashedpassword',
@@ -38,7 +38,7 @@ async function main() {
         },
     })
 
-    const guest = await prisma.user.create({
+    const guest = await db.user.create({
         data: {
             email: 'guest@bloo.com',
             passwordHash: 'hashedpassword',
@@ -112,7 +112,7 @@ async function main() {
     }
 
     for (const design of designs) {
-        await prisma.design.create({ data: design })
+        await db.design.create({ data: design })
     }
 
     console.log(`Seeding finished. Created ${designs.length} designs.`)
@@ -120,10 +120,12 @@ async function main() {
 
 main()
     .then(async () => {
-        await prisma.$disconnect()
+        await db.$disconnect()
     })
     .catch(async (e) => {
         console.error(e)
-        await prisma.$disconnect()
+        await db.$disconnect()
         process.exit(1)
     })
+
+export { }
