@@ -393,31 +393,48 @@ export function SurveyPlotter({ design, isOpen, onClose }: PlotFitterProps) {
 
     // --- INTERACTIONS ---
 
-    // Simple Mouse Drag for Building Position
-    const handleMouseDown = (e: React.MouseEvent) => {
+    // Unified Input Handlers (Mouse + Touch)
+    const handleInputStart = (clientX: number, clientY: number) => {
         isDragging.current = true
-        lastMousePos.current = { x: e.clientX, y: e.clientY }
+        lastMousePos.current = { x: clientX, y: clientY }
     }
 
-    const handleMouseMove = (e: React.MouseEvent) => {
+    const handleInputMove = (clientX: number, clientY: number) => {
         if (!isDragging.current) return
 
-        // Convert px delta to meter delta (Approximate scale for interactivity)
-        // Ideally we use the exact scale calculated in render, but a constant is "good enough" for feel
-        // Convert px delta to millimeter delta
-        // scale Factor needs adjustment for mm. If 0.05 was for meters, mm needs ~50
-        const scaleFactor = 50
-
-        const dx = (e.clientX - lastMousePos.current.x) * scaleFactor
-        const dy = (e.clientY - lastMousePos.current.y) * scaleFactor
+        const scaleFactor = 50 // mm per px approximation for drag feel
+        const dx = (clientX - lastMousePos.current.x) * scaleFactor
+        const dy = (clientY - lastMousePos.current.y) * scaleFactor
 
         setBuildingPos(prev => ({ x: prev.x + dx, y: prev.y + dy }))
-        lastMousePos.current = { x: e.clientX, y: e.clientY }
+        lastMousePos.current = { x: clientX, y: clientY }
     }
 
-    const handleMouseUp = () => {
+    const handleInputEnd = () => {
         isDragging.current = false
     }
+
+    // Mouse Wrappers
+    const handleMouseDown = (e: React.MouseEvent) => handleInputStart(e.clientX, e.clientY)
+    const handleMouseMove = (e: React.MouseEvent) => handleInputMove(e.clientX, e.clientY)
+    const handleMouseUp = () => handleInputEnd()
+
+    // Touch Wrappers
+    const handleTouchStart = (e: React.TouchEvent) => {
+        // Prevent default to stop scrolling while dragging building
+        // e.preventDefault() // React synthetic events might complain, let's see. 
+        // Better to use style touch-action: none on canvas
+        const touch = e.touches[0]
+        handleInputStart(touch.clientX, touch.clientY)
+    }
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        const touch = e.touches[0]
+        handleInputMove(touch.clientX, touch.clientY)
+    }
+
+    const handleTouchEnd = () => handleInputEnd()
+
 
     const handleWheel = (e: React.WheelEvent) => {
         const delta = e.deltaY > 0 ? 0.9 : 1.1
@@ -431,11 +448,11 @@ export function SurveyPlotter({ design, isOpen, onClose }: PlotFitterProps) {
     if (!isOpen) return null
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-            <div className="bg-slate-900 border border-slate-700 w-full max-w-6xl h-[90vh] rounded-xl flex overflow-hidden shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-0 sm:p-4">
+            <div className="bg-slate-900 border border-slate-700 w-full max-w-6xl h-full sm:h-[90vh] rounded-none sm:rounded-xl flex flex-col-reverse md:flex-row overflow-hidden shadow-2xl">
 
-                {/* Left: Input Panel */}
-                <div className="w-1/3 bg-slate-950 border-r border-slate-800 p-6 flex flex-col overflow-y-auto">
+                {/* Input Panel (Bottom on Mobile, Left on Desktop) */}
+                <div className="w-full md:w-1/3 h-1/3 md:h-full bg-slate-950 border-t md:border-t-0 md:border-r border-slate-800 p-4 sm:p-6 flex flex-col overflow-y-auto">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-xl font-bold text-white font-mono">Survey Data</h2>
                         <div className="flex bg-slate-800 rounded p-1">
@@ -540,44 +557,62 @@ export function SurveyPlotter({ design, isOpen, onClose }: PlotFitterProps) {
                     </button>
                 </div>
 
-                {/* Right: Canvas */}
-                <div className="w-2/3 relative bg-[#020617]" ref={containerRef}>
+                {/* Right: Canvas (Top on Mobile, Right on Desktop) */}
+                <div className="w-full md:w-2/3 h-2/3 md:h-full relative bg-[#020617]" ref={containerRef}>
                     {/* Toolbar */}
-                    <div className="absolute top-4 left-4 right-4 flex justify-between z-10 pointer-events-none">
-                        <div className="bg-slate-900/90 backdrop-blur px-4 py-2 rounded border border-slate-700 shadow-xl pointer-events-auto">
-                            <h3 className="text-white font-bold text-sm">Site Visualizer</h3>
-                            <div className="flex items-center gap-4 mt-1">
-                                <p className="text-xs text-slate-400">Drag to move building</p>
-                                <div className="h-3 w-[1px] bg-slate-700" />
+                    <div className="absolute top-4 left-4 right-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 z-10 pointer-events-none">
+                        <div className="bg-slate-900/90 backdrop-blur px-4 py-2 rounded border border-slate-700 shadow-xl pointer-events-auto w-full sm:w-auto flex justify-between sm:justify-start items-center">
+                            <h3 className="text-white font-bold text-sm hidden sm:block">Site Visualizer</h3>
+                            <button
+                                onClick={onClose}
+                                className="sm:hidden bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/50 px-3 py-1 rounded font-bold text-xs uppercase"
+                            >
+                                Close
+                            </button>
+                            <div className="flex items-center gap-4">
+                                <p className="text-xs text-slate-400 hidden sm:block">Drag to move</p>
+                                <div className="h-3 w-[1px] bg-slate-700 hidden sm:block" />
                                 <div className="flex items-center gap-2">
                                     <button
                                         onClick={() => setZoomLevel(prev => Math.max(prev * 0.8, 0.2))}
-                                        className="w-5 h-5 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-white rounded text-xs border border-slate-700 pointer-events-auto"
-                                    >—</button>
+                                        className="w-6 h-6 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-white rounded text-sm border border-slate-700 pointer-events-auto"
+                                    >−</button>
                                     <span className="text-[10px] text-slate-400 font-mono w-8 text-center">{Math.round(zoomLevel * 100)}%</span>
                                     <button
                                         onClick={() => setZoomLevel(prev => Math.min(prev * 1.2, 5))}
-                                        className="w-5 h-5 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-white rounded text-xs border border-slate-700 pointer-events-auto"
+                                        className="w-6 h-6 flex items-center justify-center bg-slate-800 hover:bg-slate-700 text-white rounded text-sm border border-slate-700 pointer-events-auto"
                                     >+</button>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="bg-slate-900/90 backdrop-blur px-4 py-2 rounded border border-slate-700 shadow-xl pointer-events-auto flex items-center space-x-4">
-                            <span className="text-xs text-slate-400 uppercase font-bold">Rotation</span>
+                        <div className="bg-slate-900/90 backdrop-blur px-4 py-2 rounded border border-slate-700 shadow-xl pointer-events-auto flex items-center space-x-2 w-full sm:w-auto justify-center">
+                            <span className="text-xs text-slate-400 uppercase font-bold">Rot:</span>
+                            <div className="flex items-center space-x-2">
+                                <input
+                                    type="text"
+                                    value={buildingRotation}
+                                    onChange={e => {
+                                        const val = parseInt(e.target.value) || 0
+                                        setBuildingRotation(Math.max(0, Math.min(360, val)))
+                                    }}
+                                    className="w-12 bg-slate-800 border-slate-600 text-white text-xs px-1 py-0.5 rounded text-center focus:ring-1 focus:ring-cyan-500"
+                                    placeholder="0"
+                                />
+                                <span className="text-white text-xs">°</span>
+                            </div>
                             <input
                                 type="range"
                                 min="0" max="360"
                                 value={buildingRotation}
                                 onChange={e => setBuildingRotation(parseInt(e.target.value))}
-                                className="w-32 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+                                className="w-24 sm:w-32 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
                             />
-                            <span className="text-white font-mono text-sm w-8">{buildingRotation}°</span>
                         </div>
 
                         <button
                             onClick={onClose}
-                            className="bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/50 px-4 py-2 rounded font-bold text-sm uppercase pointer-events-auto"
+                            className="hidden sm:block bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/50 px-4 py-2 rounded font-bold text-sm uppercase pointer-events-auto"
                         >
                             Close
                         </button>
@@ -589,8 +624,13 @@ export function SurveyPlotter({ design, isOpen, onClose }: PlotFitterProps) {
                         onMouseMove={handleMouseMove}
                         onMouseUp={handleMouseUp}
                         onMouseLeave={handleMouseUp}
+                        // Touch Support
+                        onTouchStart={handleTouchStart}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={handleTouchEnd}
                         onWheel={handleWheel}
-                        className="w-full h-full cursor-move"
+                        className="w-full h-full cursor-move touch-none" // touch-none prevents scrolling
+                        style={{ touchAction: 'none' }}
                     />
 
                     {/* Compass Rose */}
