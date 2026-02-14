@@ -6,11 +6,7 @@ import path from 'path'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-config'
 
-export const config = {
-    api: {
-        bodyParser: false, // Disallow Next.js body parsing, though we strictly use standard Request here
-    },
-}
+
 
 export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions)

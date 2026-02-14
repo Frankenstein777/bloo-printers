@@ -544,3 +544,86 @@ export async function verifyPurchaseAction(reference: string, designId: string, 
     return { success: false, error: 'Verification failed' }
   }
 }
+
+// ============================================================
+// SOCIAL ACTIONS
+// ============================================================
+
+export async function toggleLikeAction(designId: string): Promise<void> {
+  const session = await getSession()
+  if (!session) return
+
+  const userId = session.user.id
+  const existing = await prisma.like.findFirst({
+    where: { userId, designId }
+  })
+
+  if (existing) {
+    await prisma.like.delete({ where: { id: existing.id } })
+  } else {
+    await prisma.like.create({
+      data: { userId, designId }
+    })
+  }
+  revalidatePath('/')
+  revalidatePath('/browse')
+  revalidatePath(`/designs/${designId}`)
+}
+
+export async function addToCollectionAction(designId: string): Promise<void> {
+  const session = await getSession()
+  if (!session) return
+
+  const userId = session.user.id
+  // For MVP, we use a default 'Favorites' collection or just a simple join table if CollectionItem is direct.
+  // Schema says CollectionItem -> Collection.
+  // Let's check if user has a default collection, if not create one.
+
+  let collection = await prisma.collection.findFirst({
+    where: { userId, name: 'Favorites' }
+  })
+
+  if (!collection) {
+    collection = await prisma.collection.create({
+      data: { userId, name: 'Favorites', isPublic: false }
+    })
+  }
+
+  const existingItem = await prisma.collectionItem.findFirst({
+    where: { collectionId: collection.id, designId }
+  })
+
+  if (existingItem) {
+    await prisma.collectionItem.delete({ where: { id: existingItem.id } })
+  } else {
+    await prisma.collectionItem.create({
+      data: { collectionId: collection.id, designId }
+    })
+  }
+  revalidatePath('/')
+  revalidatePath('/browse')
+  revalidatePath(`/designs/${designId}`)
+}
+
+export async function postCommentAction(designId: string, content: string): Promise<void> {
+  const session = await getSession()
+  if (!session) return
+
+  await prisma.comment.create({
+    data: {
+      userId: session.user.id,
+      designId,
+      content
+    }
+  })
+  revalidatePath(`/designs/${designId}`)
+}
+
+export async function getCommentsAction(designId: string) {
+  // This is often better as a direct DB call in RSC, but implementing as requested by error
+  return await prisma.comment.findMany({
+    where: { designId },
+    include: { user: { select: { email: true, name: true, image: true } } },
+    orderBy: { createdAt: 'desc' }
+  })
+}
