@@ -5,7 +5,7 @@ import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-config'
-
+import { DesignTier } from '@prisma/client'
 
 
 export async function POST(req: NextRequest) {
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
         // Extract Data
         const title = formData.get('title') as string
         const description = formData.get('description') as string
-        const tier = formData.get('tier') as string
+        const tier = formData.get('tier') as DesignTier
         const price = formData.get('price') ? parseFloat(formData.get('price') as string) : null
 
         const priceRender = parseFloat(formData.get('priceRender') as string) || 0
