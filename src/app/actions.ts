@@ -503,7 +503,6 @@ export async function verifyPurchaseAction(reference: string, designId: string, 
     }
 
     // Verify amount (Paystack returns in kobo)
-    // We expect amount dealing with kobo from client? 
     // PaystackCheckout passes amount in kobo.
     if (data.data.amount !== amount) {
       console.error(`Amount mismatch: Expected ${amount}, Got ${data.data.amount}`)
@@ -515,7 +514,7 @@ export async function verifyPurchaseAction(reference: string, designId: string, 
 
     // Check if purchase already exists
     const existing = await prisma.purchase.findFirst({
-      where: { transactionId: reference }
+      where: { reference: reference }
     })
 
     if (existing) {
