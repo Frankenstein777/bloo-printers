@@ -1,61 +1,71 @@
 'use client'
 
-import { useActionState, useState } from 'react'
-import { uploadDesignAction } from '@/app/actions'
+import { useState } from 'react'
 import { FootprintEditor, EditorVertex } from '@/components/admin/FootprintEditor'
-
-const initialState = {
-    error: '',
-    success: false
-}
+import { useRouter } from 'next/navigation'
 
 export default function AdminUploadPage() {
-    const [state, formAction, isPending] = useActionState(uploadDesignAction, initialState)
+    const router = useRouter()
+    const [isUploading, setIsUploading] = useState(false)
+    const [uploadProgress, setUploadProgress] = useState(0)
+    const [error, setError] = useState('')
+    const [success, setSuccess] = useState(false)
     const [footprintVertices, setFootprintVertices] = useState<EditorVertex[]>([])
 
-    const generateSvgPath = (vertices: any[]) => {
-        if (vertices.length === 0) return ""
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        setError('')
+        setSuccess(false)
+        setIsUploading(true)
+        setUploadProgress(0)
 
-        // 1. Center vertices first
-        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
-        vertices.forEach(v => {
-            minX = Math.min(minX, v.x); maxX = Math.max(maxX, v.x)
-            minY = Math.min(minY, v.y); maxY = Math.max(maxY, v.y)
-        })
-        const centerX = (minX + maxX) / 2
-        const centerY = (minY + maxY) / 2
+        const formData = new FormData(e.currentTarget)
 
-        const centered = vertices.map(v => ({
-            ...v,
-            x: v.x - centerX,
-            y: v.y - centerY
-        }))
+        // Append footprint if not already there (it should be in the hidden input, but ensuring)
+        const footprintInput = document.getElementById('footprintInput') as HTMLInputElement
+        if (footprintInput) {
+            formData.set('buildingFootprint', footprintInput.value)
+        }
 
-        // 2. Build SVG Path
-        let path = `M ${centered[0].x.toFixed(2)} ${centered[0].y.toFixed(2)}`
+        const xhr = new XMLHttpRequest()
+        xhr.open('POST', '/api/admin/upload')
 
-        for (let i = 0; i < centered.length; i++) {
-            const v1 = centered[i]
-            const nextIdx = (i + 1) % centered.length
-            const v2 = centered[nextIdx]
-
-            // If the polyline is not closed and we are at the last vertex, skip
-            if (nextIdx === 0 && i === centered.length - 1) break
-
-            const bulge = v1.bulge || 0
-            if (bulge === 0) {
-                path += ` L ${v2.x.toFixed(2)} ${v2.y.toFixed(2)}`
-            } else {
-                const dx = v2.x - v1.x
-                const dy = v2.y - v1.y
-                const L = Math.sqrt(dx * dx + dy * dy)
-                const r = (L / 2) * (1 + bulge * bulge) / (2 * Math.abs(bulge))
-                const largeArc = Math.abs(bulge) > 1 ? 1 : 0
-                const sweep = bulge < 0 ? 1 : 0
-                path += ` A ${r.toFixed(2)} ${r.toFixed(2)} 0 ${largeArc} ${sweep} ${v2.x.toFixed(2)} ${v2.y.toFixed(2)}`
+        xhr.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+                const percent = Math.round((event.loaded / event.total) * 100)
+                setUploadProgress(percent)
             }
         }
-        return path + " Z"
+
+        xhr.onload = () => {
+            setIsUploading(false)
+            if (xhr.status >= 200 && xhr.status < 300) {
+                const response = JSON.parse(xhr.responseText)
+                if (response.success) {
+                    setSuccess(true)
+                    // Reset form or redirect
+                    if (confirm('Upload Successful! Redirect to home?')) {
+                        router.push('/')
+                    } else {
+                        // Optional: Reset form
+                        (e.target as HTMLFormElement).reset()
+                        setUploadProgress(0)
+                        setFootprintVertices([])
+                    }
+                } else {
+                    setError(response.error || 'Upload failed')
+                }
+            } else {
+                setError('Upload failed. Server responded with ' + xhr.status)
+            }
+        }
+
+        xhr.onerror = () => {
+            setIsUploading(false)
+            setError('Upload failed due to network error')
+        }
+
+        xhr.send(formData)
     }
 
     const handleDxfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -108,6 +118,9 @@ export default function AdminUploadPage() {
             }))
 
             setFootprintVertices(centered)
+            const footprintInput = document.getElementById('footprintInput') as HTMLInputElement
+            if (footprintInput) footprintInput.value = JSON.stringify(centered)
+
 
         } catch (err) {
             console.error("DXF Parse Error:", err)
@@ -117,89 +130,114 @@ export default function AdminUploadPage() {
 
     return (
         <div className="min-h-screen bg-transparent py-12 px-4 sm:px-6 lg:px-8 transition-colors">
-            <div className="max-w-md mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden md:max-w-2xl p-8">
-                <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Upload New Design</h1>
+            <div className="max-w-md mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden md:max-w-2xl p-8 border border-gray-100 dark:border-gray-700">
+                <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white flex items-center gap-2">
+                    <span>Upload New Design</span>
+                    {isUploading && <span className="text-xs font-normal px-2 py-1 bg-blue-100 text-blue-700 rounded-full animate-pulse">Uploading... {uploadProgress}%</span>}
+                </h1>
 
-                {state.error && (
-                    <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                        <strong className="font-bold">Error: </strong>
-                        <span className="block sm:inline">{state.error}</span>
+                {/* Progress Bar */}
+                {isUploading && (
+                    <div className="w-full bg-gray-200 rounded-full h-2.5 mb-6 dark:bg-gray-700">
+                        <div className="bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-out" style={{ width: `${uploadProgress}%` }}></div>
                     </div>
                 )}
 
-                < form action={formAction} className="space-y-4" >
+                {error && (
+                    <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                        <strong className="font-bold">Error: </strong>
+                        <span className="block sm:inline">{error}</span>
+                    </div>
+                )}
+
+                {success && (
+                    <div className="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                        <strong className="font-bold">Success! </strong>
+                        <span className="block sm:inline">Design uploaded successfully.</span>
+                    </div>
+                )}
+
+                <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
                         <input name="title" required className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
-                        <textarea name="description" required className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
+                        <textarea name="description" required rows={3} className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 border p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
                     </div>
 
                     {/* Specs Grid */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Floors</label>
-                            <input type="number" name="floors" required className="mt-1 block w-full rounded-md border p-2 bg-white dark:bg-gray-700 dark:border-gray-600" />
+                            <label className="block text-xs uppercase font-bold text-gray-500 dark:text-gray-400 mb-1">Floors</label>
+                            <input type="number" name="floors" required className="block w-full rounded-md border p-2 bg-white dark:bg-gray-700 dark:border-gray-600 text-sm" />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Bedrooms</label>
-                            <input type="number" name="bedrooms" required className="mt-1 block w-full rounded-md border p-2 bg-white dark:bg-gray-700 dark:border-gray-600" />
+                            <label className="block text-xs uppercase font-bold text-gray-500 dark:text-gray-400 mb-1">Bedrooms</label>
+                            <input type="number" name="bedrooms" required className="block w-full rounded-md border p-2 bg-white dark:bg-gray-700 dark:border-gray-600 text-sm" />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Bathrooms</label>
-                            <input type="number" name="bathrooms" required defaultValue="0" className="mt-1 block w-full rounded-md border p-2 bg-white dark:bg-gray-700 dark:border-gray-600" />
+                            <label className="block text-xs uppercase font-bold text-gray-500 dark:text-gray-400 mb-1">Bathrooms</label>
+                            <input type="number" name="bathrooms" required defaultValue="0" className="block w-full rounded-md border p-2 bg-white dark:bg-gray-700 dark:border-gray-600 text-sm" />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Toilets</label>
-                            <input type="number" name="toilets" required defaultValue="0" className="mt-1 block w-full rounded-md border p-2 bg-white dark:bg-gray-700 dark:border-gray-600" />
+                            <label className="block text-xs uppercase font-bold text-gray-500 dark:text-gray-400 mb-1">Toilets</label>
+                            <input type="number" name="toilets" required defaultValue="0" className="block w-full rounded-md border p-2 bg-white dark:bg-gray-700 dark:border-gray-600 text-sm" />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Living Rms</label>
-                            <input type="number" name="livingRooms" required defaultValue="1" className="mt-1 block w-full rounded-md border p-2 bg-white dark:bg-gray-700 dark:border-gray-600" />
+                            <label className="block text-xs uppercase font-bold text-gray-500 dark:text-gray-400 mb-1">Living Rms</label>
+                            <input type="number" name="livingRooms" required defaultValue="1" className="block w-full rounded-md border p-2 bg-white dark:bg-gray-700 dark:border-gray-600 text-sm" />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Stairs</label>
-                            <input type="number" name="stairs" required defaultValue="0" className="mt-1 block w-full rounded-md border p-2 bg-white dark:bg-gray-700 dark:border-gray-600" />
+                            <label className="block text-xs uppercase font-bold text-gray-500 dark:text-gray-400 mb-1">Stairs</label>
+                            <input type="number" name="stairs" required defaultValue="0" className="block w-full rounded-md border p-2 bg-white dark:bg-gray-700 dark:border-gray-600 text-sm" />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Exits</label>
-                            <input type="number" name="exits" required defaultValue="2" className="mt-1 block w-full rounded-md border p-2 bg-white dark:bg-gray-700 dark:border-gray-600" />
+                            <label className="block text-xs uppercase font-bold text-gray-500 dark:text-gray-400 mb-1">Exits</label>
+                            <input type="number" name="exits" required defaultValue="2" className="block w-full rounded-md border p-2 bg-white dark:bg-gray-700 dark:border-gray-600 text-sm" />
                         </div>
                     </div>
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Features</label>
-                        <div className="grid grid-cols-2 gap-2 text-sm text-gray-700 dark:text-gray-300">
-                            <label className="flex items-center space-x-2">
-                                <input type="checkbox" name="hasFamilyLounge" className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
-                                <span>Family Lounge</span>
-                            </label>
-                            <label className="flex items-center space-x-2">
-                                <input type="checkbox" name="hasPenthouse" className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
-                                <span>Penthouse</span>
-                            </label>
-                            <label className="flex items-center space-x-2">
-                                <input type="checkbox" name="hasStudy" className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
-                                <span>Study / Office</span>
-                            </label>
-                            <label className="flex items-center space-x-2">
-                                <input type="checkbox" name="hasAnteRoom" className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
-                                <span>Ante Room</span>
-                            </label>
-                            <label className="flex items-center space-x-2">
-                                <input type="checkbox" name="hasLaundry" className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
-                                <span>Laundry</span>
-                            </label>
-                            <label className="flex items-center space-x-2">
-                                <input type="checkbox" name="hasStore" className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
-                                <span>Store</span>
-                            </label>
-                            <label className="flex items-center space-x-2">
-                                <input type="checkbox" name="hasBQ" className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
-                                <span>BQ (Boys Quarters)</span>
-                            </label>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm text-gray-700 dark:text-gray-300">
+                            {[
+                                { label: 'Family Lounge', name: 'hasFamilyLounge' },
+                                { label: 'Penthouse', name: 'hasPenthouse' },
+                                { label: 'Study / Office', name: 'hasStudy' },
+                                { label: 'Laundry', name: 'hasLaundry' },
+                                { label: 'Store', name: 'hasStore' },
+                                { label: 'Ante Room', name: 'hasAnteRoom' },
+                                { label: 'BQ (Boys Quarters)', name: 'hasBQ' },
+                                // Amenities
+                                { label: 'Home Cinema', name: 'hasCinema' },
+                                { label: 'Gym', name: 'hasGym' },
+                                { label: 'Game Room', name: 'hasGameRoom' },
+                                { label: 'Bar', name: 'hasBar' },
+                                { label: 'Rooftop Lounge', name: 'hasRooftop' },
+                                { label: 'Reading Room', name: 'hasReadingRoom' },
+                                { label: 'Spa', name: 'hasSpa' },
+                                { label: 'Indoor Pool', name: 'hasIndoorPool' },
+                                { label: 'Courtyard', name: 'hasCourtyard' },
+                                { label: 'Atrium', name: 'hasAtrium' },
+                                { label: 'Loggia', name: 'hasLoggia' },
+                                { label: 'Pet Room', name: 'hasPetRoom' },
+                                { label: 'Basement', name: 'hasBasement' },
+                                { label: 'Garage', name: 'hasGarage' },
+                                { label: 'Swimming Pool', name: 'hasPool' },
+                                { label: 'Gatehouse', name: 'hasGatehouse' },
+                                { label: 'Cold Room', name: 'hasColdRoom' },
+                                { label: 'Pantry', name: 'hasPantry' },
+                                { label: 'Panic Room', name: 'hasPanicRoom' },
+                                { label: 'Music Room', name: 'hasMusicRoom' },
+                                { label: 'Studio', name: 'hasStudio' },
+                            ].map(field => (
+                                <label key={field.name} className="flex items-center space-x-2">
+                                    <input type="checkbox" name={field.name} className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+                                    <span>{field.label}</span>
+                                </label>
+                            ))}
                         </div>
                     </div>
 
@@ -291,8 +329,14 @@ export default function AdminUploadPage() {
                                     const hw = w / 2;
                                     const hl = l / 2;
 
-                                    // Set Vertices for Editor
                                     setFootprintVertices([
+                                        { x: -hw, y: -hl },
+                                        { x: hw, y: -hl },
+                                        { x: hw, y: hl },
+                                        { x: -hw, y: hl }
+                                    ])
+                                    const footprintInput = document.getElementById('footprintInput') as HTMLInputElement
+                                    if (footprintInput) footprintInput.value = JSON.stringify([
                                         { x: -hw, y: -hl },
                                         { x: hw, y: -hl },
                                         { x: hw, y: hl },
@@ -392,10 +436,10 @@ export default function AdminUploadPage() {
 
                     <button
                         type="submit"
-                        disabled={isPending}
-                        className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${isPending ? 'bg-indigo-400' : 'bg-indigo-600 hover:bg-indigo-700'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
+                        disabled={isUploading}
+                        className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${isUploading ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
                     >
-                        {isPending ? 'Uploading...' : 'Upload Design'}
+                        {isUploading ? 'Uploading...' : 'Upload Design'}
                     </button>
                 </form >
             </div >

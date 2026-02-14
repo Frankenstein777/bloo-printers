@@ -174,6 +174,47 @@ export default async function DesignDetailPage({ params }: { params: { id: strin
                             </div>
                         </div>
 
+                        <div className="mt-8 border-t border-gray-200 dark:border-gray-700 pt-8">
+                            <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-4">Features & Amenities</h3>
+                            <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-sm text-gray-600 dark:text-gray-400">
+                                {[
+                                    { label: 'Family Lounge', val: design.hasFamilyLounge },
+                                    { label: 'Penthouse', val: design.hasPenthouse },
+                                    { label: 'Study / Office', val: design.hasStudy },
+                                    { label: 'Laundry', val: design.hasLaundry },
+                                    { label: 'Store', val: design.hasStore },
+                                    { label: 'Ante Room', val: design.hasAnteRoom },
+                                    { label: 'BQ', val: design.hasBQ },
+                                    { label: 'Home Cinema', val: design.hasCinema },
+                                    { label: 'Gym', val: design.hasGym },
+                                    { label: 'Game Room', val: design.hasGameRoom },
+                                    { label: 'Bar', val: design.hasBar },
+                                    { label: 'Rooftop Lounge', val: design.hasRooftop },
+                                    { label: 'Reading Room', val: design.hasReadingRoom },
+                                    { label: 'Spa', val: design.hasSpa },
+                                    { label: 'Indoor Pool', val: design.hasIndoorPool },
+                                    { label: 'Courtyard', val: design.hasCourtyard },
+                                    { label: 'Atrium', val: design.hasAtrium },
+                                    { label: 'Loggia', val: design.hasLoggia },
+                                    { label: 'Pet Room', val: design.hasPetRoom },
+                                    { label: 'Basement', val: design.hasBasement },
+                                    { label: 'Garage', val: design.hasGarage },
+                                    { label: 'Swimming Pool', val: design.hasPool },
+                                    { label: 'Gatehouse', val: design.hasGatehouse },
+                                    { label: 'Cold Room', val: design.hasColdRoom },
+                                    { label: 'Pantry', val: design.hasPantry },
+                                    { label: 'Panic Room', val: design.hasPanicRoom },
+                                    { label: 'Music Room', val: design.hasMusicRoom },
+                                    { label: 'Studio', val: design.hasStudio },
+                                ].filter(f => f.val).map(f => (
+                                    <div key={f.label} className="flex items-center gap-2">
+                                        <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+                                        <span>{f.label}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
                         <div className="mt-6 border-t border-gray-200 dark:border-gray-700 pt-6">
                             <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Tools</h3>
                             <PlotFitterTrigger design={sanitizedDesign as any} />

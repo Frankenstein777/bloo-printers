@@ -120,6 +120,29 @@ model Design {
   hasStore        Boolean   @default(false)
   hasAnteRoom     Boolean   @default(false)
   hasBQ           Boolean   @default(false)
+  
+  // Clean Luxury Amenities
+  hasCinema       Boolean   @default(false)
+  hasGym          Boolean   @default(false)
+  hasGameRoom     Boolean   @default(false)
+  hasBar          Boolean   @default(false)
+  hasRooftop      Boolean   @default(false)
+  hasReadingRoom  Boolean   @default(false)
+  hasSpa          Boolean   @default(false)
+  hasIndoorPool   Boolean   @default(false)
+  hasCourtyard    Boolean   @default(false)
+  hasAtrium       Boolean   @default(false)
+  hasLoggia       Boolean   @default(false)
+  hasPetRoom      Boolean   @default(false)
+  hasBasement     Boolean   @default(false)
+  hasGarage       Boolean   @default(false)
+  hasPool         Boolean   @default(false)
+  hasGatehouse    Boolean   @default(false)
+  hasColdRoom     Boolean   @default(false)
+  hasPantry       Boolean   @default(false)
+  hasPanicRoom    Boolean   @default(false)
+  hasMusicRoom    Boolean   @default(false)
+  hasStudio       Boolean   @default(false)
 
   // Plot Details
   // plotSize already defined above at line 50
@@ -162,6 +185,7 @@ model Purchase {
   status    String    // e.g., "succeeded", "pending"
   provider  String    @default("PAYSTACK") // "PAYSTACK", "STRIPE"
   reference String    @unique // Payment reference
+  currency  String    @default("NGN")
   items     Json?     // Array of selected strings e.g. ["DWG", "Electrical"]
   createdAt DateTime  @default(now())
   

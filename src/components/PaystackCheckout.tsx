@@ -26,7 +26,7 @@ export default function PaystackCheckout({
     amount,
     designId,
     designTitle,
-    publicKey = 'pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    publicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || 'pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
     isSubscription = false
 }: PaystackCheckoutProps) {
     const [loading, setLoading] = useState(false)

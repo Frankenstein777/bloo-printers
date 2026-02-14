@@ -137,6 +137,28 @@ export default function DesignEditForm({ design }: DesignEditFormProps) {
                             { label: 'Ante Room', name: 'hasAnteRoom' },
                             { label: 'BQ', name: 'hasBQ' },
                             { label: 'Featured Project', name: 'isFeatured' },
+                            // New Amenities
+                            { label: 'Home Cinema', name: 'hasCinema' },
+                            { label: 'Gym', name: 'hasGym' },
+                            { label: 'Game Room', name: 'hasGameRoom' },
+                            { label: 'Bar', name: 'hasBar' },
+                            { label: 'Rooftop Lounge', name: 'hasRooftop' },
+                            { label: 'Reading Room', name: 'hasReadingRoom' },
+                            { label: 'Spa', name: 'hasSpa' },
+                            { label: 'Indoor Pool', name: 'hasIndoorPool' },
+                            { label: 'Courtyard', name: 'hasCourtyard' },
+                            { label: 'Atrium', name: 'hasAtrium' },
+                            { label: 'Loggia', name: 'hasLoggia' },
+                            { label: 'Pet Room', name: 'hasPetRoom' },
+                            { label: 'Basement', name: 'hasBasement' },
+                            { label: 'Garage', name: 'hasGarage' },
+                            { label: 'Swimming Pool', name: 'hasPool' },
+                            { label: 'Gatehouse', name: 'hasGatehouse' },
+                            { label: 'Cold Room', name: 'hasColdRoom' },
+                            { label: 'Pantry', name: 'hasPantry' },
+                            { label: 'Panic Room', name: 'hasPanicRoom' },
+                            { label: 'Music Room', name: 'hasMusicRoom' },
+                            { label: 'Studio', name: 'hasStudio' },
                         ].map(field => (
                             <label key={field.name} className="flex items-center space-x-2 text-sm text-slate-700 dark:text-slate-300 cursor-pointer">
                                 <input type="checkbox" name={field.name} defaultChecked={(design as any)[field.name]} className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />
