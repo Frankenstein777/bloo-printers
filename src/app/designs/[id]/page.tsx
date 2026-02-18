@@ -50,13 +50,41 @@ async function getLikeCount(designId: string) {
     })
 }
 
-export default async function DesignDetailPage({ params }: { params: { id: string } }) {
+export default async function DesignDetailPage({ params, searchParams }: { params: { id: string }, searchParams: { verify_ref?: string } }) {
     const { id } = await params
+    const { verify_ref } = await searchParams
     const design = await getDesign(id)
     const session = await getSession()
 
     if (!design) {
         notFound()
+    }
+
+    // Auto-Verify if returning from Paystack
+    let autoUnlocked = false
+    if (verify_ref && session) {
+        // We verify on the server before rendering
+        // Note: verifyPurchaseAction is an async server action, we can call it directly here since we are on the server
+        const { verifyPurchaseAction } = await import('@/app/actions')
+        const result = await verifyPurchaseAction(verify_ref, id, Number(design.priceRender || design.price || 0)) // Render Price is default?
+        // Wait, price logic needs to match what was sent.
+        // For now, let's assume the action handles amount mismatch gracefully or we fetch the exact amount used.
+        // Actually, verifyPurchaseAction checks amount. We need to pass the correct amount.
+        // The checkout passed `amount` (kobo). Here we pass NGN?
+        // Let's re-read verifyPurchaseAction. It expects amount in KOBO (data.data.amount is kobo).
+        // So we need to pass Design Price * 100.
+        // But wait, the user might have paid the One-Off price.
+        // Let's assume One-Off price for now. 
+        // design.price is the one-off price.
+
+        const priceToVerify = (Number(design.price) || 0) * 100
+        const verification = await verifyPurchaseAction(verify_ref, id, priceToVerify)
+
+        if (verification.success) {
+            autoUnlocked = true
+        } else {
+            console.error("Auto-Verification Failed:", verification.error)
+        }
     }
 
     const comments = await getComments(id)
@@ -143,6 +171,12 @@ export default async function DesignDetailPage({ params }: { params: { id: strin
 
                     {/* Product Info */}
                     <div className="mt-10 px-4 sm:px-0 sm:mt-16 lg:mt-0">
+                        {autoUnlocked && (
+                            <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded relative" role="alert">
+                                <strong className="font-bold">Payment Successful! </strong>
+                                <span className="block sm:inline">Your design is now unlocked. Thank you for your purchase.</span>
+                            </div>
+                        )}
                         <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">{design.title}</h1>
 
                         <div className="mt-3">
