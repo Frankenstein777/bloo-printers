@@ -3,10 +3,8 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import DummyPaymentForm from './DummyPaymentForm'
+import PaystackCheckout from './PaystackCheckout' // Use Real Component
 import DesignConfigurator from './DesignConfigurator'
-import { verifyPurchaseAction } from '@/app/checkout/actions'
-import { generateInvoice } from '@/lib/invoice-client'
 import { useRouter } from 'next/navigation'
 
 interface CheckoutClientProps {
@@ -28,51 +26,6 @@ export default function CheckoutClient({ design, prices, userEmail }: CheckoutCl
     // Default: Renderings (10000) selected
     const [total, setTotal] = useState(prices.render)
     const [selectedItems, setSelectedItems] = useState<string[]>(['3D Renderings (High Res)'])
-
-    const handleSuccess = async (cardholderName: string) => {
-        const ref = 'OB-' + Date.now()
-
-        // server verification (simulated for MVP dummy payment)
-        try {
-            const result = await verifyPurchaseAction(ref, design.id, total * 100, selectedItems) // Actions expects Kobo
-
-            if (result.success) {
-                // Map labels back to prices for the invoice
-                const itemPriceMap: Record<string, number> = {
-                    '3D Renderings (High Res)': prices.render,
-                    'Complete Design PDF': prices.pdf,
-                    'Source CAD Files (DWG/RVT)': prices.dwg,
-                    'Electrical Drawings': prices.elec,
-                    'Mechanical Drawings': prices.mech,
-                    'Structural Engineering': prices.struct,
-                }
-
-                await generateInvoice({
-                    id: ref,
-                    date: new Date(),
-                    user: {
-                        email: userEmail || '',
-                        name: cardholderName // Pass actual name
-                    },
-                    items: selectedItems.map(item => ({
-                        description: item,
-                        quantity: 1,
-                        price: itemPriceMap[item] || 0 // Lookup price or default to 0
-                    })),
-                    total: total,
-                    currency: 'NGN',
-                    reference: ref
-                })
-
-                router.push(`/designs/${design.id}?unlocked=true`)
-            } else {
-                alert('Error: ' + (result.error || 'Unknown server error'))
-            }
-        } catch (e: any) {
-            console.error("Client Catch:", e)
-            alert('Client Error: ' + e.message)
-        }
-    }
 
     return (
         <div className="min-h-screen bg-neutral-900 text-white pt-24 pb-12 px-4 sm:px-6 lg:px-8 font-mono">
@@ -120,9 +73,21 @@ export default function CheckoutClient({ design, prices, userEmail }: CheckoutCl
                     </div>
 
                     {total > 0 ? (
-                        <DummyPaymentForm
-                            amount={total}
-                            onSuccess={handleSuccess}
+                        <PaystackCheckout
+                            email={userEmail || 'guest@example.com'}
+                            amount={total * 100} // Convert to Kobo
+                            designId={design.id}
+                            designTitle={design.title}
+                            metadata={{
+                                items: selectedItems.join(', '),
+                                custom_fields: [
+                                    {
+                                        display_name: "Selected Items",
+                                        variable_name: "selected_items",
+                                        value: selectedItems.join(', ')
+                                    }
+                                ]
+                            }}
                         />
                     ) : (
                         <div className="text-center py-4 text-gray-500 border border-dashed border-gray-700 rounded">

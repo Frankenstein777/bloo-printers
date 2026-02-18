@@ -13,6 +13,7 @@ interface PaystackCheckoutProps {
     designTitle: string
     publicKey?: string
     isSubscription?: boolean
+    metadata?: any // Allow passing extra data
 }
 
 declare global {
@@ -27,7 +28,8 @@ export default function PaystackCheckout({
     designId,
     designTitle,
     publicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
-    isSubscription = false
+    isSubscription = false,
+    metadata = {}
 }: PaystackCheckoutProps) {
     const [loading, setLoading] = useState(false)
     const [scriptLoaded, setScriptLoaded] = useState(false)
@@ -57,12 +59,14 @@ export default function PaystackCheckout({
             ref: 'PAY-' + Math.floor((Math.random() * 1000000000) + 1),
             metadata: {
                 designId: designId,
+                ...metadata, // Merge passed metadata (like selected items)
                 custom_fields: [
                     {
                         display_name: "Design Title",
                         variable_name: "design_title",
                         value: designTitle
-                    }
+                    },
+                    ...(metadata?.custom_fields || []) // Append extra fields if any
                 ]
             },
             callback: function (response: any) {
