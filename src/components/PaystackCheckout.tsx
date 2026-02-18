@@ -35,73 +35,82 @@ export default function PaystackCheckout({
 
     const handlePayment = () => {
         setLoading(true)
+        console.log("Paystack: Starting Payment Flow")
+        console.log("Paystack: Public Key loaded?", !!publicKey, publicKey?.substring(0, 10) + "...")
+        console.log("Paystack: Script loaded?", scriptLoaded)
+        console.log("Paystack: Window Object?", !!window.PaystackPop)
 
         if (!window.PaystackPop) {
             alert('Payment system is initializing... please wait.')
+            console.error("PaystackPop is undefined", window)
             setLoading(false)
             return
         }
 
-        const handler = window.PaystackPop.setup({
-            key: publicKey,
-            email: email,
-            amount: amount,
-            currency: 'NGN',
-            ref: 'TEST-' + Math.floor((Math.random() * 1000000000) + 1),
-            metadata: {
-                designId: designId,
-                custom_fields: [
-                    {
-                        display_name: "Design Title",
-                        variable_name: "design_title",
-                        value: designTitle
-                    }
-                ]
-            },
-            callback: async function (response: any) {
-                try {
-                    const result = await verifyPurchaseAction(response.reference, designId, amount)
-
-                    if (result.success) {
-                        // Generate Invoice
-                        try {
-                            generateInvoice({
-                                id: response.reference,
-                                date: new Date(),
-                                user: { email: email },
-                                items: [{ description: `Access: ${designTitle}`, quantity: 1, price: amount / 100 }],
-                                total: amount / 100,
-                                currency: 'NGN',
-                                reference: response.reference
-                            })
-                        } catch (e) {
-                            console.error("Invoice Error", e)
+        try {
+            const handler = window.PaystackPop.setup({
+                key: publicKey,
+                email: email,
+                amount: amount,
+                currency: 'NGN',
+                ref: 'TEST-' + Math.floor((Math.random() * 1000000000) + 1),
+                metadata: {
+                    designId: designId,
+                    custom_fields: [
+                        {
+                            display_name: "Design Title",
+                            variable_name: "design_title",
+                            value: designTitle
                         }
+                    ]
+                },
+                callback: async function (response: any) {
+                    console.log("Paystack: Callback received", response)
+                    try {
+                        const result = await verifyPurchaseAction(response.reference, designId, amount)
+                        console.log("Paystack: Verification Result", result)
 
-                        alert('Payment Successful! Redirecting you to the design...')
-                        router.push(`/designs/${designId}?unlocked=true`)
+                        if (result.success) {
+                            // Generate Invoice
+                            try {
+                                generateInvoice({
+                                    id: response.reference,
+                                    date: new Date(),
+                                    user: { email: email },
+                                    items: [{ description: `Access: ${designTitle}`, quantity: 1, price: amount / 100 }],
+                                    total: amount / 100,
+                                    currency: 'NGN',
+                                    reference: response.reference
+                                })
+                            } catch (e) {
+                                console.error("Invoice Error", e)
+                            }
 
-                    } else {
-                        alert('Payment verification failed on server. Please contact support.')
+                            alert('Payment Successful! Redirecting you to the design...')
+                            router.push(`/designs/${designId}?unlocked=true`)
+
+                        } else {
+                            alert('Payment verification failed on server. Please contact support. Error: ' + result.error)
+                            setLoading(false)
+                        }
+                    } catch (err) {
+                        console.error("Verification Error", err)
+                        alert('An error occurred during verification.')
                         setLoading(false)
                     }
-                } catch (err) {
-                    console.error("Verification Error", err)
-                    alert('An error occurred during verification.')
+                },
+                onClose: function () {
+                    console.log("Paystack: Window Closed")
                     setLoading(false)
-                }
-            },
-            onClose: function () {
-                setLoading(false)
-            },
-        })
+                },
+            })
 
-        try {
+            console.log("Paystack: Handler Created", handler)
             handler.openIframe()
         } catch (e) {
-            console.error("Pop Error", e)
+            console.error("Paystack: Initialization Error", e)
             setLoading(false)
-            alert("Could not open payment window. Please enable popups.")
+            alert("Could not open payment window. Check console for details.")
         }
     }
 
@@ -132,6 +141,20 @@ export default function PaystackCheckout({
                 <br />
                 Instant Access + PDF Invoice generated upon success.
             </p>
+
+            <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
+                <button
+                    onClick={async () => {
+                        const { checkEnvVarsAction } = await import('@/app/actions-debug')
+                        const result = await checkEnvVarsAction()
+                        console.log("DEBUG: Server Env Check", result)
+                        alert(`Server Key Status: ${result.hasSecret ? 'LOADED' : 'MISSING'}\nPrefix: ${result.prefix}`)
+                    }}
+                    className="text-xs text-gray-400 underline w-full text-center"
+                >
+                    Debug: Check Server Keys
+                </button>
+            </div>
         </div>
     )
 }
