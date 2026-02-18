@@ -42,10 +42,17 @@ export default function PaystackCheckout({
             return
         }
 
-        const handler = window.PaystackPop.setup({
+        const safeAmount = Math.round(amount) // Ensure Integer
+        if (isNaN(safeAmount) || safeAmount <= 0) {
+            alert('Invalid Payment Amount')
+            setLoading(false)
+            return
+        }
+
+        const paystackConfig = {
             key: publicKey,
             email: email,
-            amount: amount, // Kobo
+            amount: safeAmount,
             currency: 'NGN',
             ref: 'PAY-' + Math.floor((Math.random() * 1000000000) + 1),
             metadata: {
@@ -58,44 +65,61 @@ export default function PaystackCheckout({
                     }
                 ]
             },
-            callback: async function (response: any) {
-                try {
-                    const result = await verifyPurchaseAction(response.reference, designId, amount)
-
-                    if (result.success) {
-                        try {
-                            generateInvoice({
-                                id: response.reference,
-                                date: new Date(),
-                                user: { email: email },
-                                items: [{ description: `Access: ${designTitle}`, quantity: 1, price: amount / 100 }],
-                                total: amount / 100,
-                                currency: 'NGN',
-                                reference: response.reference
-                            })
-                        } catch (e) {
-                            console.error("Invoice Error", e)
-                        }
-
-                        alert('Payment Successful! Redirecting you to the design...')
-                        router.push(`/designs/${designId}?unlocked=true`)
-
-                    } else {
-                        alert('Payment verification failed on server. Please contact support.')
-                        setLoading(false)
-                    }
-                } catch (err) {
-                    console.error("Verification Error", err)
-                    alert('An error occurred during verification.')
-                    setLoading(false)
-                }
+            callback: function (response: any) {
+                // Wrap async logic
+                onPaymentSuccess(response)
             },
             onClose: function () {
                 setLoading(false)
+                console.log("Paystack Window Closed")
             },
-        })
+        }
 
-        handler.openIframe()
+        console.log("Paystack Config Payload:", { ...paystackConfig, key: '***' }) // Log payload (hide key)
+
+        try {
+            const handler = window.PaystackPop.setup(paystackConfig)
+            handler.openIframe()
+        } catch (error) {
+            console.error("Paystack Setup Error:", error)
+            setLoading(false)
+            alert("Failed to initialize payment gateway.")
+        }
+    }
+
+    const onPaymentSuccess = async (response: any) => {
+        console.log("Payment Success Callback:", response)
+        try {
+            const result = await verifyPurchaseAction(response.reference, designId, amount)
+
+            if (result.success) {
+                // ... Invoice generation (fire and forget or await) ... 
+                try {
+                    await generateInvoice({
+                        id: response.reference,
+                        date: new Date(),
+                        user: { email: email },
+                        items: [{ description: `Access: ${designTitle}`, quantity: 1, price: amount / 100 }],
+                        total: amount / 100,
+                        currency: 'NGN',
+                        reference: response.reference
+                    })
+                } catch (e) {
+                    console.error("Invoice Error", e)
+                }
+
+                alert('Payment Successful! Redirecting you to the design...')
+                router.push(`/designs/${designId}?unlocked=true`)
+
+            } else {
+                alert('Payment verification failed on server: ' + (result.error || 'Unknown Error'))
+                setLoading(false)
+            }
+        } catch (err) {
+            console.error("Verification Error", err)
+            alert('An error occurred during verification.')
+            setLoading(false)
+        }
     }
 
     return (
