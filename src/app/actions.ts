@@ -486,6 +486,63 @@ export async function updateUserAction(formData: FormData): Promise<ActionState>
   }
 }
 
+// ============================================================
+// PAYMENT ACTIONS
+// ============================================================
+
+export async function initializePaymentAction(email: string, amount: number, designId: string, designTitle: string) {
+  try {
+    const session = await getSession()
+    if (!session) return { success: false, error: 'User not logged in' }
+
+    const reference = 'PAY-' + Math.floor((Math.random() * 1000000000) + 1)
+
+    // Construct Callback URL (Verify on return)
+    // In production, this should be your actual domain
+    // For Vercel, we can try to use headers or just a relative path if Paystack supports it (usually needs absolute)
+    // Let's use a dynamic approach or env var
+    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
+    const callbackUrl = `${baseUrl}/designs/${designId}?verify_ref=${reference}`
+
+    const res = await fetch('https://api.paystack.co/transaction/initialize', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email,
+        amount, // In kobo
+        reference,
+        callback_url: callbackUrl,
+        metadata: {
+          designId,
+          custom_fields: [
+            {
+              display_name: "Design Title",
+              variable_name: "design_title",
+              value: designTitle
+            }
+          ]
+        }
+      })
+    })
+
+    const data = await res.json()
+
+    if (!data.status) {
+      console.error('Paystack Init Failed:', data)
+      return { success: false, error: data.message || 'Initialization failed' }
+    }
+
+    return { success: true, url: data.data.authorization_url, reference }
+
+  } catch (error) {
+    console.error('Payment Init Error:', error)
+    return { success: false, error: 'Payment initialization failed' }
+  }
+}
+
 export async function verifyPurchaseAction(reference: string, designId: string, amount: number): Promise<{ success: boolean; error?: string }> {
   try {
     const res = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
