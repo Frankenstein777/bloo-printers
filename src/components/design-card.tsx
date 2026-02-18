@@ -105,11 +105,9 @@ export default function DesignCard({ design, initialLikes, isLiked, userEmail }:
                             {design.bedrooms} Beds • {design.floors} Floors
                         </div>
                         <p className="text-lg font-medium text-[#00a3ad] dark:text-[#00f2ff] font-mono">
-                            {design.tier === 'PREMIUM'
-                                ? 'Subscribers Only'
-                                : design.price
-                                    ? `₦${(Number(design.price)).toLocaleString()}`
-                                    : 'FREE'}
+                            {design.tier === 'FREE' ? 'Free Download' :
+                                design.tier === 'PREMIUM' ? 'Subscribers Only' :
+                                    'Purchase Options'}
                         </p>
                     </div>
 
