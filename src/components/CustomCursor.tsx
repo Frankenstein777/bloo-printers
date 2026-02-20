@@ -8,6 +8,10 @@ export default function CustomCursor() {
     const [isVisible, setIsVisible] = useState(false)
     const { resolvedTheme } = useTheme()
 
+    // Don't render on touch/mobile devices (coarse pointer = finger, not mouse)
+    const isTouchDevice = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches
+    if (isTouchDevice) return null
+
     useEffect(() => {
         const onMouseMove = (e: MouseEvent) => {
             if (!isVisible) setIsVisible(true)
