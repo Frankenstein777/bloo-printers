@@ -115,8 +115,8 @@ const SCRIPT: Node[] = [
     {
         id: 'visualizer',
         messages: [
-            "🧭 The **Site Visualizer** lets you check if a design fits your actual plot of land.",
-            "1️⃣ Open any design.\n2️⃣ Scroll to the **Visualizer** section.\n3️⃣ Enter your plot dimensions (Width × Depth).\n4️⃣ Rotate, scale and position the building footprint on your plot.\n5️⃣ See exactly what fits!"
+            "🧭 The **Plot Fit Checker** lets you see if a design fits your actual land.",
+            "1️⃣ Open any design detail page.\n2️⃣ Click the **'Check Plot Fit'** button (blue/indigo button on the right side).\n3️⃣ A surveyor tool opens — enter your plot boundary as survey lines (bearing + distance, just like a survey document).\n4️⃣ The system traces your land shape from those survey readings.\n5️⃣ The building footprint is overlaid on your plot — drag and rotate it to find the best position!"
         ],
         options: [
             { label: '💳 How do I buy this design?', next: 'buying' },

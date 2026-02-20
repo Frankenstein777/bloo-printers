@@ -2,47 +2,46 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { SignOutButton } from '@/components/auth/SignOutButton'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 
-// Generate initials-based avatar color from email
+// Deterministic color from email string
 function getAvatarColor(str: string) {
     const colors = [
-        'bg-cyan-500', 'bg-blue-500', 'bg-purple-500', 'bg-green-500',
-        'bg-orange-500', 'bg-pink-500', 'bg-teal-500'
+        '#0e7490', // cyan-700
+        '#1d4ed8', // blue-700
+        '#6d28d9', // violet-700
+        '#065f46', // emerald-800
+        '#b45309', // amber-700
+        '#be185d', // pink-700
+        '#0f766e', // teal-700
     ]
-    const index = str.charCodeAt(0) % colors.length
-    return colors[index]
+    let hash = 0
+    for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash)
+    return colors[Math.abs(hash) % colors.length]
 }
 
 function UserAvatar({ session }: { session: any }) {
-    const email: string = session.user.email || ''
-    const name: string = session.user.name || ''
-    const image: string = session.user.image || ''
-    const role: string = session.user.role || ''
-    const sub: string = session.user.subscriptionStatus || ''
-    const initials = (name ? name[0] : email[0] || '?').toUpperCase()
-    const badgeText = sub === 'PREMIUM' ? '⭐' : role === 'ADMIN' ? '🔑' : ''
+    const email: string = session?.user?.email || ''
+    const name: string = session?.user?.name || ''
+    const role: string = session?.user?.role || ''
+    const sub: string = session?.user?.subscriptionStatus || ''
+
+    // Use first letter of name, or first letter of email
+    const initial = (name ? name[0] : email[0] || '?').toUpperCase()
+    const bg = getAvatarColor(email)
+
+    const badge = sub === 'PREMIUM' ? '⭐' : role === 'ADMIN' ? '🔑' : null
 
     return (
-        <Link href="/dashboard" className="flex items-center gap-2 group" title={email}>
-            {image ? (
-                <Image
-                    src={image}
-                    alt={name || email}
-                    width={36}
-                    height={36}
-                    className="rounded-full border-2 border-[#00f2ff]/40 group-hover:border-[#00f2ff] transition-all"
-                />
-            ) : (
-                <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm font-mono border-2 border-[#00f2ff]/40 group-hover:border-[#00f2ff] transition-all ${getAvatarColor(email)}`}>
-                    {initials}
-                </div>
-            )}
-            {badgeText && (
-                <span className="text-sm" title={sub === 'PREMIUM' ? 'Premium' : 'Admin'}>{badgeText}</span>
-            )}
+        <Link href="/dashboard" title={email} className="flex items-center gap-1.5 group">
+            <div
+                className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm font-mono border-2 border-transparent group-hover:border-[#00f2ff] transition-all"
+                style={{ backgroundColor: bg }}
+            >
+                {initial}
+            </div>
+            {badge && <span className="text-sm leading-none">{badge}</span>}
         </Link>
     )
 }
@@ -55,21 +54,9 @@ export default function NavbarClient({ session }: { session: any }) {
             <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-16">
                     <div className="flex items-center">
-                        <Link href="/" className="flex-shrink-0 flex items-center gap-3">
-                            {/* Octopus Logo */}
-                            <Image
-                                src="/logo.png"
-                                alt="Ocean of Blueprints Logo"
-                                width={36}
-                                height={36}
-                                className="invert dark:invert-0 opacity-80 dark:opacity-100"
-                            />
-                            <span className="font-black font-mono text-xl tracking-tighter text-[#00a3ad] dark:text-[#00f2ff] hidden sm:block">
+                        <Link href="/" className="flex-shrink-0 flex items-center">
+                            <span className="font-black font-mono text-xl tracking-tighter text-[#00a3ad] dark:text-[#00f2ff]">
                                 OCEAN OF BLUEPRINTS
-                            </span>
-                            {/* Mobile: abbreviated */}
-                            <span className="font-black font-mono text-base tracking-tighter text-[#00a3ad] dark:text-[#00f2ff] sm:hidden">
-                                OOB
                             </span>
                         </Link>
                         <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
@@ -156,7 +143,6 @@ export default function NavbarClient({ session }: { session: any }) {
                             </Link>
                         )}
                     </div>
-                    {/* Mobile sign out */}
                     {session && (
                         <div className="pt-4 pb-4 border-t border-gray-200 dark:border-gray-800 px-4">
                             <SignOutButton />
