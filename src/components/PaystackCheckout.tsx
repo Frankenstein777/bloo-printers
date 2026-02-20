@@ -6,6 +6,12 @@ import { verifyPurchaseAction } from '@/app/actions'
 import { generateInvoice } from '@/lib/invoice-client'
 import { useRouter } from 'next/navigation'
 
+interface InvoiceItem {
+    description: string
+    quantity: number
+    price: number
+}
+
 interface PaystackCheckoutProps {
     email: string
     amount: number // In Kobo
@@ -13,7 +19,8 @@ interface PaystackCheckoutProps {
     designTitle: string
     publicKey?: string
     isSubscription?: boolean
-    metadata?: any // Allow passing extra data
+    metadata?: any
+    invoiceItems?: InvoiceItem[] // Itemized breakdown for invoice
 }
 
 declare global {
@@ -29,7 +36,8 @@ export default function PaystackCheckout({
     designTitle,
     publicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
     isSubscription = false,
-    metadata = {}
+    metadata = {},
+    invoiceItems
 }: PaystackCheckoutProps) {
     const [loading, setLoading] = useState(false)
     const [scriptLoaded, setScriptLoaded] = useState(false)
@@ -99,11 +107,16 @@ export default function PaystackCheckout({
             if (result.success) {
                 // ... Invoice generation (fire and forget or await) ... 
                 try {
+                    // Use itemized breakdown if provided, else fallback to single line
+                    const items = (invoiceItems && invoiceItems.length > 0)
+                        ? invoiceItems
+                        : [{ description: `Access: ${designTitle}`, quantity: 1, price: amount / 100 }]
+
                     await generateInvoice({
                         id: response.reference,
                         date: new Date(),
                         user: { email: email },
-                        items: [{ description: `Access: ${designTitle}`, quantity: 1, price: amount / 100 }],
+                        items,
                         total: amount / 100,
                         currency: 'NGN',
                         reference: response.reference

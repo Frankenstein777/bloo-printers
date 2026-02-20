@@ -3,9 +3,8 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import PaystackCheckout from './PaystackCheckout' // Use Real Component
+import PaystackCheckout from './PaystackCheckout'
 import DesignConfigurator from './DesignConfigurator'
-import { useRouter } from 'next/navigation'
 
 interface CheckoutClientProps {
     design: any
@@ -20,12 +19,27 @@ interface CheckoutClientProps {
     userEmail?: string | null
 }
 
-export default function CheckoutClient({ design, prices, userEmail }: CheckoutClientProps) {
-    const router = useRouter()
+// Maps the item labels returned by DesignConfigurator → their price
+const LABEL_PRICE_MAP: Record<string, string> = {
+    '3D Renderings (High Res)': 'priceRender',
+    'Full PDF Plans': 'pricePdf',
+    'AutoCAD DWG Files': 'priceDwg',
+    'Electrical Drawings': 'priceElec',
+    'Mechanical Drawings': 'priceMech',
+    'Structural Plans': 'priceStruct',
+}
 
-    // Default: Renderings (10000) selected
+export default function CheckoutClient({ design, prices, userEmail }: CheckoutClientProps) {
     const [total, setTotal] = useState(prices.render)
     const [selectedItems, setSelectedItems] = useState<string[]>(['3D Renderings (High Res)'])
+
+    // Build invoice lines from selected items
+    const invoiceItems = selectedItems.map(label => ({
+        description: label,
+        quantity: 1,
+        price: prices[LABEL_PRICE_MAP[label]?.replace('price', '').toLowerCase() as keyof typeof prices]
+            ?? 0
+    }))
 
     return (
         <div className="min-h-screen bg-neutral-900 text-white pt-24 pb-12 px-4 sm:px-6 lg:px-8 font-mono">
@@ -60,11 +74,18 @@ export default function CheckoutClient({ design, prices, userEmail }: CheckoutCl
                     <h1 className="text-3xl font-black mb-2 tracking-tighter uppercase text-white">Checkout</h1>
                     <p className="text-gray-400 text-sm mb-8">Secure Transaction • Instant Digital Delivery</p>
 
-                    <div className="space-y-4 mb-8 border-b border-gray-700 pb-8">
-                        <div className="flex justify-between items-center text-lg">
-                            <span className="text-gray-400">Selected Items</span>
-                            <span className="font-bold text-right text-xs max-w-[200px]">{selectedItems.join(', ') || 'None'}</span>
-                        </div>
+                    {/* Itemized breakdown */}
+                    <div className="space-y-2 mb-6 border-b border-gray-700 pb-6">
+                        {invoiceItems.length > 0 ? (
+                            invoiceItems.map((item, i) => (
+                                <div key={i} className="flex justify-between text-sm">
+                                    <span className="text-gray-300">{item.description}</span>
+                                    <span className="text-white font-bold">₦{item.price.toLocaleString()}</span>
+                                </div>
+                            ))
+                        ) : (
+                            <p className="text-gray-500 text-sm">No items selected yet.</p>
+                        )}
                     </div>
 
                     <div className="flex justify-between items-center text-3xl font-bold mb-10">
@@ -75,9 +96,10 @@ export default function CheckoutClient({ design, prices, userEmail }: CheckoutCl
                     {total > 0 ? (
                         <PaystackCheckout
                             email={userEmail || 'guest@example.com'}
-                            amount={total * 100} // Convert to Kobo
+                            amount={total * 100}
                             designId={design.id}
                             designTitle={design.title}
+                            invoiceItems={invoiceItems}
                             metadata={{
                                 items: selectedItems.join(', '),
                                 custom_fields: [
@@ -105,3 +127,4 @@ export default function CheckoutClient({ design, prices, userEmail }: CheckoutCl
         </div>
     )
 }
+

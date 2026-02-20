@@ -100,15 +100,10 @@ export default function DesignCard({ design, initialLikes, isLiked, userEmail }:
                 </div>
 
                 <div className="mt-4">
-                    <div className="flex justify-between items-center mb-2">
+                    <div className="flex items-center mb-2">
                         <div className="text-sm text-gray-500 dark:text-gray-400 font-mono">
                             {design.bedrooms} Beds • {design.floors} Floors
                         </div>
-                        <p className="text-lg font-medium text-[#00a3ad] dark:text-[#00f2ff] font-mono">
-                            {design.tier === 'FREE' ? 'Free Download' :
-                                design.tier === 'PREMIUM' ? 'Subscribers Only' :
-                                    'Purchase Options'}
-                        </p>
                     </div>
 
                     <div className="relative z-10 border-t border-gray-100 dark:border-gray-800 pt-2 flex items-center justify-between">
