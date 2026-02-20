@@ -1,6 +1,49 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { usePathname } from 'next/navigation'
+
+// ──────────────────────────────────────────
+// Context: extra options injected based on current page
+// ──────────────────────────────────────────
+function getPageContext(pathname: string): { hint?: string; extraOptions?: Option[] } {
+    if (pathname.startsWith('/browse')) {
+        return {
+            hint: "🔍 You're browsing the **catalog**.",
+            extraOptions: [
+                { label: '🗂 How do I filter designs?', next: 'filters' },
+                { label: '❤️ How do likes & saves work?', next: 'social' },
+            ]
+        }
+    }
+    if (pathname.startsWith('/designs/')) {
+        return {
+            hint: "📐 You're viewing a **design detail page**.",
+            extraOptions: [
+                { label: '🧭 What is the Site Visualizer?', next: 'visualizer' },
+                { label: '💳 How do I buy this design?', next: 'buying' },
+            ]
+        }
+    }
+    if (pathname.startsWith('/checkout')) {
+        return {
+            hint: "💳 You're on the **checkout page**.",
+            extraOptions: [
+                { label: '📦 What file types can I get?', next: 'filetypes' },
+                { label: '🔒 Is payment secure?', next: 'security' },
+            ]
+        }
+    }
+    if (pathname.startsWith('/dashboard') || pathname.startsWith('/profile')) {
+        return {
+            hint: "👤 You're on your **dashboard**.",
+            extraOptions: [
+                { label: '📂 Where are my purchased files?', next: 'downloads' },
+            ]
+        }
+    }
+    return {}
+}
 
 // ──────────────────────────────────────────
 // CHATBOT SCRIPT
@@ -47,6 +90,40 @@ const SCRIPT: Node[] = [
         ]
     },
     {
+        id: 'filters',
+        messages: [
+            "On the Browse page, use the **Filter Sidebar** on the left to narrow down by:",
+            "🛏 Number of bedrooms\n📐 Plot size\n⭐ Amenities (Pool, Cinema, BQ, etc.)\n📁 File types available (DWG, PDF, etc.)"
+        ],
+        options: [
+            { label: '❤️ What about likes & saves?', next: 'social' },
+            { label: '🔍 Go to Catalog', action: 'browse' },
+            { label: '🏠 Back to Start', next: 'start' },
+        ]
+    },
+    {
+        id: 'social',
+        messages: [
+            "On every design card you can:",
+            "❤️ **Like** — Let us know what you love\n🔖 **Save** — Bookmark to your Collections\n💬 **Comment** — Share thoughts with the community"
+        ],
+        options: [
+            { label: '💳 How do I buy?', next: 'buying' },
+            { label: '🏠 Back to Start', next: 'start' },
+        ]
+    },
+    {
+        id: 'visualizer',
+        messages: [
+            "🧭 The **Site Visualizer** lets you check if a design fits your actual plot of land.",
+            "1️⃣ Open any design.\n2️⃣ Scroll to the **Visualizer** section.\n3️⃣ Enter your plot dimensions (Width × Depth).\n4️⃣ Rotate, scale and position the building footprint on your plot.\n5️⃣ See exactly what fits!"
+        ],
+        options: [
+            { label: '💳 How do I buy this design?', next: 'buying' },
+            { label: '🏠 Back to Start', next: 'start' },
+        ]
+    },
+    {
         id: 'buying',
         messages: [
             "Buying is simple and secure:",
@@ -55,7 +132,19 @@ const SCRIPT: Node[] = [
         options: [
             { label: '📦 What files can I get?', next: 'filetypes' },
             { label: '💰 What are the prices?', next: 'pricing' },
+            { label: '🔒 Is payment secure?', next: 'security' },
             { label: '🔍 Browse Catalog', action: 'browse' },
+            { label: '🏠 Back to Start', next: 'start' },
+        ]
+    },
+    {
+        id: 'security',
+        messages: [
+            "🔒 Yes, 100%! All payments are processed by **Paystack** — Nigeria's most trusted payment gateway.",
+            "We do NOT store your card details. Your transaction is verified server-side before anything is unlocked."
+        ],
+        options: [
+            { label: '💳 How to buy', next: 'buying' },
             { label: '🏠 Back to Start', next: 'start' },
         ]
     },
@@ -75,12 +164,24 @@ const SCRIPT: Node[] = [
         id: 'pricing',
         messages: [
             "Each design has individual prices per file type.",
-            "Prices are set by our architects and vary per design. You'll see the exact breakdown at checkout before you pay — no hidden fees!"
+            "Prices vary per design and are set by our architects. You'll see the full breakdown at checkout — no hidden fees!"
         ],
         options: [
             { label: '🔍 Browse and See Prices', action: 'browse' },
             { label: '💳 How to buy', next: 'buying' },
             { label: '📞 Ask a human', next: 'contact' },
+            { label: '🏠 Back to Start', next: 'start' },
+        ]
+    },
+    {
+        id: 'downloads',
+        messages: [
+            "After a successful purchase, your files appear in your **Dashboard** under the Downloads section.",
+            "You can re-download at any time — no expiry!"
+        ],
+        options: [
+            { label: '🔍 Browse more designs', action: 'browse' },
+            { label: '📞 Need help?', next: 'contact' },
             { label: '🏠 Back to Start', next: 'start' },
         ]
     },
@@ -101,25 +202,19 @@ const SCRIPT: Node[] = [
 const NODE_MAP = Object.fromEntries(SCRIPT.map(n => [n.id, n]))
 
 // ──────────────────────────────────────────
-// Bot Icon SVG
+// Bot Icon
 // ──────────────────────────────────────────
 function BotIcon({ className }: { className?: string }) {
     return (
         <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-            {/* Head */}
             <rect x="6" y="12" width="24" height="18" rx="4" fill="currentColor" opacity="0.9" />
-            {/* Eyes */}
             <rect x="11" y="17" width="4" height="4" rx="2" fill="#001f2b" />
             <rect x="21" y="17" width="4" height="4" rx="2" fill="#001f2b" />
-            {/* Eye glow */}
             <rect x="12" y="18" width="2" height="2" rx="1" fill="#00f2ff" opacity="0.8" />
             <rect x="22" y="18" width="2" height="2" rx="1" fill="#00f2ff" opacity="0.8" />
-            {/* Mouth */}
             <rect x="13" y="24" width="10" height="2" rx="1" fill="#001f2b" opacity="0.6" />
-            {/* Antenna */}
             <rect x="17" y="6" width="2" height="6" rx="1" fill="currentColor" opacity="0.7" />
             <circle cx="18" cy="5" r="2.5" fill="currentColor" />
-            {/* Ears/sides */}
             <rect x="3" y="16" width="3" height="6" rx="1.5" fill="currentColor" opacity="0.6" />
             <rect x="30" y="16" width="3" height="6" rx="1.5" fill="currentColor" opacity="0.6" />
         </svg>
@@ -128,9 +223,10 @@ function BotIcon({ className }: { className?: string }) {
 
 // ──────────────────────────────────────────
 type Message = { role: 'bot' | 'user', text: string }
-const JINGLE_INTERVAL_MS = 20000 // jingle every 20s when idle
+const JINGLE_INTERVAL_MS = 20000
 
 export default function GuidedChatbot() {
+    const pathname = usePathname()
     const [open, setOpen] = useState(false)
     const [nodeId, setNodeId] = useState('start')
     const [messages, setMessages] = useState<Message[]>([])
@@ -138,22 +234,22 @@ export default function GuidedChatbot() {
     const [jingle, setJingle] = useState(false)
     const bottomRef = useRef<HTMLDivElement>(null)
     const jingleTimer = useRef<ReturnType<typeof setInterval> | null>(null)
+    const { hint, extraOptions = [] } = getPageContext(pathname)
 
-    // Initialise with start messages
+    // Init with greeting + page hint
     useEffect(() => {
         const node = NODE_MAP['start']
-        setMessages(node.messages.map(t => ({ role: 'bot', text: t })))
+        const initialMessages: Message[] = node.messages.map(t => ({ role: 'bot', text: t }))
+        if (hint) initialMessages.push({ role: 'bot', text: hint })
+        setMessages(initialMessages)
         setTimeout(() => setOptionsVisible(true), 500)
-    }, [])
+    }, [hint])
 
-    // Jingle when closed / idle
     useEffect(() => {
         if (open) {
-            // Clear jingle timer while open
             if (jingleTimer.current) clearInterval(jingleTimer.current)
             setJingle(false)
         } else {
-            // Start periodic jingle to attract attention
             jingleTimer.current = setInterval(() => {
                 setJingle(true)
                 setTimeout(() => setJingle(false), 1000)
@@ -162,7 +258,6 @@ export default function GuidedChatbot() {
         return () => { if (jingleTimer.current) clearInterval(jingleTimer.current) }
     }, [open])
 
-    // Scroll to bottom on new messages
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
     }, [messages])
@@ -192,15 +287,17 @@ export default function GuidedChatbot() {
                 case 'close': setOpen(false); goToNode('start'); return
             }
         }
-
         if (opt.next) setTimeout(() => goToNode(opt.next!), 300)
     }, [goToNode])
 
+    // Merge page-specific extra options into current node's options
     const currentNode = NODE_MAP[nodeId]
+    const currentOptions = nodeId === 'start'
+        ? [...currentNode.options, ...extraOptions]
+        : currentNode.options
 
     return (
         <>
-            {/* Jingle animation styles */}
             <style>{`
                 @keyframes bloo-jingle {
                     0%, 100% { transform: rotate(0deg) scale(1); }
@@ -211,22 +308,19 @@ export default function GuidedChatbot() {
                     75% { transform: rotate(-5deg) scale(1.05); }
                 }
                 .bloo-jingle { animation: bloo-jingle 0.9s ease-in-out; }
-
                 @keyframes bloo-pulse-ring {
                     0% { transform: scale(1); opacity: 0.7; }
                     100% { transform: scale(2.2); opacity: 0; }
                 }
                 .bloo-ring {
-                    position: absolute;
-                    inset: 0;
-                    border-radius: 9999px;
+                    position: absolute; inset: 0; border-radius: 9999px;
                     background: rgba(0, 242, 255, 0.4);
                     animation: bloo-pulse-ring 1s ease-out;
                 }
             `}</style>
 
-            {/* Floating Toggle Button */}
-            <div className="fixed bottom-6 right-6 z-[200]">
+            {/* Chatbot button — positioned above the audio control (bottom-24) */}
+            <div className="fixed bottom-24 right-6 z-[200]">
                 {jingle && <span className="bloo-ring" />}
                 <button
                     onClick={() => { setOpen(o => !o); setJingle(false) }}
@@ -241,15 +335,14 @@ export default function GuidedChatbot() {
                         <BotIcon className="w-8 h-8" />
                     )}
                 </button>
-                {/* Notification dot when closed and not yet opened */}
                 {!open && (
                     <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-red-500 border-2 border-neutral-950 animate-pulse" />
                 )}
             </div>
 
-            {/* Chat Widget */}
+            {/* Chat Widget — opens above button */}
             {open && (
-                <div className="fixed bottom-24 right-6 z-[199] w-[350px] max-h-[520px] flex flex-col rounded-2xl overflow-hidden border border-[#00f2ff]/30 shadow-[0_0_40px_rgba(0,242,255,0.15)] bg-neutral-950">
+                <div className="fixed bottom-40 right-6 z-[199] w-[350px] max-h-[500px] flex flex-col rounded-2xl overflow-hidden border border-[#00f2ff]/30 shadow-[0_0_40px_rgba(0,242,255,0.15)] bg-neutral-950">
                     {/* Header */}
                     <div className="flex items-center gap-3 px-4 py-3 bg-[#00a3ad]/20 border-b border-[#00f2ff]/20">
                         <div className="w-9 h-9 rounded-full bg-[#00f2ff] flex items-center justify-center text-black">
@@ -269,8 +362,7 @@ export default function GuidedChatbot() {
                                 <div
                                     className={`max-w-[85%] px-3 py-2 rounded-xl text-sm font-mono leading-relaxed whitespace-pre-line ${msg.role === 'user'
                                         ? 'bg-[#00f2ff]/20 text-[#00f2ff] rounded-br-none'
-                                        : 'bg-white/5 text-gray-200 rounded-bl-none border border-white/10'
-                                        }`}
+                                        : 'bg-white/5 text-gray-200 rounded-bl-none border border-white/10'}`}
                                     dangerouslySetInnerHTML={{ __html: msg.text.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>') }}
                                 />
                             </div>
@@ -281,7 +373,7 @@ export default function GuidedChatbot() {
                     {/* Options */}
                     {optionsVisible && (
                         <div className="px-4 py-3 space-y-2 border-t border-white/5 bg-black/20">
-                            {currentNode.options.map((opt, i) => (
+                            {currentOptions.map((opt, i) => (
                                 <button
                                     key={i}
                                     onClick={() => handleOption(opt)}
