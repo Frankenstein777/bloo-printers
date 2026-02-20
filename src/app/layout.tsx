@@ -11,8 +11,8 @@ import AmbientAudio from '@/components/AmbientAudio'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-    title: 'Bloo Printers - Architectural Design Marketplace',
-    description: 'Premium architectural designs and AI concepts.',
+    title: 'Octoplans - Architectural Design Marketplace',
+    description: 'Premium architectural blueprints, precision plans, and AI concepts by Octoplans.',
 }
 
 import { Providers } from "@/components/providers"

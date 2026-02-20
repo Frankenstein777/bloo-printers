@@ -50,7 +50,7 @@ export async function generateInvoice(data: InvoiceData) {
     // Logo / Header
     doc.setFontSize(22)
     doc.setTextColor(0, 242, 255) // Cyan #00f2ff
-    doc.text('OCEAN OF BLUEPRINTS', 20, 20)
+    doc.text('OCTOPLANS', 20, 20)
 
     doc.setFontSize(10)
     doc.setTextColor(100)
@@ -107,7 +107,7 @@ export async function generateInvoice(data: InvoiceData) {
     }
 
     doc.setTextColor(0)
-    doc.text("Ocean of Blueprints", 20, finalY + 20)
+    doc.text("Octoplans", 20, finalY + 20)
 
     // Reset standard font for label
     doc.setFont("helvetica", "normal")

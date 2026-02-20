@@ -312,6 +312,14 @@ export function AquariumBackground() {
     const lastMousePos = useRef({ x: -9999, y: -9999 })
     const mouseIdleTime = useRef(0)
     const scrollY = useRef(0)
+    const logoImgRef = useRef<HTMLImageElement | null>(null)
+
+    // Pre-load octopus SVG as bitmap for canvas drawing
+    useEffect(() => {
+        const img = new window.Image()
+        img.src = '/logo.svg'
+        img.onload = () => { logoImgRef.current = img }
+    }, [])
 
     useEffect(() => {
         const canvas = canvasRef.current
@@ -402,6 +410,26 @@ export function AquariumBackground() {
                 if (active) r.draw(ctx)
                 return active
             })
+
+            // Draw octopus logo watermarks
+            if (logoImgRef.current) {
+                const logo = logoImgRef.current
+                // Large central ghost
+                ctx.save()
+                ctx.globalAlpha = 0.04
+                ctx.filter = 'invert(1)'
+                const s1 = Math.min(width, height) * 0.55
+                ctx.drawImage(logo, width / 2 - s1 / 2, height / 2 - s1 / 2, s1, s1)
+                // Smaller repeat bottom-left
+                const s2 = Math.min(width, height) * 0.22
+                ctx.globalAlpha = 0.025
+                ctx.drawImage(logo, width * 0.08, height * 0.72, s2, s2)
+                // Top-right
+                ctx.globalAlpha = 0.025
+                ctx.drawImage(logo, width * 0.78, height * 0.06, s2, s2)
+                ctx.filter = 'none'
+                ctx.restore()
+            }
 
             // ... (inside animate loop)
 

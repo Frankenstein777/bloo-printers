@@ -24,7 +24,7 @@ export function OnboardingTour() {
 
     const steps = [
         {
-            title: "Welcome to Ocean of Blueprints",
+            title: "Welcome to Octoplans",
             content: "Your premier destination for architectural designs. Let us show you around quickly.",
             target: "body" // centered
         },

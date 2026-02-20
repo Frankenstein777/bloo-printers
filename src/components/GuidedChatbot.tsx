@@ -66,7 +66,7 @@ const SCRIPT: Node[] = [
     {
         id: 'start',
         messages: [
-            "👋 Hello! Welcome to **Ocean of Blueprints**.",
+            "👋 Hello! Welcome to **Octoplans**.",
             "I'm Bloo — your virtual guide. What can I help you with today?"
         ],
         options: [
@@ -282,7 +282,7 @@ export default function GuidedChatbot() {
                 case 'dashboard': window.location.href = '/dashboard'; return
                 case 'contact': window.location.href = '/#contact'; return
                 case 'whatsapp':
-                    window.open(`https://wa.me/2347068095681?text=${encodeURIComponent("Hello, I'm reaching out from Ocean of Blueprints and need help.")}`, '_blank')
+                    window.open(`https://wa.me/2347068095681?text=${encodeURIComponent("Hello! I'm reaching out from Octoplans and need help.")}`, '_blank')
                     goToNode('start'); return
                 case 'close': setOpen(false); goToNode('start'); return
             }

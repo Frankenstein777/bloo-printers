@@ -299,7 +299,7 @@ export default async function DesignDetailPage({ params, searchParams }: { param
                             {/* Alteration Request */}
                             <div className="mt-6 text-center">
                                 <a
-                                    href={`https://wa.me/2347068095681?text=${encodeURIComponent(`Hello, I wish to intend for some alteration to ${design.title} found on the ocean of blueprints`)}`}
+                                    href={`https://wa.me/2347068095681?text=${encodeURIComponent(`Hello, I wish to request some alterations to ${design.title} found on Octoplans`)}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-green-500 hover:underline transition-colors"

@@ -58,16 +58,16 @@ export default function NavbarClient({ session }: { session: any }) {
                         <Link href="/" className="flex-shrink-0 flex items-center gap-2">
                             <Image
                                 src="/logo.svg"
-                                alt="Ocean of Blueprints"
+                                alt="Octoplans"
                                 width={32}
                                 height={32}
                                 className="dark:invert dark:brightness-[3] dark:hue-rotate-[160deg] opacity-80 dark:opacity-100 w-8 h-8"
                             />
                             <span className="font-black font-mono text-xl tracking-tighter text-[#00a3ad] dark:text-[#00f2ff] hidden sm:block">
-                                OCEAN OF BLUEPRINTS
+                                OCTOPLANS
                             </span>
                             <span className="font-black font-mono text-base tracking-tighter text-[#00a3ad] dark:text-[#00f2ff] sm:hidden">
-                                OOB
+                                OOP
                             </span>
                         </Link>
                         <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
