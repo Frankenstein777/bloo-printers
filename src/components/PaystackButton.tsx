@@ -1,13 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-// We will use a dynamic import or checking for window.PaystackPop if we were using the script directly.
-// But for cleaner React code, we'll implement a custom handler or use 'react-paystack' pattern.
-// However, adding a new dependency might be annoying. Let's use the Inline Script approach for maximum compatibility without `npm install`.
-
 import Script from 'next/script'
 import { verifyPurchaseAction } from '@/app/actions'
 import { generateInvoice } from '@/lib/invoice-client'
+import { useToast } from '@/components/ToastProvider'
 
 interface PaystackButtonProps {
     email: string
@@ -17,45 +14,39 @@ interface PaystackButtonProps {
 }
 
 declare global {
-    interface Window {
-        PaystackPop: any
-    }
+    interface Window { PaystackPop: any }
 }
 
 export default function PaystackButton({ email, amount, designId, publicKey = 'pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' }: PaystackButtonProps) {
     const [loading, setLoading] = useState(false)
+    const { toast } = useToast()
 
     const handlePayment = () => {
         setLoading(true)
 
-        // Check if Paystack loaded
         if (!window.PaystackPop) {
-            alert('Payment system loading... please try again in a second.')
+            toast('Payment system loading... please try again in a second.', 'info')
             setLoading(false)
             return
         }
 
         const handler = window.PaystackPop.setup({
             key: publicKey,
-            email: email,
-            amount: amount, // in kobo
+            email,
+            amount,
             currency: 'NGN',
-            ref: 'TEST-' + Math.floor((Math.random() * 1000000000) + 1), // Generate a random ref
-            metadata: {
-                designId: designId
-            },
+            ref: 'TEST-' + Math.floor((Math.random() * 1000000000) + 1),
+            metadata: { designId },
             callback: async function (response: any) {
                 try {
-                    // Verify transaction on server
                     const result = await verifyPurchaseAction(response.reference, designId, amount)
-
                     if (result.success) {
-                        alert('Payment successful! generating Invoice...')
+                        toast('Payment successful! Generating invoice...', 'success', 6000)
                         try {
-                            generateInvoice({
+                            await generateInvoice({
                                 id: response.reference,
                                 date: new Date(),
-                                user: { email: email },
+                                user: { email },
                                 items: [{ description: 'Design Access', quantity: 1, price: amount / 100 }],
                                 total: amount / 100,
                                 currency: 'NGN',
@@ -63,28 +54,26 @@ export default function PaystackButton({ email, amount, designId, publicKey = 'p
                             })
                         } catch (pdfError) {
                             console.error("Invoice generation failed", pdfError)
-                            alert("Payment success, but invoice generation failed. Please contact support.")
+                            toast("Payment successful — invoice generation failed. Please contact support.", 'warning')
                         }
                     } else {
-                        alert('Payment verification failed on server. Contact support.')
+                        toast('Payment verification failed on server. Contact support.', 'error')
                     }
                 } catch (err) {
                     console.error("Payment Error", err)
-                    alert('An error occurred during verification.')
+                    toast('An error occurred during verification.', 'error')
                 } finally {
                     setLoading(false)
                 }
             },
-            onClose: function () {
-                setLoading(false)
-            },
+            onClose: function () { setLoading(false) },
         })
 
         try {
             handler.openIframe()
         } catch (e) {
             setLoading(false)
-            alert("Could not open payment window.")
+            toast("Could not open payment window.", 'error')
         }
     }
 

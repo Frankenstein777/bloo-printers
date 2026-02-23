@@ -262,8 +262,10 @@ export default function DesignEditForm({ design }: DesignEditFormProps) {
                                     <button
                                         type="button"
                                         onClick={() => {
-                                            // Handle removal - for now we just show it's possible
-                                            alert('To remove images, strictly edit the URL list below or implement full gallery management.')
+                                            // Image removal: edit URLs directly below
+                                            // (full gallery management is a pending feature)
+                                            const el = document.getElementById('imageUrls')
+                                            if (el) { el.scrollIntoView({ behavior: 'smooth' }); el.focus() }
                                         }}
                                         className="text-white text-xs bg-red-600 px-2 py-1 rounded"
                                     >

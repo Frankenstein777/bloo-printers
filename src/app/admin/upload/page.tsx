@@ -43,15 +43,7 @@ export default function AdminUploadPage() {
                 const response = JSON.parse(xhr.responseText)
                 if (response.success) {
                     setSuccess(true)
-                    // Reset form or redirect
-                    if (confirm('Upload Successful! Redirect to home?')) {
-                        router.push('/')
-                    } else {
-                        // Optional: Reset form
-                        (e.target as HTMLFormElement).reset()
-                        setUploadProgress(0)
-                        setFootprintVertices([])
-                    }
+                    setTimeout(() => router.push('/admin/designs'), 1200)
                 } else {
                     setError(response.error || 'Upload failed')
                 }
@@ -79,14 +71,14 @@ export default function AdminUploadPage() {
             const dxf = parser.parseSync(text)
 
             if (!dxf || !dxf.entities) {
-                alert("Failed to parse DXF or no entities found.")
+                setError("Failed to parse DXF or no entities found.")
                 return
             }
 
             const polylines = dxf.entities.filter(e => e.type === 'LWPOLYLINE' || e.type === 'POLYLINE')
 
             if (polylines.length === 0) {
-                alert("No polylines found in DXF. Please ensure the footprint is a closed polyline.")
+                setError("No polylines found in DXF. Please ensure the footprint is a closed polyline.")
                 return
             }
 
@@ -124,7 +116,7 @@ export default function AdminUploadPage() {
 
         } catch (err) {
             console.error("DXF Parse Error:", err)
-            alert("Failed to parse DXF. Ensure it is a valid ASCII DXF file.")
+            setError("Failed to parse DXF. Ensure it is a valid ASCII DXF file.")
         }
     }
 
