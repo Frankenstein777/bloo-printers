@@ -35,6 +35,18 @@ async function loadFontToBase64(url: string): Promise<string> {
     })
 }
 
+// Helper to load any image as a data URL (for jsPDF addImage)
+async function loadImageDataUrl(url: string): Promise<string> {
+    const res = await fetch(url)
+    const blob = await res.blob()
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onloadend = () => resolve(reader.result as string)
+        reader.onerror = reject
+        reader.readAsDataURL(blob)
+    })
+}
+
 export async function generateInvoice(data: InvoiceData) {
     const doc = new jsPDF()
 
@@ -47,15 +59,24 @@ export async function generateInvoice(data: InvoiceData) {
         console.error("Could not load custom font, falling back to Courier", e)
     }
 
-    // Logo / Header
+    // Logo image in header
+    try {
+        const logoDataUrl = await loadImageDataUrl('/logo.png')
+        // Place octopus logo top-left: 12mm wide, proportional height (~12.6mm for 526×550 ratio)
+        doc.addImage(logoDataUrl, 'PNG', 20, 8, 12, 12.6)
+    } catch (e) {
+        console.warn('Could not load logo for invoice', e)
+    }
+
+    // Brand name & address (offset right of logo)
     doc.setFontSize(22)
     doc.setTextColor(0, 242, 255) // Cyan #00f2ff
-    doc.text('OCTOPLANS', 20, 20)
+    doc.text('OCTOPLANS', 35, 16)
 
     doc.setFontSize(10)
     doc.setTextColor(100)
-    doc.text('Advanced Architectural Systems', 20, 26)
-    doc.text('Lagos, Nigeria', 20, 31)
+    doc.text('Advanced Architectural Systems', 35, 22)
+    doc.text('Lagos, Nigeria', 35, 27)
 
     // Invoice Info
     doc.setFontSize(16)

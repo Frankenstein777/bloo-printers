@@ -313,12 +313,26 @@ export function AquariumBackground() {
     const mouseIdleTime = useRef(0)
     const scrollY = useRef(0)
     const logoImgRef = useRef<HTMLImageElement | null>(null)
+    // Glow animation state: phase 0=idle, 1=glowing
+    const glowRef = useRef({ active: false, progress: 0, direction: 1 })
 
     // Pre-load octopus SVG as bitmap for canvas drawing
     useEffect(() => {
         const img = new window.Image()
         img.src = '/logo.svg'
         img.onload = () => { logoImgRef.current = img }
+
+        // Schedule random glow pulses every 2-5 seconds
+        let glowTimeout: ReturnType<typeof setTimeout>
+        const scheduleGlow = () => {
+            const delay = 2000 + Math.random() * 3000
+            glowTimeout = setTimeout(() => {
+                glowRef.current = { active: true, progress: 0, direction: 1 }
+                scheduleGlow()
+            }, delay)
+        }
+        scheduleGlow()
+        return () => clearTimeout(glowTimeout)
     }, [])
 
     useEffect(() => {
@@ -411,22 +425,34 @@ export function AquariumBackground() {
                 return active
             })
 
-            // Draw octopus logo watermarks
+            // Draw single centred octopus with glow pulse
             if (logoImgRef.current) {
                 const logo = logoImgRef.current
-                // Large central ghost
+                const glow = glowRef.current
+
+                // Advance glow animation (~60fps: 0→1 in ~45 frames = ~0.75s up, 0.75s down)
+                if (glow.active) {
+                    glow.progress += 0.022 * glow.direction
+                    if (glow.progress >= 1) { glow.progress = 1; glow.direction = -1 }
+                    if (glow.progress <= 0) { glow.progress = 0; glow.active = false; glow.direction = 1 }
+                }
+
+                // Opacity: 0.04 baseline → up to 0.18 at peak glow
+                const glowAlpha = 0.04 + Math.sin(glow.progress * Math.PI) * 0.14
+
                 ctx.save()
-                ctx.globalAlpha = 0.04
+                ctx.globalAlpha = glowAlpha
                 ctx.filter = 'invert(1)'
-                const s1 = Math.min(width, height) * 0.55
-                ctx.drawImage(logo, width / 2 - s1 / 2, height / 2 - s1 / 2, s1, s1)
-                // Smaller repeat bottom-left
-                const s2 = Math.min(width, height) * 0.22
-                ctx.globalAlpha = 0.025
-                ctx.drawImage(logo, width * 0.08, height * 0.72, s2, s2)
-                // Top-right
-                ctx.globalAlpha = 0.025
-                ctx.drawImage(logo, width * 0.78, height * 0.06, s2, s2)
+                const s = Math.min(width, height) * 0.52
+                ctx.drawImage(logo, width / 2 - s / 2, height / 2 - s / 2, s, s)
+
+                // Extra cyan glow halo at peak
+                if (glow.active && glow.progress > 0.3) {
+                    ctx.globalAlpha = Math.sin(glow.progress * Math.PI) * 0.07
+                    ctx.filter = 'invert(1) sepia(1) saturate(10) hue-rotate(160deg)'
+                    ctx.drawImage(logo, width / 2 - s / 2 - 4, height / 2 - s / 2 - 4, s + 8, s + 8)
+                }
+
                 ctx.filter = 'none'
                 ctx.restore()
             }
