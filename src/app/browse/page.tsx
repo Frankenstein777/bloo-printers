@@ -2,8 +2,7 @@ import { PrismaClient } from '@prisma/client'
 import Link from 'next/link'
 import Image from 'next/image'
 import { getSession } from '@/lib/auth'
-import SearchInput from '@/components/SearchInput'
-import { FilterSidebar } from '@/components/FilterSidebar'
+import SearchBar from '@/components/SearchBar'
 import { SocialActions } from '@/components/social-actions'
 import DesignCard from '@/components/design-card'
 
@@ -93,8 +92,8 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
 
     return (
         <div className="min-h-screen pt-20 pb-20 px-4 sm:px-6 lg:px-8 relative z-10 pointer-events-auto">
-            <div className="max-w-7xl mx-auto">
-                <div className="text-center mb-12">
+            <div className="max-w-screen-2xl mx-auto">
+                <div className="text-center mb-10">
                     <h1 className="text-4xl font-bold font-mono tracking-tight text-gray-900 dark:text-white sm:text-5xl md:text-6xl mb-4">
                         <span className="text-[#00a3ad] dark:text-[#00f2ff]">CATALOG</span>_BROWSER
                     </h1>
@@ -103,47 +102,39 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
                     </p>
                 </div>
 
+                {/* Search + filter bar */}
                 <div className="flex justify-center mb-8">
-                    <SearchInput />
+                    <SearchBar />
                 </div>
 
-                <div className="lg:flex lg:gap-8">
-                    {/* Sidebar Filter */}
-                    <div className="flex-shrink-0">
-                        <FilterSidebar />
+                {/* Results Grid — full width, 6 columns on XL */}
+                {shuffledDesigns.length === 0 ? (
+                    <div className="text-center py-20 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">
+                        <p className="text-xl text-gray-500 font-mono">NO_DATA_FOUND</p>
+                        <p className="text-sm text-gray-400 mt-2">Try adjusting your filters or search terms.</p>
                     </div>
-
-                    {/* Results Grid */}
-                    <div className="flex-1">
-                        {shuffledDesigns.length === 0 ? (
-                            <div className="text-center py-20 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">
-                                <p className="text-xl text-gray-500 font-mono">NO_DATA_FOUND</p>
-                                <p className="text-sm text-gray-400 mt-2">Try adjusting your filters or search terms.</p>
-                            </div>
-                        ) : (
-                            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
-                                {shuffledDesigns.map((design) => (
-                                    <DesignCard
-                                        key={design.id}
-                                        design={{
-                                            ...design,
-                                            price: design.price ? Number(design.price) : null,
-                                            priceRender: Number(design.priceRender || 0),
-                                            priceDwg: Number(design.priceDwg || 0),
-                                            pricePdf: Number(design.pricePdf || 0),
-                                            priceElec: Number(design.priceElec || 0),
-                                            priceMech: Number(design.priceMech || 0),
-                                            priceStruct: Number(design.priceStruct || 0),
-                                        }}
-                                        initialLikes={likeCounts[design.id] || 0}
-                                        isLiked={!!likesMap[design.id]}
-                                        userEmail={session?.user.email || undefined}
-                                    />
-                                ))}
-                            </div>
-                        )}
+                ) : (
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 xl:gap-4">
+                        {shuffledDesigns.map((design) => (
+                            <DesignCard
+                                key={design.id}
+                                design={{
+                                    ...design,
+                                    price: design.price ? Number(design.price) : null,
+                                    priceRender: Number(design.priceRender || 0),
+                                    priceDwg: Number(design.priceDwg || 0),
+                                    pricePdf: Number(design.pricePdf || 0),
+                                    priceElec: Number(design.priceElec || 0),
+                                    priceMech: Number(design.priceMech || 0),
+                                    priceStruct: Number(design.priceStruct || 0),
+                                }}
+                                initialLikes={likeCounts[design.id] || 0}
+                                isLiked={!!likesMap[design.id]}
+                                userEmail={session?.user.email || undefined}
+                            />
+                        ))}
                     </div>
-                </div>
+                )}
             </div>
         </div>
     )
