@@ -443,14 +443,14 @@ export function AquariumBackground() {
                 ctx.save()
                 ctx.globalAlpha = glowAlpha
                 ctx.filter = 'invert(1)'
-                const s = Math.min(width, height) * 0.52
+                const s = Math.min(width, height) * 1.04
                 ctx.drawImage(logo, width / 2 - s / 2, height / 2 - s / 2, s, s)
 
                 // Extra cyan glow halo at peak
                 if (glow.active && glow.progress > 0.3) {
                     ctx.globalAlpha = Math.sin(glow.progress * Math.PI) * 0.07
                     ctx.filter = 'invert(1) sepia(1) saturate(10) hue-rotate(160deg)'
-                    ctx.drawImage(logo, width / 2 - s / 2 - 4, height / 2 - s / 2 - 4, s + 8, s + 8)
+                    ctx.drawImage(logo, width / 2 - s / 2 - 8, height / 2 - s / 2 - 8, s + 16, s + 16)
                 }
 
                 ctx.filter = 'none'
