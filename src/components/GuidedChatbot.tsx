@@ -202,28 +202,18 @@ const SCRIPT: Node[] = [
 const NODE_MAP = Object.fromEntries(SCRIPT.map(n => [n.id, n]))
 
 // ──────────────────────────────────────────
-// Bot Icon
+// Message Icon
 // ──────────────────────────────────────────
-function BotIcon({ className }: { className?: string }) {
+function MessageIcon({ className }: { className?: string }) {
     return (
-        <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-            <rect x="6" y="12" width="24" height="18" rx="4" fill="currentColor" opacity="0.9" />
-            <rect x="11" y="17" width="4" height="4" rx="2" fill="#001f2b" />
-            <rect x="21" y="17" width="4" height="4" rx="2" fill="#001f2b" />
-            <rect x="12" y="18" width="2" height="2" rx="1" fill="#00f2ff" opacity="0.8" />
-            <rect x="22" y="18" width="2" height="2" rx="1" fill="#00f2ff" opacity="0.8" />
-            <rect x="13" y="24" width="10" height="2" rx="1" fill="#001f2b" opacity="0.6" />
-            <rect x="17" y="6" width="2" height="6" rx="1" fill="currentColor" opacity="0.7" />
-            <circle cx="18" cy="5" r="2.5" fill="currentColor" />
-            <rect x="3" y="16" width="3" height="6" rx="1.5" fill="currentColor" opacity="0.6" />
-            <rect x="30" y="16" width="3" height="6" rx="1.5" fill="currentColor" opacity="0.6" />
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
+            <path fillRule="evenodd" d="M4.804 21.644A6.707 6.707 0 0 0 6 20.24l.1-.118a1.2 1.2 0 0 1 .83-.34 8.167 8.167 0 0 0 2.27.318c4.97 0 9-3.582 9-8s-4.03-8-9-8-9 3.582-9 8c0 2.508 1.34 4.75 3.4 6.136a1.2 1.2 0 0 1 .494.945c.026.745-.183 1.503-.69 2.158l-.208.261a.575.575 0 0 0 .608.944Z" clipRule="evenodd" />
         </svg>
     )
 }
 
 // ──────────────────────────────────────────
 type Message = { role: 'bot' | 'user', text: string }
-const JINGLE_INTERVAL_MS = 20000
 
 export default function GuidedChatbot() {
     const pathname = usePathname()
@@ -247,15 +237,22 @@ export default function GuidedChatbot() {
 
     useEffect(() => {
         if (open) {
-            if (jingleTimer.current) clearInterval(jingleTimer.current)
+            if (jingleTimer.current) clearTimeout(jingleTimer.current)
             setJingle(false)
         } else {
-            jingleTimer.current = setInterval(() => {
-                setJingle(true)
-                setTimeout(() => setJingle(false), 1000)
-            }, JINGLE_INTERVAL_MS)
+            const scheduleJingle = () => {
+                const delay = 1000 + Math.random() * 3000 // 1 to 4 seconds
+                jingleTimer.current = setTimeout(() => {
+                    setJingle(true)
+                    setTimeout(() => {
+                        setJingle(false)
+                        scheduleJingle()
+                    }, 1000)
+                }, delay)
+            }
+            scheduleJingle()
         }
-        return () => { if (jingleTimer.current) clearInterval(jingleTimer.current) }
+        return () => { if (jingleTimer.current) clearTimeout(jingleTimer.current) }
     }, [open])
 
     useEffect(() => {
@@ -300,12 +297,12 @@ export default function GuidedChatbot() {
         <>
             <style>{`
                 @keyframes bloo-jingle {
-                    0%, 100% { transform: rotate(0deg) scale(1); }
-                    15% { transform: rotate(-15deg) scale(1.15); }
-                    30% { transform: rotate(15deg) scale(1.15); }
-                    45% { transform: rotate(-10deg) scale(1.1); }
-                    60% { transform: rotate(10deg) scale(1.1); }
-                    75% { transform: rotate(-5deg) scale(1.05); }
+                    0%, 100% { transform: rotate(0deg) scale(1); filter: hue-rotate(0deg); }
+                    15% { transform: rotate(-15deg) scale(1.15); filter: hue-rotate(90deg); }
+                    30% { transform: rotate(15deg) scale(1.15); filter: hue-rotate(-90deg); }
+                    45% { transform: rotate(-10deg) scale(1.1); filter: hue-rotate(45deg); }
+                    60% { transform: rotate(10deg) scale(1.1); filter: hue-rotate(-45deg); }
+                    75% { transform: rotate(-5deg) scale(1.05); filter: hue-rotate(20deg); }
                 }
                 .bloo-jingle { animation: bloo-jingle 0.9s ease-in-out; }
                 @keyframes bloo-pulse-ring {
@@ -332,7 +329,7 @@ export default function GuidedChatbot() {
                             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     ) : (
-                        <BotIcon className="w-8 h-8" />
+                        <MessageIcon className="w-8 h-8" />
                     )}
                 </button>
                 {!open && (
@@ -346,7 +343,7 @@ export default function GuidedChatbot() {
                     {/* Header */}
                     <div className="flex items-center gap-3 px-4 py-3 bg-[#00a3ad]/20 border-b border-[#00f2ff]/20">
                         <div className="w-9 h-9 rounded-full bg-[#00f2ff] flex items-center justify-center text-black">
-                            <BotIcon className="w-6 h-6" />
+                            <MessageIcon className="w-6 h-6" />
                         </div>
                         <div>
                             <p className="font-bold text-white text-sm font-mono">BLOO</p>
