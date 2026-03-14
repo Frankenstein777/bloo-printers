@@ -1,0 +1,24 @@
+[
+  {
+    "origin": [
+      "http://localhost:3000",
+      "https://octoplans.vercel.app",
+      "https://*.vercel.app",
+      "https://octoplans.com"
+    ],
+    "method": [
+      "PUT",
+      "GET",
+      "HEAD",
+      "DELETE"
+    ],
+    "maxAgeSeconds": 3600,
+    "responseHeader": [
+      "Content-Type",
+      "Content-Length",
+      "Authorization",
+      "User-Agent",
+      "x-goog-resumable"
+    ]
+  }
+]

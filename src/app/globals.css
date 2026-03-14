@@ -2,9 +2,10 @@
 @source "../**/*.{js,ts,jsx,tsx}";
 
 :root {
+  color-scheme: dark;
   --background: #f8fafc;
   --foreground: #0a192f;
-  
+
   /* Primary: Dark Navy */
   --primary: #0a192f;
   
@@ -20,6 +21,7 @@
   /* Border: Gray 200 */
   --border: #e5e7eb;
 }
+
 
 .dark {
   /* Navy Blue Theme */

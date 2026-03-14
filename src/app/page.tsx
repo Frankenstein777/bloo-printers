@@ -59,12 +59,12 @@ export default function Home() {
               </div>
               <div className="mt-8 grid grid-cols-2 gap-4 font-mono text-sm">
                 <div className="p-4 border border-[#00f2ff]/30 bg-[#00f2ff]/5">
-                  <span className="block text-2xl font-bold">100+</span>
-                  <span className="opacity-70">Blueprints</span>
+                  <span className="block text-2xl font-bold text-[#00a3ad] dark:text-[#00f2ff]">100+</span>
+                  <span className="opacity-70 text-gray-600 dark:text-gray-400">Blueprints</span>
                 </div>
                 <div className="p-4 border border-[#00f2ff]/30 bg-[#00f2ff]/5">
-                  <span className="block text-2xl font-bold">Instant</span>
-                  <span className="opacity-70">Access</span>
+                  <span className="block text-2xl font-bold text-[#00a3ad] dark:text-[#00f2ff]">Instant</span>
+                  <span className="opacity-70 text-gray-600 dark:text-gray-400">Access</span>
                 </div>
               </div>
             </div>
@@ -91,17 +91,17 @@ export default function Home() {
               { u: "Builder 88", c: "Zero latency. Instant delivery. The future of construction is here." },
               { u: "Design Core", c: "Aesthetic and functional. Octoplans is the only resource we trust." }
             ].map((t, i) => (
-              <div key={i} className="p-6 border border-gray-200 dark:border-gray-800 bg-white/5 backdrop-blur-sm hover:border-[#00f2ff] transition-colors group">
+              <div key={i} className="p-6 border border-gray-200 dark:border-gray-800 bg-white/5 backdrop-blur-sm hover:border-[#00f2ff] transition-colors group text-gray-100">
                 <div className="flex items-center space-x-3 mb-4">
                   <div className="w-10 h-10 bg-[#00f2ff]/20 rounded-none flex items-center justify-center text-[#00f2ff]">
                     {t.u[0]}
                   </div>
                   <div>
-                    <p className="font-mono font-bold text-sm tracking-widest uppercase">{t.u}</p>
+                    <p className="font-mono font-bold text-sm tracking-widest uppercase text-white">{t.u}</p>
                     <p className="text-xs opacity-50 font-mono uppercase">Verified Purchase</p>
                   </div>
                 </div>
-                <p className="italic opacity-80">&quot;{t.c}&quot;</p>
+                <p className="italic opacity-80 text-gray-200">&quot;{t.c}&quot;</p>
               </div>
             ))}
           </div>
@@ -171,7 +171,7 @@ export default function Home() {
       </section>
 
       {/* FOOTER */}
-      <footer className="relative z-10 py-8 text-center text-xs font-mono opacity-50 border-t border-gray-800 uppercase">
+      <footer className="relative z-10 py-8 text-center text-xs font-mono opacity-50 border-t border-gray-800 uppercase text-gray-300 dark:text-gray-500">
         <p>Octoplans © 2026. All rights reserved.</p>
       </footer>
     </div>
