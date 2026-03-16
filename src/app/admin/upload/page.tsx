@@ -63,11 +63,11 @@ export default function AdminUploadPage() {
       }
 
       setUploadStatus('Uploading preview images…')
-      const previewKeys: string[] = []
+      const previewUrls: string[] = []
       for (let i = 0; i < previewFiles.length; i++) {
         setUploadStatus(`Uploading preview image ${i + 1} of ${previewFiles.length}…`)
-        const { key } = await uploadFile({ file: previewFiles[i], designId: tempDesignId, fileType: `preview-${i}` })
-        previewKeys.push(key)
+        const { publicUrl } = await uploadFile({ file: previewFiles[i], designId: tempDesignId, fileType: `preview-${i}` })
+        previewUrls.push(publicUrl)
         updateProgress()
       }
 
@@ -144,7 +144,7 @@ export default function AdminUploadPage() {
         software_AUTOCAD:  formData.get('software_AUTOCAD') === 'on',
         software_PDF:      formData.get('software_PDF') === 'on',
         // S3 keys (not file content)
-        previewImages: previewKeys,
+        previewImages: previewUrls,
         rvtUrl:         fileKeys['rvt']         ?? null,
         plnUrl:         fileKeys['pln']         ?? null,
         skpUrl:         fileKeys['skp']         ?? null,
