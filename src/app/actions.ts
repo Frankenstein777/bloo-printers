@@ -45,11 +45,18 @@ export async function signupAction(formData: FormData): Promise<void> {
 }
 
 export async function subscribeAction(): Promise<void> {
-  const cookieStore = await cookies()
-  const token = cookieStore.get('auth-token')
-  if (!token) redirect('/login')
-  cookieStore.set('auth-token', 'subscriber')
+  const session = await getSession()
+  if (!session?.user) redirect('/login')
+
+  // In a real application, this would redirect to a Stripe/Paystack checkout
+  // For MVP purposes, we're granting PREMIUM access directly
+  await prisma.user.update({
+    where: { id: session.user.id },
+    data: { subscriptionStatus: 'PREMIUM' }
+  })
+  
   revalidatePath('/')
+  redirect('/profile') // Redirecting to profile instead of just '/' can be better UX
 }
 
 export async function purchaseAction(designId: string): Promise<void> {
@@ -598,6 +605,54 @@ export async function verifyPurchaseAction(reference: string, designId: string, 
   } catch (error) {
     console.error('Payment Verification Error:', error)
     return { success: false, error: 'Verification failed' }
+  }
+}
+
+export async function verifySubscriptionAction(reference: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const res = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
+      headers: {
+        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+      },
+      cache: 'no-store'
+    })
+
+    const data = await res.json()
+
+    if (!data.status || data.data.status !== 'success') {
+      return { success: false, error: 'Transaction failed or invalid' }
+    }
+
+    const session = await getSession()
+    if (!session) return { success: false, error: 'User not logged in' }
+
+    // Update user to PREMIUM
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: { subscriptionStatus: 'PREMIUM' }
+    })
+
+    // Optionally create a Subscription record
+    // We set period end to 30 days from now (approx 1 month)
+    const thirtyDaysFromNow = new Date()
+    thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30)
+
+    await prisma.subscription.create({
+      data: {
+        userId: session.user.id,
+        paystackSubscriptionCode: data.data.plan, // if a plan was used, Paystack returns it
+        status: 'active',
+        currentPeriodEnd: thirtyDaysFromNow
+      }
+    })
+
+    revalidatePath('/')
+    revalidatePath('/profile')
+
+    return { success: true }
+  } catch (error) {
+    console.error('Subscription Verification Error:', error)
+    return { success: false, error: 'Subscription verification failed' }
   }
 }
 

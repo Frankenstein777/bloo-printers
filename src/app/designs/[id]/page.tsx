@@ -13,6 +13,7 @@ import { CommentSection } from '@/components/comment-section'
 import { ProtectedImage } from '@/components/ProtectedImage'
 import { ImageGallery } from '@/components/ImageGallery'
 import PaystackButton from '@/components/PaystackButton'
+import PaystackSubscribeButton from '@/components/PaystackSubscribeButton'
 import { PlotFitterTrigger } from '@/components/plot-fitter/PlotFitterTrigger'
 import { DownloadButtons } from '@/components/DownloadButtons'
 
@@ -275,11 +276,9 @@ export default async function DesignDetailPage({ params, searchParams }: { param
                                 <div className="space-y-4">
                                     {design.tier === 'PREMIUM' && (
                                         <div className="space-y-3">
-                                            <form action={subscribeAction}>
-                                                <button type="submit" className="w-full bg-purple-600 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-purple-700 uppercase tracking-wider">
-                                                    Subscribe (Monthly Access)
-                                                </button>
-                                            </form>
+                                            <PaystackSubscribeButton 
+                                                email={session?.user?.email || ''} 
+                                            />
                                             <div className="relative flex py-2 items-center">
                                                 <div className="flex-grow border-t border-gray-400"></div>
                                                 <span className="flex-shrink-0 mx-4 text-gray-400 text-xs uppercase">Or</span>
