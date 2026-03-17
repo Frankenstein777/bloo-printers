@@ -14,6 +14,7 @@ import { ProtectedImage } from '@/components/ProtectedImage'
 import { ImageGallery } from '@/components/ImageGallery'
 import PaystackButton from '@/components/PaystackButton'
 import { PlotFitterTrigger } from '@/components/plot-fitter/PlotFitterTrigger'
+import { DownloadButtons } from '@/components/DownloadButtons'
 
 // ... existing imports ...
 
@@ -137,6 +138,17 @@ export default async function DesignDetailPage({ params, searchParams }: { param
         // Only Admin or Purchaser (handled above) can access
     }
 
+    const availableFiles = [
+        { type: 'dwg', label: 'DWG', url: design.dwgUrl },
+        { type: 'pdf', label: 'PDF', url: design.pdfUrl },
+        { type: 'rvt', label: 'Revit (RVT)', url: design.rvtUrl },
+        { type: 'pln', label: 'ArchiCAD (PLN)', url: design.plnUrl },
+        { type: 'skp', label: 'SketchUp (SKP)', url: design.skpUrl },
+        { type: 'electrical', label: 'Electrical', url: design.electricalUrl },
+        { type: 'mechanical', label: 'Mechanical', url: design.mechanicalUrl },
+        { type: 'structural', label: 'Structural', url: design.structuralUrl },
+    ].filter(f => !!f.url).map(f => ({ type: f.type, label: f.label }))
+
     return (
         <div className="min-h-screen bg-transparent py-12 transition-colors">
             <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
@@ -254,11 +266,11 @@ export default async function DesignDetailPage({ params, searchParams }: { param
                             <PlotFitterTrigger design={sanitizedDesign as any} />
                         </div>
 
-                        <div className="mt-10 flex sm:flex-col1">
+                        <div className="mt-10 flex flex-col sm:flex-col1">
                             {canDownload ? (
-                                <a href={design.dwgUrl} target="_blank" rel="noopener noreferrer" className="max-w-xs flex-1 bg-indigo-600 border border-transparent rounded-md py-3 px-8 flex items-center justify-center text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-indigo-500 sm:w-full">
-                                    Download DWG
-                                </a>
+                                <div className="w-full">
+                                    <DownloadButtons designId={design.id} files={availableFiles} />
+                                </div>
                             ) : (
                                 <div className="space-y-4">
                                     {design.tier === 'PREMIUM' && (
