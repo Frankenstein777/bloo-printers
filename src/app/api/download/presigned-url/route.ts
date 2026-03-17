@@ -52,8 +52,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `Unknown fileType: ${fileType}` }, { status: 400 })
   }
 
-  // Admins can always download; regular users need a successful purchase
-  if (session.user.role !== 'ADMIN') {
+  const design = await prisma.design.findUnique({
+    where: { id: designId },
+    select: {
+      title: true,
+      tier: true,
+      rvtUrl: true, plnUrl: true, skpUrl: true, pdfUrl: true, dwgUrl: true,
+      electricalUrl: true, mechanicalUrl: true, structuralUrl: true,
+    },
+  })
+
+  if (!design) {
+    return NextResponse.json({ error: 'Design not found' }, { status: 404 })
+  }
+
+  // Admins can always download; regular users need a successful purchase unless design is free
+  if (session.user.role !== 'ADMIN' && design.tier !== 'FREE') {
     const purchase = await prisma.purchase.findFirst({
       where: { designId, userId: session.user.id, status: 'succeeded' },
     })
@@ -63,19 +77,6 @@ export async function POST(req: NextRequest) {
         { status: 403 }
       )
     }
-  }
-
-  const design = await prisma.design.findUnique({
-    where: { id: designId },
-    select: {
-      title: true,
-      rvtUrl: true, plnUrl: true, skpUrl: true, pdfUrl: true, dwgUrl: true,
-      electricalUrl: true, mechanicalUrl: true, structuralUrl: true,
-    },
-  })
-
-  if (!design) {
-    return NextResponse.json({ error: 'Design not found' }, { status: 404 })
   }
 
   const s3Key = (design as Record<string, unknown>)[dbField] as string | null | undefined
