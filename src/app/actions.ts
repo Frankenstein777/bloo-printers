@@ -304,33 +304,6 @@ export async function updateDesignAction(designId: string, formData: FormData): 
   }
 
   try {
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads')
-    await mkdir(uploadDir, { recursive: true })
-
-    // Helper: Stream file to disk
-    const saveFileStream = async (file: File | null): Promise<string | undefined> => {
-      if (!file || file.size === 0) return undefined
-      const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}-${file.name.replace(/\s/g, '-')}`
-      const filepath = path.join(uploadDir, filename)
-      try {
-        const { createWriteStream } = await import('fs')
-        const { Readable } = await import('stream')
-        // @ts-ignore
-        const webStream = file.stream()
-        const nodeStream = Readable.fromWeb(webStream as any)
-        const writeStream = createWriteStream(filepath)
-        await new Promise<void>((resolve, reject) => {
-          nodeStream.pipe(writeStream)
-          writeStream.on('finish', () => resolve())
-          writeStream.on('error', reject)
-        })
-        return `/uploads/${filename}`
-      } catch (e) {
-        console.error("Stream Save Error:", e)
-        return undefined
-      }
-    }
-
     const data: Record<string, any> = {}
 
     // Strings
