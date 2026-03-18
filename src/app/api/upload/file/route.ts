@@ -97,15 +97,15 @@ export async function POST(req: NextRequest) {
       const height = metadata.height || 800
       
       const fontSize = Math.max(24, Math.min(96, Math.floor(width / 25)))
-      const patternWidth = fontSize * 11
-      const patternHeight = fontSize * 6
+      const patternWidth = fontSize * 12
+      const patternHeight = fontSize * 8
 
       // Generate SVG text for watermark
       const svgText = `
         <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <pattern id="wm" width="${patternWidth}" height="${patternHeight}" patternUnits="userSpaceOnUse" patternTransform="rotate(-30)">
-              <text x="0" y="${fontSize}" font-size="${fontSize}px" font-weight="bold" font-family="Arial, Helvetica, sans-serif" fill="rgba(255, 255, 255, 0.4)">MADE BY OCTOPLANS</text>
+              <text x="${patternWidth / 2}" y="${patternHeight / 2 + fontSize * 0.35}" text-anchor="middle" font-size="${fontSize}px" font-weight="bold" font-family="sans-serif" fill="#ffffff" fill-opacity="0.35">MADE BY OCTOPLANS</text>
             </pattern>
           </defs>
           <rect x="0" y="0" width="100%" height="100%" fill="url(#wm)" />
