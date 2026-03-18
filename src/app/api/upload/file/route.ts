@@ -88,35 +88,13 @@ export async function POST(req: NextRequest) {
       })
 
       // 2. Process and upload watermarked image
-      const metadata = await sharp(buffer).metadata()
-      const width = metadata.width || 1200
-      const height = metadata.height || 800
-      
-      const fontSize = Math.max(24, Math.min(96, Math.floor(width / 25)))
-      const stepX = fontSize * 12
-      const stepY = fontSize * 8
-      
-      const diagHalf = Math.sqrt(width * width + height * height) / 2
-      
-      let textElements = ''
-      for (let y = -diagHalf - stepY; y <= diagHalf + stepY; y += stepY) {
-        for (let x = -diagHalf - stepX; x <= diagHalf + stepX; x += stepX) {
-          textElements += `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="${fontSize}px" font-weight="bold" font-family="sans-serif" fill="#ffffff" fill-opacity="0.35">MADE BY OCTOPLANS</text>\n`
-        }
-      }
-
-      // Generate explicit SVG text nodes without <pattern>
-      const svgText = `
-        <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
-          <g transform="translate(${width/2}, ${height/2}) rotate(-30)">
-            ${textElements}
-          </g>
-        </svg>
-      `
+      const path = await import('path')
+      const watermarkPath = path.join(process.cwd(), 'public', 'made by octoplans.png')
       
       const watermarkedBuffer = await sharp(buffer)
         .composite([{
-          input: Buffer.from(svgText),
+          input: watermarkPath,
+          tile: true,
           gravity: 'northwest'
         }])
         .toBuffer()
