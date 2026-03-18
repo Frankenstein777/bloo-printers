@@ -41,7 +41,9 @@ export default function RootLayout({
                         <AmbientAudio />
                         <Navbar />
                         <GuidedChatbot />
-                        {children}
+                        <main className="pt-16">
+                            {children}
+                        </main>
                     </ThemeProvider>
                 </Providers>
             </body>
