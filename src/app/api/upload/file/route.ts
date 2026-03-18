@@ -91,13 +91,24 @@ export async function POST(req: NextRequest) {
       })
 
       // 2. Process and upload watermarked image
+      // Get image dimensions to size the SVG overlay
+      const metadata = await sharp(buffer).metadata()
+      const width = metadata.width || 1200
+      const height = metadata.height || 800
+      
+      const fontSize = Math.max(24, Math.min(96, Math.floor(width / 25)))
+      const patternWidth = fontSize * 11
+      const patternHeight = fontSize * 6
+
       // Generate SVG text for watermark
       const svgText = `
-        <svg width="600" height="200">
-          <style>
-            .title { fill: rgba(255, 255, 255, 0.45); font-size: 48px; font-weight: bold; font-family: sans-serif; }
-          </style>
-          <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" class="title">MADE BY OCTOPLANS</text>
+        <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="wm" width="${patternWidth}" height="${patternHeight}" patternUnits="userSpaceOnUse" patternTransform="rotate(-30)">
+              <text x="0" y="${fontSize}" font-size="${fontSize}px" font-weight="bold" font-family="Arial, Helvetica, sans-serif" fill="rgba(255, 255, 255, 0.4)">MADE BY OCTOPLANS</text>
+            </pattern>
+          </defs>
+          <rect x="0" y="0" width="100%" height="100%" fill="url(#wm)" />
         </svg>
       `
       
