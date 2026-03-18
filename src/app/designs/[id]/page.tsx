@@ -123,7 +123,7 @@ export default async function DesignDetailPage({ params, searchParams }: { param
 
     // Determining access rights
     let canDownload = false
-    let showBlur = false
+    const showBlur = false // Removed — images are watermarked server-side
 
     if (isAdmin || hasPurchased) {
         canDownload = true
@@ -132,8 +132,6 @@ export default async function DesignDetailPage({ params, searchParams }: { param
     } else if (design.tier === 'PREMIUM') {
         if (isSubscriber) {
             canDownload = true
-        } else {
-            showBlur = true
         }
     } else if (design.tier === 'EXCLUSIVE') {
         // Only Admin or Purchaser (handled above) can access
