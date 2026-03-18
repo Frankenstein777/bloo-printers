@@ -91,9 +91,21 @@ export async function POST(req: NextRequest) {
       const path = await import('path')
       const watermarkPath = path.join(process.cwd(), 'public', 'made by octoplans.png')
       
+      // Rotate the watermark and add transparent padding for spacing
+      const processedWatermark = await sharp(watermarkPath)
+        .rotate(-45, { background: { r: 0, g: 0, b: 0, alpha: 0 } })
+        .extend({
+          top: 150,
+          bottom: 150,
+          left: 150,
+          right: 150,
+          background: { r: 0, g: 0, b: 0, alpha: 0 }
+        })
+        .toBuffer()
+
       const watermarkedBuffer = await sharp(buffer)
         .composite([{
-          input: watermarkPath,
+          input: processedWatermark,
           tile: true,
           gravity: 'northwest'
         }])
