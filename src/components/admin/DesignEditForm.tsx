@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useRef } from 'react'
 import { Design } from '@prisma/client'
 import { updateDesignAction, deleteDesignAction } from '@/app/actions'
 import { FootprintEditor, EditorVertex } from '@/components/admin/FootprintEditor'
 import { useRouter } from 'next/navigation'
+import { useFirebaseUpload } from '@/hooks/useFirebaseUpload'
 
 interface DesignEditFormProps {
     design: Design
@@ -13,9 +14,11 @@ interface DesignEditFormProps {
 export default function DesignEditForm({ design }: DesignEditFormProps) {
     const router = useRouter()
     const [isPending, startTransition] = useTransition()
+    const [isUploading, setIsUploading] = useState(false)
     const [error, setError] = useState('')
     const [success, setSuccess] = useState('')
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+    const { uploadFile } = useFirebaseUpload()
 
     // Parse initial footprint
     const initialFootprint = typeof design.buildingFootprint === 'string'
@@ -29,14 +32,45 @@ export default function DesignEditForm({ design }: DesignEditFormProps) {
     const handleSubmit = async (formData: FormData) => {
         setError('')
         setSuccess('')
+        setIsUploading(true)
 
         startTransition(async () => {
-            const res = await updateDesignAction(design.id, formData)
-            if (res.error) {
-                setError(res.error)
-            } else {
-                setSuccess('Design updated successfully')
-                router.refresh()
+            try {
+                // Upload any new preview images to Firebase first
+                const fileInput = document.getElementById('newPreviewImagesInput') as HTMLInputElement
+                const files = fileInput?.files ? Array.from(fileInput.files) : []
+
+                if (files.length > 0) {
+                    const uploadedUrls: string[] = []
+                    const nextIndex = design.previewImages.length
+
+                    for (let i = 0; i < files.length; i++) {
+                        const { publicUrl } = await uploadFile({
+                            file: files[i],
+                            designId: design.id,
+                            fileType: `preview-${nextIndex + i}`,
+                        })
+                        uploadedUrls.push(publicUrl)
+                    }
+
+                    // Pass uploaded URLs via a hidden field the server action can read
+                    formData.set('uploadedPreviewUrls', JSON.stringify(uploadedUrls))
+                }
+
+                // Clear the file input so the server action doesn't try to save them locally
+                formData.delete('newPreviewImages')
+
+                const res = await updateDesignAction(design.id, formData)
+                if (res.error) {
+                    setError(res.error)
+                } else {
+                    setSuccess('Design updated successfully')
+                    router.refresh()
+                }
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Upload failed')
+            } finally {
+                setIsUploading(false)
             }
         })
     }
@@ -279,6 +313,7 @@ export default function DesignEditForm({ design }: DesignEditFormProps) {
                     <div>
                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Update Preview Images (Add New)</label>
                         <input
+                            id="newPreviewImagesInput"
                             type="file"
                             name="newPreviewImages"
                             accept="image/*"

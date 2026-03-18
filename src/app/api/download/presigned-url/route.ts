@@ -47,8 +47,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'designId and fileType are required' }, { status: 400 })
   }
 
-  const dbField = FILE_TYPE_TO_FIELD[fileType]
-  if (!dbField) {
+  // Resolve DB field — clean-preview files are handled separately below
+  const isCleanPreview = fileType.startsWith('clean-preview-')
+  const dbField = isCleanPreview ? null : FILE_TYPE_TO_FIELD[fileType]
+
+  if (!isCleanPreview && !dbField) {
     return NextResponse.json({ error: `Unknown fileType: ${fileType}` }, { status: 400 })
   }
 
@@ -80,9 +83,11 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  let s3Key = (design as Record<string, unknown>)[dbField] as string | null | undefined
+  let s3Key: string | null | undefined = dbField
+    ? (design as Record<string, unknown>)[dbField] as string | null | undefined
+    : null
 
-  if (!s3Key && fileType.startsWith('clean-preview-')) {
+  if (!s3Key && isCleanPreview) {
     const index = parseInt(fileType.replace('clean-preview-', ''), 10)
     const url = design.previewImages[index]
     if (url) {

@@ -404,19 +404,16 @@ export async function updateDesignAction(designId: string, formData: FormData): 
       if (val !== null) data[f] = val
     })
 
-    // New Images
-    const newImages = formData.getAll('newPreviewImages') as File[]
-    if (newImages && newImages.length > 0 && newImages[0].size > 0) {
-      const validUrls: string[] = []
-      for (const file of newImages) {
-        const url = await saveFileStream(file)
-        if (url) validUrls.push(url)
-      }
-      if (validUrls.length > 0) {
-        // Fetch existing to append
-        const existing = await prisma.design.findUnique({ where: { id: designId }, select: { previewImages: true } })
-        data.previewImages = [...(existing?.previewImages || []), ...validUrls]
-      }
+    // New Images — already uploaded to Firebase by the client, URLs passed as JSON
+    const uploadedUrlsRaw = formData.get('uploadedPreviewUrls') as string | null
+    if (uploadedUrlsRaw) {
+      try {
+        const newUrls: string[] = JSON.parse(uploadedUrlsRaw)
+        if (newUrls.length > 0) {
+          const existing = await prisma.design.findUnique({ where: { id: designId }, select: { previewImages: true } })
+          data.previewImages = [...(existing?.previewImages || []), ...newUrls]
+        }
+      } catch { /* ignore parse error */ }
     }
 
     await prisma.design.update({
