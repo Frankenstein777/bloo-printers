@@ -20,6 +20,7 @@ import { getSession } from '@/lib/auth'
 import { adminStorage } from '@/lib/firebase-admin'
 import { designFileKey, previewImageKey, storagePublicUrl } from '@/lib/firebase-storage'
 import { Readable } from 'stream'
+import sharp from 'sharp'
 
 export const runtime = 'nodejs'
 // Allow up to 500 MB — large RVT/DWG files
@@ -52,16 +53,73 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Build storage key ─────────────────────────────────────────
-  const key = fileType.startsWith('preview-')
-    ? previewImageKey(designId, parseInt(fileType.replace('preview-', ''), 10), file.name)
+  const isPreview = fileType.startsWith('preview-')
+  const index = isPreview ? parseInt(fileType.replace('preview-', ''), 10) : 0
+
+  const key = isPreview
+    ? previewImageKey(designId, index, file.name)
     : designFileKey(designId, fileType, file.name)
 
-  // ── Stream file to Firebase Storage ──────────────────────────
+  const cleanKey = isPreview
+    ? `designs/${designId}/clean-preview-${index}.${file.name.split('.').pop()?.toLowerCase() ?? 'jpg'}`
+    : null
+
+  // ── Upload ──────────────────────────────────────────
   try {
     const bucket = adminStorage.bucket()
-    const storageFile = bucket.file(key)
-
     const contentType = file.type || 'application/octet-stream'
+
+    if (isPreview) {
+      const buffer = Buffer.from(await file.arrayBuffer())
+
+      // 1. Process and upload clean image with EXIF metadata
+      const cleanBuffer = await sharp(buffer)
+        .withMetadata({
+          exif: {
+            IFD0: {
+              Copyright: 'made by octoplans',
+              Software: 'made by octoplans',
+            }
+          }
+        })
+        .toBuffer()
+      
+      const cleanFile = bucket.file(cleanKey!)
+      await cleanFile.save(cleanBuffer, {
+        metadata: { contentType },
+        resumable: false,
+      })
+
+      // 2. Process and upload watermarked image
+      // Generate SVG text for watermark
+      const svgText = `
+        <svg width="600" height="200">
+          <style>
+            .title { fill: rgba(255, 255, 255, 0.45); font-size: 48px; font-weight: bold; font-family: sans-serif; }
+          </style>
+          <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" class="title">MADE BY OCTOPLANS</text>
+        </svg>
+      `
+      
+      const watermarkedBuffer = await sharp(buffer)
+        .composite([{
+          input: Buffer.from(svgText),
+          gravity: 'center'
+        }])
+        .toBuffer()
+
+      const storageFile = bucket.file(key)
+      await storageFile.save(watermarkedBuffer, {
+        metadata: { contentType },
+        resumable: false,
+      })
+
+      const publicUrl = storagePublicUrl(key)
+      return NextResponse.json({ key, publicUrl })
+    }
+
+    // ── Stream file to Firebase Storage (for non-preview files) ───
+    const storageFile = bucket.file(key)
     const writeStream = storageFile.createWriteStream({
       metadata: { contentType },
       resumable: false, // disable for files < 5 MB threshold; fine for most

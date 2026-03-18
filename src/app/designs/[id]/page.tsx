@@ -150,6 +150,12 @@ export default async function DesignDetailPage({ params, searchParams }: { param
         { type: 'structural', label: 'Structural', url: design.structuralUrl },
     ].filter(f => !!f.url).map(f => ({ type: f.type, label: f.label }))
 
+    if (design.previewImages && design.previewImages.length > 0) {
+        design.previewImages.forEach((url, i) => {
+            availableFiles.unshift({ type: `clean-preview-${i}`, label: `Original Image ${i + 1}` })
+        })
+    }
+
     return (
         <div className="min-h-screen bg-transparent py-12 transition-colors">
             <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
@@ -313,7 +319,7 @@ export default async function DesignDetailPage({ params, searchParams }: { param
                                     href={`https://wa.me/2347068095681?text=${encodeURIComponent(`Hello, I wish to request some alterations to ${design.title} found on Octoplans`)}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-green-500 hover:underline transition-colors"
+                                    className="w-full bg-[#00a3ad] dark:bg-[#00f2ff] text-black font-bold py-3 px-8 rounded-md flex items-center justify-center hover:shadow-[0_0_20px_rgba(0,242,255,0.5)] transition-all uppercase tracking-widest gap-2"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" /></svg>
                                     Request Alterations / Custom Changes

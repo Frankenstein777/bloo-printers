@@ -59,6 +59,7 @@ export async function POST(req: NextRequest) {
       tier: true,
       rvtUrl: true, plnUrl: true, skpUrl: true, pdfUrl: true, dwgUrl: true,
       electricalUrl: true, mechanicalUrl: true, structuralUrl: true,
+      previewImages: true,
     },
   })
 
@@ -79,7 +80,16 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const s3Key = (design as Record<string, unknown>)[dbField] as string | null | undefined
+  let s3Key = (design as Record<string, unknown>)[dbField] as string | null | undefined
+
+  if (!s3Key && fileType.startsWith('clean-preview-')) {
+    const index = parseInt(fileType.replace('clean-preview-', ''), 10)
+    const url = design.previewImages[index]
+    if (url) {
+      const ext = url.split('?')[0].split('.').pop() || 'jpg'
+      s3Key = `designs/${designId}/clean-preview-${index}.${ext}`
+    }
+  }
 
   if (!s3Key) {
     return NextResponse.json(
