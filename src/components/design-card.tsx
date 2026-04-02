@@ -30,14 +30,19 @@ interface DesignCardProps {
     initialLikes: number
     isLiked: boolean
     userEmail?: string
+    discountPct?: number // seeded discount % for this card (0 = no discount)
 }
 
-export default function DesignCard({ design, initialLikes, isLiked, userEmail }: DesignCardProps) {
+export default function DesignCard({ design, initialLikes, isLiked, userEmail, discountPct }: DesignCardProps) {
     const [showComments, setShowComments] = useState(false)
     const [comments, setComments] = useState<any[]>([])
     const [isLoadingComments, setIsLoadingComments] = useState(false)
     const [newComment, setNewComment] = useState('')
     const [isPosting, setIsPosting] = useState(false)
+
+    const hasDiscount = !!discountPct && discountPct > 0
+    const basePrice = design.priceRender || design.price || 0
+    const discountedPrice = hasDiscount ? Math.round(basePrice * (1 - discountPct! / 100)) : basePrice
 
     const handleToggleComments = async () => {
         if (!showComments) {
@@ -78,6 +83,7 @@ export default function DesignCard({ design, initialLikes, isLiked, userEmail }:
                     className="object-cover object-center w-full h-full pointer-events-none select-none"
                     draggable={false}
                 />
+                {/* Tier badge */}
                 <div className="absolute top-2 right-2 z-30">
                     <span className={`inline-flex items-center px-2.5 py-0.5 text-xs font-medium uppercase tracking-wider ${design.tier === 'FREE' ? 'bg-green-100 text-green-800' :
                         design.tier === 'PREMIUM' ? 'bg-purple-100 text-purple-800' :
@@ -86,6 +92,14 @@ export default function DesignCard({ design, initialLikes, isLiked, userEmail }:
                         {design.tier}
                     </span>
                 </div>
+                {/* Discount badge */}
+                {hasDiscount && (
+                    <div className="absolute top-2 left-2 z-30">
+                        <span className="inline-flex items-center gap-1 bg-[#00f2ff] text-black text-xs font-black px-2 py-0.5 rounded shadow-[0_0_8px_rgba(0,242,255,0.6)] uppercase tracking-widest">
+                            🏷️ {discountPct}% OFF
+                        </span>
+                    </div>
+                )}
             </div>
 
             <div className="p-4 flex-1 flex flex-col justify-between">
@@ -100,10 +114,29 @@ export default function DesignCard({ design, initialLikes, isLiked, userEmail }:
                 </div>
 
                 <div className="mt-4">
-                    <div className="flex items-center mb-2">
+                    <div className="flex items-center mb-2 gap-3">
                         <div className="text-sm text-gray-500 dark:text-gray-400 font-mono">
                             {design.bedrooms} Beds • {design.floors} Floors
                         </div>
+                        {/* Price display */}
+                        {basePrice > 0 && (
+                            <div className="ml-auto text-right">
+                                {hasDiscount ? (
+                                    <div className="flex flex-col items-end">
+                                        <span className="text-xs text-gray-400 line-through font-mono">
+                                            ₦{basePrice.toLocaleString()}
+                                        </span>
+                                        <span className="text-sm text-[#00f2ff] font-black font-mono">
+                                            ₦{discountedPrice.toLocaleString()}
+                                        </span>
+                                    </div>
+                                ) : (
+                                    <span className="text-sm text-gray-700 dark:text-gray-300 font-mono">
+                                        ₦{basePrice.toLocaleString()}
+                                    </span>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     <div className="relative z-10 border-t border-gray-100 dark:border-gray-800 pt-2 flex items-center justify-between">

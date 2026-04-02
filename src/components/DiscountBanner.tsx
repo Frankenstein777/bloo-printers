@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react'
 
 interface DiscountBannerProps {
     label: string
-    percentage: number
+    percentageMin: number
+    percentageMax: number
     expiresAt: string | null
 }
 
@@ -34,11 +35,15 @@ function useCountdown(expiresAt: string | null) {
     return timeLeft
 }
 
-export default function DiscountBanner({ label, percentage, expiresAt }: DiscountBannerProps) {
+export default function DiscountBanner({ label, percentageMin, percentageMax, expiresAt }: DiscountBannerProps) {
     const timeLeft = useCountdown(expiresAt)
 
     // If timed and expired on client, hide
     if (expiresAt && !timeLeft) return null
+
+    const rangeLabel = percentageMin === percentageMax
+        ? `${percentageMin}% OFF`
+        : `${percentageMin}%–${percentageMax}% OFF`
 
     return (
         <div className="w-full bg-gradient-to-r from-[#003d40] via-[#005e63] to-[#003d40] border-b border-[#00f2ff]/30 py-2 px-4 flex items-center justify-center gap-3 text-sm font-mono relative overflow-hidden z-[60]">
@@ -50,9 +55,9 @@ export default function DiscountBanner({ label, percentage, expiresAt }: Discoun
                 <span className="font-bold text-[#00f2ff] uppercase tracking-widest">{label}</span>
                 <span className="text-white/60">—</span>
                 <span className="bg-[#00f2ff] text-black font-black px-2 py-0.5 rounded text-xs tracking-widest">
-                    {percentage}% OFF
+                    {rangeLabel}
                 </span>
-                <span className="text-white/60 text-xs">all designs</span>
+                <span className="text-white/60 text-xs">on select designs</span>
             </span>
 
             {expiresAt && timeLeft && (

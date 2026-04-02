@@ -5,6 +5,8 @@ import { getSession } from '@/lib/auth'
 import SearchBar from '@/components/SearchBar'
 import { SocialActions } from '@/components/social-actions'
 import DesignCard from '@/components/design-card'
+import { getActiveDiscount } from '@/app/actions'
+import { getSeededDiscountPct } from '@/lib/discount'
 
 // Force dynamic rendering since we rely on searchParams and session
 export const dynamic = 'force-dynamic'
@@ -88,6 +90,9 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
         [shuffledDesigns[i], shuffledDesigns[j]] = [shuffledDesigns[j], shuffledDesigns[i]];
     }
 
+    // Fetch active discount for badge display
+    const activeDiscount = await getActiveDiscount()
+
     return (
         <div className="min-h-screen pt-20 pb-20 px-4 sm:px-6 lg:px-8 relative z-10 pointer-events-auto">
             <div className="max-w-screen-2xl mx-auto">
@@ -113,24 +118,30 @@ export default async function BrowsePage({ searchParams }: { searchParams: Promi
                     </div>
                 ) : (
                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 xl:gap-4">
-                        {shuffledDesigns.map((design) => (
-                            <DesignCard
-                                key={design.id}
-                                design={{
-                                    ...design,
-                                    price: design.price ? Number(design.price) : null,
-                                    priceRender: Number(design.priceRender || 0),
-                                    priceDwg: Number(design.priceDwg || 0),
-                                    pricePdf: Number(design.pricePdf || 0),
-                                    priceElec: Number(design.priceElec || 0),
-                                    priceMech: Number(design.priceMech || 0),
-                                    priceStruct: Number(design.priceStruct || 0),
-                                }}
-                                initialLikes={likeCounts[design.id] || 0}
-                                isLiked={!!likesMap[design.id]}
-                                userEmail={session?.user.email || undefined}
-                            />
-                        ))}
+                        {shuffledDesigns.map((design) => {
+                            const discountPct = activeDiscount
+                                ? getSeededDiscountPct(activeDiscount.id, design.id, activeDiscount.percentageMin, activeDiscount.percentageMax)
+                                : 0
+                            return (
+                                <DesignCard
+                                    key={design.id}
+                                    design={{
+                                        ...design,
+                                        price: design.price ? Number(design.price) : null,
+                                        priceRender: Number(design.priceRender || 0),
+                                        priceDwg: Number(design.priceDwg || 0),
+                                        pricePdf: Number(design.pricePdf || 0),
+                                        priceElec: Number(design.priceElec || 0),
+                                        priceMech: Number(design.priceMech || 0),
+                                        priceStruct: Number(design.priceStruct || 0),
+                                    }}
+                                    initialLikes={likeCounts[design.id] || 0}
+                                    isLiked={!!likesMap[design.id]}
+                                    userEmail={session?.user.email || undefined}
+                                    discountPct={discountPct}
+                                />
+                            )
+                        })}
                     </div>
                 )}
             </div>

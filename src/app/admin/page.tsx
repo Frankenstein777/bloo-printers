@@ -3,11 +3,20 @@ import { getSession } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
-import { createDiscountFormAction, deactivateDiscountFormAction, getActiveDiscount } from '@/app/actions'
+import {
+    createDiscountFormAction,
+    deactivateDiscountFormAction,
+    getActiveDiscount,
+    createAnnouncementFormAction,
+    deactivateAnnouncementAction,
+    getActiveAnnouncements,
+} from '@/app/actions'
 
 export default async function AdminDashboardPage() {
     const session = await getSession()
     if (!session || session.user.role !== 'ADMIN') redirect('/')
+
+    const isMainAdmin = session.user.email === 'frankensteingary777@gmail.com'
 
     // Metrics
     const [
@@ -15,7 +24,8 @@ export default async function AdminDashboardPage() {
         totalUsers,
         totalSales,
         recentSales,
-        activeDiscount
+        activeDiscount,
+        activeAnnouncements,
     ] = await Promise.all([
         prisma.design.count(),
         prisma.user.count(),
@@ -25,7 +35,8 @@ export default async function AdminDashboardPage() {
             orderBy: { createdAt: 'desc' },
             include: { user: true, design: true }
         }),
-        getActiveDiscount()
+        getActiveDiscount(),
+        isMainAdmin ? getActiveAnnouncements() : Promise.resolve([]),
     ])
 
     return (
@@ -85,7 +96,7 @@ export default async function AdminDashboardPage() {
                                     <p className="text-sm text-slate-500 mt-1">Add new architectural designs to the catalog</p>
                                 </Link>
 
-                                {session.user.email === 'frankensteingary777@gmail.com' && (
+                                {isMainAdmin && (
                                     <Link href="/admin/users" className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-purple-500 dark:hover:border-purple-500 transition-colors group">
                                         <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 text-purple-600 rounded-lg flex items-center justify-center mb-4 group-hover:bg-purple-600 group-hover:text-white transition-colors">
                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
@@ -128,11 +139,11 @@ export default async function AdminDashboardPage() {
                         </div>
                     </div>
 
-                    {/* Sidebar / Info */}
+                    {/* Sidebar — Main Admin Only Controls */}
                     <div className="space-y-6">
 
-                        {/* Discount Management — Main Admin Only */}
-                        {session.user.email === 'frankensteingary777@gmail.com' && (
+                        {/* Discount Control */}
+                        {isMainAdmin && (
                             <div className="bg-slate-900 border border-[#00f2ff]/20 rounded-xl p-6">
                                 <h3 className="font-bold text-lg text-[#00f2ff] mb-1 flex items-center gap-2">
                                     <span>🏷️</span> Discount Control
@@ -141,7 +152,12 @@ export default async function AdminDashboardPage() {
                                 {activeDiscount ? (
                                     <div className="mb-4 p-3 bg-[#00f2ff]/10 border border-[#00f2ff]/30 rounded-lg">
                                         <p className="text-white font-bold text-sm">{activeDiscount.label}</p>
-                                        <p className="text-[#00f2ff] font-black text-xl">{activeDiscount.percentage}% OFF</p>
+                                        <p className="text-[#00f2ff] font-black text-xl">
+                                            {activeDiscount.percentageMin === activeDiscount.percentageMax
+                                                ? `${activeDiscount.percentageMin}% OFF`
+                                                : `${activeDiscount.percentageMin}%–${activeDiscount.percentageMax}% OFF`}
+                                        </p>
+                                        <p className="text-slate-400 text-xs mt-1">Range applied per design (seeded)</p>
                                         {activeDiscount.expiresAt ? (
                                             <p className="text-slate-400 text-xs mt-1">Expires: {new Date(activeDiscount.expiresAt).toLocaleString()}</p>
                                         ) : (
@@ -162,9 +178,15 @@ export default async function AdminDashboardPage() {
                                         <label className="block text-xs text-slate-400 mb-1">Label (shown on banner)</label>
                                         <input name="label" required placeholder="e.g. Launch Sale 🎉" className="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-[#00f2ff]" />
                                     </div>
-                                    <div>
-                                        <label className="block text-xs text-slate-400 mb-1">Discount %</label>
-                                        <input name="percentage" type="number" min="1" max="100" required placeholder="e.g. 20" className="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-[#00f2ff]" />
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label className="block text-xs text-slate-400 mb-1">Min %</label>
+                                            <input name="percentageMin" type="number" min="1" max="100" required placeholder="e.g. 10" className="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-[#00f2ff]" />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs text-slate-400 mb-1">Max %</label>
+                                            <input name="percentageMax" type="number" min="1" max="100" required placeholder="e.g. 30" className="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-[#00f2ff]" />
+                                        </div>
                                     </div>
                                     <div>
                                         <label className="block text-xs text-slate-400 mb-1">Duration (hours) — leave blank for permanent</label>
@@ -172,6 +194,57 @@ export default async function AdminDashboardPage() {
                                     </div>
                                     <button type="submit" className="w-full bg-[#00f2ff] hover:bg-[#00a3ad] text-black font-black py-2 rounded text-sm tracking-widest uppercase transition-colors">
                                         Activate Discount
+                                    </button>
+                                </form>
+                            </div>
+                        )}
+
+                        {/* Announcements */}
+                        {isMainAdmin && (
+                            <div className="bg-slate-900 border border-purple-500/20 rounded-xl p-6">
+                                <h3 className="font-bold text-lg text-purple-300 mb-1 flex items-center gap-2">
+                                    <span>📢</span> Announcements
+                                </h3>
+
+                                {/* Active announcements list */}
+                                {activeAnnouncements.length > 0 ? (
+                                    <div className="mb-4 space-y-2">
+                                        {activeAnnouncements.map(a => (
+                                            <div key={a.id} className="p-3 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+                                                <p className="text-white font-bold text-sm">{a.title}</p>
+                                                <p className="text-slate-400 text-xs mt-0.5 line-clamp-2">{a.body}</p>
+                                                {a.expiresAt && (
+                                                    <p className="text-purple-400 text-xs mt-1">Expires: {new Date(a.expiresAt).toLocaleString()}</p>
+                                                )}
+                                                <form action={deactivateAnnouncementAction} className="mt-2">
+                                                    <input type="hidden" name="announcementId" value={a.id} />
+                                                    <button type="submit" className="w-full text-xs bg-red-900/50 hover:bg-red-700 text-red-300 hover:text-white border border-red-700 py-1 rounded transition-colors font-bold">
+                                                        Remove
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-slate-400 text-sm mb-4">No active announcements.</p>
+                                )}
+
+                                {/* Create announcement form */}
+                                <form action={createAnnouncementFormAction} className="space-y-3">
+                                    <div>
+                                        <label className="block text-xs text-slate-400 mb-1">Title</label>
+                                        <input name="announcementTitle" required placeholder="e.g. Site Maintenance Saturday" className="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-400" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs text-slate-400 mb-1">Message</label>
+                                        <textarea name="announcementBody" required rows={3} placeholder="Full announcement message..." className="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-400 resize-none" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs text-slate-400 mb-1">Duration (hours) — leave blank for permanent</label>
+                                        <input name="announcementDuration" type="number" min="0" step="0.5" placeholder="e.g. 48" className="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-400" />
+                                    </div>
+                                    <button type="submit" className="w-full bg-purple-600 hover:bg-purple-500 text-white font-black py-2 rounded text-sm tracking-widest uppercase transition-colors">
+                                        Publish Announcement
                                     </button>
                                 </form>
                             </div>

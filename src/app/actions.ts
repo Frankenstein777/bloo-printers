@@ -13,10 +13,11 @@ import { prisma } from '@/lib/prisma'
 export async function signupAction(formData: FormData): Promise<void> {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
+  const phone = (formData.get('phone') as string)?.trim() || null
   const existingUser = await prisma.user.findUnique({ where: { email } })
   if (existingUser) return
-  const newUser = await prisma.user.create({
-    data: { email, passwordHash: password, role: 'USER', subscriptionStatus: 'FREE' },
+  await prisma.user.create({
+    data: { email, passwordHash: password, phone, role: 'USER', subscriptionStatus: 'FREE' },
   })
   redirect('/login')
 }
@@ -531,23 +532,24 @@ export async function createDiscountAction(formData: FormData): Promise<ActionSt
   }
 
   const label = (formData.get('label') as string)?.trim()
-  const percentage = parseInt(formData.get('percentage') as string)
+  const percentageMin = parseInt(formData.get('percentageMin') as string)
+  const percentageMax = parseInt(formData.get('percentageMax') as string)
   const durationHours = formData.get('durationHours') as string
   const isTimeLimited = !!durationHours && durationHours !== '0'
 
-  if (!label || isNaN(percentage) || percentage < 1 || percentage > 100) {
-    return { error: 'Invalid discount details. Percentage must be between 1 and 100.' }
+  if (!label || isNaN(percentageMin) || isNaN(percentageMax)
+    || percentageMin < 1 || percentageMax > 100 || percentageMin > percentageMax) {
+    return { error: 'Invalid discount range. Min must be ≥ 1, Max ≤ 100, Min ≤ Max.' }
   }
 
   try {
-    // Deactivate any existing active discounts first
     await prisma.discount.updateMany({ where: { isActive: true }, data: { isActive: false } })
 
     const expiresAt = isTimeLimited
       ? new Date(Date.now() + parseFloat(durationHours) * 60 * 60 * 1000)
       : null
 
-    await prisma.discount.create({ data: { label, percentage, isActive: true, expiresAt } })
+    await prisma.discount.create({ data: { label, percentageMin, percentageMax, isActive: true, expiresAt } })
 
     revalidatePath('/')
     revalidatePath('/browse')
@@ -596,7 +598,75 @@ export async function getActiveDiscount() {
   return {
     id: discount.id,
     label: discount.label,
-    percentage: discount.percentage,
+    percentageMin: discount.percentageMin,
+    percentageMax: discount.percentageMax,
     expiresAt: discount.expiresAt?.toISOString() ?? null,
   }
+}
+
+// ── Announcement Actions ────────────────────────────────────────────────────
+
+export async function createAnnouncementAction(formData: FormData): Promise<ActionState> {
+  const session = await getSession()
+  if (!session || !isMainAdmin(session.user.email)) {
+    return { error: 'Unauthorized.' }
+  }
+
+  const title = (formData.get('announcementTitle') as string)?.trim()
+  const body = (formData.get('announcementBody') as string)?.trim()
+  const durationHours = formData.get('announcementDuration') as string
+  const isTimeLimited = !!durationHours && durationHours !== '0'
+
+  if (!title || !body) {
+    return { error: 'Title and body are required.' }
+  }
+
+  try {
+    const expiresAt = isTimeLimited
+      ? new Date(Date.now() + parseFloat(durationHours) * 60 * 60 * 1000)
+      : null
+    await prisma.announcement.create({ data: { title, body, isActive: true, expiresAt } })
+    revalidatePath('/')
+    revalidatePath('/browse')
+    revalidatePath('/admin')
+    return { success: true }
+  } catch (e) {
+    console.error('Create announcement error:', e)
+    return { error: 'Failed to create announcement.' }
+  }
+}
+
+export async function createAnnouncementFormAction(formData: FormData): Promise<void> {
+  await createAnnouncementAction(formData)
+}
+
+export async function deactivateAnnouncementAction(formData: FormData): Promise<void> {
+  const session = await getSession()
+  if (!session || !isMainAdmin(session.user.email)) return
+  const id = formData.get('announcementId') as string
+  if (!id) return
+  try {
+    await prisma.announcement.update({ where: { id }, data: { isActive: false } })
+    revalidatePath('/')
+    revalidatePath('/browse')
+    revalidatePath('/admin')
+  } catch (e) {
+    console.error('Deactivate announcement error:', e)
+  }
+}
+
+export async function getActiveAnnouncements() {
+  const announcements = await prisma.announcement.findMany({
+    where: {
+      isActive: true,
+      OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }]
+    },
+    orderBy: { createdAt: 'desc' }
+  })
+  return announcements.map(a => ({
+    id: a.id,
+    title: a.title,
+    body: a.body,
+    expiresAt: a.expiresAt?.toISOString() ?? null,
+  }))
 }

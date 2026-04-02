@@ -43,7 +43,8 @@ function UserAvatar({ session }: { session: any }) {
 interface Discount {
     id: string
     label: string
-    percentage: number
+    percentageMin: number
+    percentageMax: number
     expiresAt: string | null
 }
 
@@ -56,7 +57,8 @@ export default function NavbarClient({ session, discount }: { session: any; disc
             {discount && (
                 <DiscountBanner
                     label={discount.label}
-                    percentage={discount.percentage}
+                    percentageMin={discount.percentageMin}
+                    percentageMax={discount.percentageMax}
                     expiresAt={discount.expiresAt}
                 />
             )}

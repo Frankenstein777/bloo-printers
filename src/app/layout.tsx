@@ -7,6 +7,9 @@ import { AquariumBackground } from "@/components/aquarium-background"
 import CustomCursor from "@/components/CustomCursor"
 import { GlobalProtection } from "@/components/GlobalProtection"
 import AmbientAudio from '@/components/AmbientAudio'
+import AnnouncementBar from '@/components/AnnouncementBar'
+import { getActiveAnnouncements } from '@/app/actions'
+import { getSession } from '@/lib/auth'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -19,11 +22,17 @@ import { Providers } from "@/components/providers"
 
 import GuidedChatbot from "@/components/GuidedChatbot"
 
-export default function RootLayout({
+export default async function RootLayout({
     children,
 }: {
     children: React.ReactNode
 }) {
+    const [announcements, session] = await Promise.all([
+        getActiveAnnouncements(),
+        getSession(),
+    ])
+    const isAdmin = session?.user?.email === 'frankensteingary777@gmail.com'
+
     return (
         <html lang="en" suppressHydrationWarning>
             <body className={inter.className}>
@@ -40,6 +49,9 @@ export default function RootLayout({
                         <GlobalProtection />
                         <AmbientAudio />
                         <Navbar />
+                        {announcements.length > 0 && (
+                            <AnnouncementBar announcements={announcements} isAdmin={isAdmin} />
+                        )}
                         <GuidedChatbot />
                         <main className="pt-16">
                             {children}

@@ -276,10 +276,20 @@ model CollectionItem {
 }
 
 model Discount {
-  id          String    @id @default(cuid())
-  label       String
-  percentage  Int
-  isActive    Boolean   @default(true)
-  expiresAt   DateTime?
-  createdAt   DateTime  @default(now())
+  id             String    @id @default(cuid())
+  label          String
+  percentageMin  Int       @default(0)
+  percentageMax  Int       @default(0)
+  isActive       Boolean   @default(true)
+  expiresAt      DateTime?
+  createdAt      DateTime  @default(now())
+}
+
+model Announcement {
+  id        String    @id @default(cuid())
+  title     String
+  body      String
+  isActive  Boolean   @default(true)
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
 }

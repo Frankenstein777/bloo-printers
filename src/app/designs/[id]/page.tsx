@@ -13,6 +13,8 @@ import PaystackButton from '@/components/PaystackButton'
 import PaystackSubscribeButton from '@/components/PaystackSubscribeButton'
 import { PlotFitterTrigger } from '@/components/plot-fitter/PlotFitterTrigger'
 import { DownloadButtons } from '@/components/DownloadButtons'
+import { getActiveDiscount } from '@/app/actions'
+import { getSeededDiscountPct } from '@/lib/discount'
 
 // ... existing imports ...
 
@@ -101,6 +103,18 @@ export default async function DesignDetailPage({ params, searchParams }: { param
         priceMech: Number(design.priceMech),
         priceStruct: Number(design.priceStruct),
     }
+
+    // Fetch active discount and compute seeded % for this design
+    const activeDiscount = await getActiveDiscount()
+    const discountPct = activeDiscount
+        ? getSeededDiscountPct(activeDiscount.id, design.id, activeDiscount.percentageMin, activeDiscount.percentageMax)
+        : 0
+    const hasDiscount = discountPct > 0
+
+    // Pre-compute discounted prices for display
+    const discountedRender = hasDiscount ? Math.round(sanitizedDesign.priceRender * (1 - discountPct / 100)) : sanitizedDesign.priceRender
+    const discountedDwg = hasDiscount ? Math.round(sanitizedDesign.priceDwg * (1 - discountPct / 100)) : sanitizedDesign.priceDwg
+    const discountedPdf = hasDiscount ? Math.round(sanitizedDesign.pricePdf * (1 - discountPct / 100)) : sanitizedDesign.pricePdf
 
     // Access Logic
     // Access Logic
@@ -193,11 +207,30 @@ export default async function DesignDetailPage({ params, searchParams }: { param
                         )}
                         <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">{design.title}</h1>
 
+                        {hasDiscount && (
+                            <div className="mt-3 inline-flex items-center gap-2 bg-[#00f2ff]/10 border border-[#00f2ff]/40 rounded-lg px-3 py-1.5">
+                                <span className="text-[#00f2ff] font-black text-sm font-mono">🏷️ {discountPct}% OFF</span>
+                                <span className="text-white/50 text-xs font-mono">limited offer</span>
+                            </div>
+                        )}
+
                         <div className="mt-3">
                             <h2 className="sr-only">Product information</h2>
-                            <p className="text-3xl text-gray-900 dark:text-white text-[#00a3ad] dark:text-[#00f2ff] font-mono">
-                                {design.price ? `₦${Number(design.price).toLocaleString()}` : design.tier}
-                            </p>
+                            {hasDiscount ? (
+                                <div className="flex items-baseline gap-3">
+                                    <p className="text-2xl text-[#00f2ff] font-black font-mono">
+                                        ₦{discountedRender.toLocaleString()}
+                                    </p>
+                                    <p className="text-lg text-gray-400 line-through font-mono">
+                                        ₦{sanitizedDesign.priceRender.toLocaleString()}
+                                    </p>
+                                    <span className="text-xs text-gray-500 font-mono">(3D Renders)</span>
+                                </div>
+                            ) : (
+                                <p className="text-3xl text-gray-900 dark:text-white text-[#00a3ad] dark:text-[#00f2ff] font-mono">
+                                    {design.price ? `₦${Number(design.price).toLocaleString()}` : design.tier}
+                                </p>
+                            )}
                         </div>
 
                         <div className="mt-6">
