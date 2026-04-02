@@ -1,12 +1,10 @@
 
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
 import { getSession } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import ProfileClientWrapper from '@/components/profile/ProfileClientWrapper'
 import { WatermarkOverlay } from '@/components/WatermarkOverlay'
-
-const prisma = new PrismaClient()
 
 export default async function UserProfilePage() {
     const session = await getSession()

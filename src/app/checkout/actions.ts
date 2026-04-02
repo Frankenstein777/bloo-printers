@@ -1,12 +1,10 @@
 'use server'
 
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { getSession } from '@/lib/auth'
 import { verifyPaystackTransaction } from '@/lib/paystack'
 import { randomUUID } from 'crypto'
-
-const prisma = new PrismaClient()
 
 export async function verifyPurchaseAction(reference: string, designId: string, amountKobo: number, items: string[] = []) {
     try {

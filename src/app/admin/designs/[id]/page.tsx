@@ -1,11 +1,9 @@
 
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
 import { getSession } from '@/lib/auth'
 import { redirect, notFound } from 'next/navigation'
 import DesignEditForm from '@/components/admin/DesignEditForm'
 import Link from 'next/link'
-
-const prisma = new PrismaClient()
 
 interface PageProps {
     params: Promise<{ id: string }>

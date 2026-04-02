@@ -1,11 +1,9 @@
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
 import { getSession } from '@/lib/auth'
 import { notFound, redirect } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import CheckoutClient from '@/components/CheckoutClient'
-
-const prisma = new PrismaClient()
 
 export default async function CheckoutPage({ params }: { params: { id: string } }) {
     const { id } = await params

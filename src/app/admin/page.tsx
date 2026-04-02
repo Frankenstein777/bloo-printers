@@ -1,10 +1,9 @@
 
-import { PrismaClient } from '@prisma/client'
 import { getSession } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-
-const prisma = new PrismaClient()
+import { prisma } from '@/lib/prisma'
+import { createDiscountFormAction, deactivateDiscountFormAction, getActiveDiscount } from '@/app/actions'
 
 export default async function AdminDashboardPage() {
     const session = await getSession()
@@ -15,7 +14,8 @@ export default async function AdminDashboardPage() {
         totalDesigns,
         totalUsers,
         totalSales,
-        recentSales
+        recentSales,
+        activeDiscount
     ] = await Promise.all([
         prisma.design.count(),
         prisma.user.count(),
@@ -24,7 +24,8 @@ export default async function AdminDashboardPage() {
             take: 5,
             orderBy: { createdAt: 'desc' },
             include: { user: true, design: true }
-        })
+        }),
+        getActiveDiscount()
     ])
 
     return (
@@ -129,6 +130,53 @@ export default async function AdminDashboardPage() {
 
                     {/* Sidebar / Info */}
                     <div className="space-y-6">
+
+                        {/* Discount Management — Main Admin Only */}
+                        {session.user.email === 'frankensteingary777@gmail.com' && (
+                            <div className="bg-slate-900 border border-[#00f2ff]/20 rounded-xl p-6">
+                                <h3 className="font-bold text-lg text-[#00f2ff] mb-1 flex items-center gap-2">
+                                    <span>🏷️</span> Discount Control
+                                </h3>
+
+                                {activeDiscount ? (
+                                    <div className="mb-4 p-3 bg-[#00f2ff]/10 border border-[#00f2ff]/30 rounded-lg">
+                                        <p className="text-white font-bold text-sm">{activeDiscount.label}</p>
+                                        <p className="text-[#00f2ff] font-black text-xl">{activeDiscount.percentage}% OFF</p>
+                                        {activeDiscount.expiresAt ? (
+                                            <p className="text-slate-400 text-xs mt-1">Expires: {new Date(activeDiscount.expiresAt).toLocaleString()}</p>
+                                        ) : (
+                                            <p className="text-slate-400 text-xs mt-1">No expiry (permanent until deactivated)</p>
+                                        )}
+                                        <form action={deactivateDiscountFormAction} className="mt-3">
+                                            <button type="submit" className="w-full text-sm bg-red-900/50 hover:bg-red-700 text-red-300 hover:text-white border border-red-700 py-1.5 rounded transition-colors font-bold">
+                                                Deactivate Discount
+                                            </button>
+                                        </form>
+                                    </div>
+                                ) : (
+                                    <p className="text-slate-400 text-sm mb-4">No active discount.</p>
+                                )}
+
+                                <form action={createDiscountFormAction} className="space-y-3">
+                                    <div>
+                                        <label className="block text-xs text-slate-400 mb-1">Label (shown on banner)</label>
+                                        <input name="label" required placeholder="e.g. Launch Sale 🎉" className="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-[#00f2ff]" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs text-slate-400 mb-1">Discount %</label>
+                                        <input name="percentage" type="number" min="1" max="100" required placeholder="e.g. 20" className="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-[#00f2ff]" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs text-slate-400 mb-1">Duration (hours) — leave blank for permanent</label>
+                                        <input name="durationHours" type="number" min="0" step="0.5" placeholder="e.g. 24" className="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-[#00f2ff]" />
+                                    </div>
+                                    <button type="submit" className="w-full bg-[#00f2ff] hover:bg-[#00a3ad] text-black font-black py-2 rounded text-sm tracking-widest uppercase transition-colors">
+                                        Activate Discount
+                                    </button>
+                                </form>
+                            </div>
+                        )}
+
                         <div className="bg-indigo-900 rounded-xl p-6 text-white">
                             <h3 className="font-bold text-lg mb-2">Admin Tips</h3>
                             <ul className="space-y-2 text-indigo-100 text-sm list-disc pl-4">

@@ -1,10 +1,8 @@
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { getSession } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import SearchInput from '@/components/admin/SearchInput'
-
-const prisma = new PrismaClient()
 
 interface PageProps {
     searchParams: Promise<{ q?: string }>

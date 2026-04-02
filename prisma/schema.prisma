@@ -274,3 +274,12 @@ model CollectionItem {
 
   @@unique([collectionId, designId])
 }
+
+model Discount {
+  id          String    @id @default(cuid())
+  label       String
+  percentage  Int
+  isActive    Boolean   @default(true)
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+}

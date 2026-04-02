@@ -1,12 +1,10 @@
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import Image from 'next/image'
 import { getSession } from '@/lib/auth'
 import SearchBar from '@/components/SearchBar'
 import { SocialActions } from '@/components/social-actions'
 import DesignCard from '@/components/design-card'
-
-const prisma = new PrismaClient()
 
 // Force dynamic rendering since we rely on searchParams and session
 export const dynamic = 'force-dynamic'

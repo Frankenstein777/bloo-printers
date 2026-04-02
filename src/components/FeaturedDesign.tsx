@@ -1,9 +1,7 @@
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import Image from 'next/image'
 import { WatermarkOverlay } from './WatermarkOverlay'
-
-const prisma = new PrismaClient()
 
 async function getFeaturedDesign() {
     const featured = await prisma.design.findFirst({

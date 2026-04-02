@@ -1,12 +1,9 @@
-import { PrismaClient } from '@prisma/client'
 import { getSession } from '@/lib/auth'
 import Image from 'next/image'
 import Link from 'next/link'
-import { subscribeAction, purchaseAction } from '@/app/actions'
 import { notFound } from 'next/navigation'
 import AIRenderGenerator from '@/components/AIRenderGenerator'
-
-const prisma = new PrismaClient()
+import { prisma } from '@/lib/prisma'
 
 import { SocialActions } from '@/components/social-actions'
 import { CommentSection } from '@/components/comment-section'
