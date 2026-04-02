@@ -7,7 +7,7 @@ export function WatermarkOverlay() {
                 <div key={i} className="flex items-center justify-center transform -rotate-45">
                     <span className="text-white/50 font-black text-xl md:text-2xl whitespace-nowrap uppercase tracking-[0.2em]"
                         style={{ textShadow: '0 0 4px rgba(0,0,0,0.6)' }}>
-                        OceanofBlueprints
+
                     </span>
                 </div>
             ))}
