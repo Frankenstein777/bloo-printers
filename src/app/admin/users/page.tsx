@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client'
 import { getSession } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { elevateToAdminAction, demoteFromAdminAction } from '@/app/actions'
+import { elevateUserFormAction, demoteUserFormAction } from '@/app/actions'
 
 const prisma = new PrismaClient()
 
@@ -61,7 +61,8 @@ export default async function AdminUsersPage() {
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             {!isMainAdmin && (
-                                                <form action={isAdmin ? demoteFromAdminAction.bind(null, user.id) : elevateToAdminAction.bind(null, user.id)}>
+                                                <form action={isAdmin ? demoteUserFormAction : elevateUserFormAction}>
+                                                    <input type="hidden" name="userId" value={user.id} />
                                                     <button type="submit" className={`text-sm font-medium ${isAdmin ? 'text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-500' : 'text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-500'}`}>
                                                         {isAdmin ? 'Remove Admin' : 'Make Admin'}
                                                     </button>

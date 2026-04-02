@@ -713,6 +713,17 @@ export async function getCommentsAction(designId: string) {
 // MAIN ADMIN USER MANAGEMENT
 // ============================================================
 
+// Form-compatible wrappers (void return type for Next.js <form action={...}>)
+export async function elevateUserFormAction(formData: FormData): Promise<void> {
+  const userId = formData.get('userId') as string
+  await elevateToAdminAction(userId)
+}
+
+export async function demoteUserFormAction(formData: FormData): Promise<void> {
+  const userId = formData.get('userId') as string
+  await demoteFromAdminAction(userId)
+}
+
 export async function elevateToAdminAction(userId: string): Promise<ActionState> {
   const session = await getSession()
   if (!session || session.user.email !== 'frankensteingary777@gmail.com') {
