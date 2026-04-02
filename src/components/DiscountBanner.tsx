@@ -42,8 +42,8 @@ export default function DiscountBanner({ label, percentageMin, percentageMax, ex
     if (expiresAt && !timeLeft) return null
 
     const rangeLabel = percentageMin === percentageMax
-        ? `${percentageMin}% OFF`
-        : `${percentageMin}%–${percentageMax}% OFF`
+        ? `${percentageMax}% OFF`
+        : `UP TO ${percentageMax}% OFF`
 
     return (
         <div className="w-full bg-gradient-to-r from-[#003d40] via-[#005e63] to-[#003d40] border-b border-[#00f2ff]/30 py-2 px-4 flex items-center justify-center gap-3 text-sm font-mono relative overflow-hidden z-[60]">
@@ -54,8 +54,8 @@ export default function DiscountBanner({ label, percentageMin, percentageMax, ex
                 <span className="text-[#00f2ff] animate-pulse text-base">🏷️</span>
                 <span className="font-bold text-[#00f2ff] uppercase tracking-widest">{label}</span>
                 <span className="text-white/60">—</span>
-                <span className="bg-[#00f2ff] text-black font-black px-2 py-0.5 rounded text-xs tracking-widest">
-                    {rangeLabel}
+                <span className="bg-[#00f2ff] text-black font-black px-2 py-0.5 rounded text-xs tracking-widest uppercase">
+                    Massive Discounts • {rangeLabel}
                 </span>
                 <span className="text-white/60 text-xs">on select designs</span>
             </span>
