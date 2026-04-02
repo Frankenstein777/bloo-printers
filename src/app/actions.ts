@@ -708,3 +708,51 @@ export async function getCommentsAction(designId: string) {
     orderBy: { createdAt: 'desc' }
   })
 }
+
+// ============================================================
+// MAIN ADMIN USER MANAGEMENT
+// ============================================================
+
+export async function elevateToAdminAction(userId: string): Promise<ActionState> {
+  const session = await getSession()
+  if (!session || session.user.email !== 'frankensteingary777@gmail.com') {
+    return { error: 'Unauthorized. Only the main admin can perform this action.' }
+  }
+
+  try {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { role: 'ADMIN' }
+    })
+    revalidatePath('/admin/users')
+    return { success: true }
+  } catch (e) {
+    console.error('Elevate to admin error:', e)
+    return { error: 'Failed to elevate user.' }
+  }
+}
+
+export async function demoteFromAdminAction(userId: string): Promise<ActionState> {
+  const session = await getSession()
+  if (!session || session.user.email !== 'frankensteingary777@gmail.com') {
+    return { error: 'Unauthorized. Only the main admin can perform this action.' }
+  }
+
+  // Prevent main admin from demoting themselves
+  const targetUser = await prisma.user.findUnique({ where: { id: userId } })
+  if (targetUser?.email === 'frankensteingary777@gmail.com') {
+    return { error: 'Cannot demote the main admin.' }
+  }
+
+  try {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { role: 'USER' }
+    })
+    revalidatePath('/admin/users')
+    return { success: true }
+  } catch (e) {
+    console.error('Demote from admin error:', e)
+    return { error: 'Failed to demote user.' }
+  }
+}
