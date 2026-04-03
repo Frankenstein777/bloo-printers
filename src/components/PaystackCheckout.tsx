@@ -132,7 +132,7 @@ export default function PaystackCheckout({
         <div className="w-full max-w-md mx-auto space-y-6">
             <Script
                 src="https://js.paystack.co/v1/inline.js"
-                strategy="lazyOnload"
+                strategy="afterInteractive"
                 onLoad={() => setScriptLoaded(true)}
             />
 

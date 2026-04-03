@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { FeaturedDesign } from '@/components/FeaturedDesign'
+import { TestimonialList } from '@/components/TestimonialList'
 
 const WA_NUMBER = '2347068095681'
 const WA_MSG = encodeURIComponent("Hello! I'm reaching out from the Octoplans website and I'd like to inquire about your architectural services.")
@@ -85,26 +86,7 @@ export default function Home() {
             Testimonials
           </h2>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              { u: "Architect X", c: "The precision is unmatched. Downloaded a villa plan and printed it directly to the site." },
-              { u: "Builder 88", c: "Zero latency. Instant delivery. The future of construction is here." },
-              { u: "Design Core", c: "Aesthetic and functional. Octoplans is the only resource we trust." }
-            ].map((t, i) => (
-              <div key={i} className="p-6 border border-gray-200 dark:border-gray-800 bg-white/5 backdrop-blur-sm hover:border-[#00f2ff] transition-colors group text-gray-100">
-                <div className="flex items-center space-x-3 mb-4">
-                  <div className="w-10 h-10 bg-[#00f2ff]/20 rounded-none flex items-center justify-center text-[#00f2ff]">
-                    {t.u[0]}
-                  </div>
-                  <div>
-                    <p className="font-mono font-bold text-sm tracking-widest uppercase text-white">{t.u}</p>
-                    <p className="text-xs opacity-50 font-mono uppercase">Verified Purchase</p>
-                  </div>
-                </div>
-                <p className="italic opacity-80 text-gray-200">&quot;{t.c}&quot;</p>
-              </div>
-            ))}
-          </div>
+          <TestimonialList />
         </div>
       </section>
 
@@ -143,7 +125,29 @@ export default function Home() {
             </div>
 
             {/* Social Media row */}
-            <div className="flex justify-center gap-4">
+            <div className="flex flex-wrap justify-center gap-4">
+              {/* Facebook */}
+              <a
+                href="https://facebook.com/octoplans"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-5 py-3 border border-blue-600/50 text-blue-500 hover:bg-blue-600/10 hover:border-blue-500 transition-all font-mono text-sm uppercase tracking-wider"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.04c-5.5 0-9.96 4.46-9.96 9.96 0 4.96 3.63 9.08 8.4 9.83v-6.95h-2.53v-2.88h2.53v-2.19c0-2.5 1.49-3.89 3.77-3.89 1.1 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.86h2.78l-.44 2.88h-2.34v6.95c4.78-.75 8.4-4.87 8.4-9.83 0-5.5-4.46-9.96-9.96-9.96z" /></svg>
+                Facebook
+              </a>
+
+              {/* TikTok */}
+              <a
+                href="https://tiktok.com/@octoplans"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-5 py-3 border border-gray-400/50 text-gray-200 hover:bg-gray-400/10 hover:border-gray-200 transition-all font-mono text-sm uppercase tracking-wider"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.53.02C13.84 0 15.14.01 16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" /></svg>
+                TikTok
+              </a>
+
               {/* Instagram */}
               <a
                 href="https://instagram.com/octoplans"

@@ -43,13 +43,23 @@ export async function uploadDesignAction(prevState: ActionState, formData: FormD
 
   const getPrice = (key: string, def: number) => parseFloat(formData.get(key) as string) || def
 
-  const priceRender = getPrice('priceRender', 10000)
-  const priceDwg = getPrice('priceDwg', 70000)
-  const pricePdf = getPrice('pricePdf', 40000)
-  const priceElec = getPrice('priceElec', 10000)
-  const priceMech = getPrice('priceMech', 10000)
-  const priceStruct = getPrice('priceStruct', 30000)
-  const price = priceRender
+  let priceRender = getPrice('priceRender', 10000)
+  let priceDwg = getPrice('priceDwg', 70000)
+  let pricePdf = getPrice('pricePdf', 40000)
+  let priceElec = getPrice('priceElec', 10000)
+  let priceMech = getPrice('priceMech', 10000)
+  let priceStruct = getPrice('priceStruct', 30000)
+  let price = priceRender
+
+  if (tier === 'FREE') {
+      priceRender = 0
+      priceDwg = 0
+      pricePdf = 0
+      priceElec = 0
+      priceMech = 0
+      priceStruct = 0
+      price = 0
+  }
 
   const floors = parseInt(formData.get('floors') as string) || 0
   const bedrooms = parseInt(formData.get('bedrooms') as string) || 0

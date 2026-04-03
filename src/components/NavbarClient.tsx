@@ -52,7 +52,7 @@ export default function NavbarClient({ session, discount }: { session: any; disc
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
     return (
-        <div className="fixed w-full z-50 top-0">
+        <div className="fixed w-full z-[100] top-0">
             {/* Full-width discount announcement banner */}
             {discount && (
                 <DiscountBanner
@@ -88,6 +88,12 @@ export default function NavbarClient({ session, discount }: { session: any; disc
                                 </Link>
                                 <Link href="/#about" className="border-transparent text-gray-500 dark:text-gray-300 hover:text-[#00f2ff] hover:border-[#00f2ff] inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium font-mono uppercase">
                                     About
+                                </Link>
+                                <Link href="/custom-brief" className="border-transparent text-gray-500 dark:text-gray-300 hover:text-[#00f2ff] hover:border-[#00f2ff] inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium font-mono uppercase">
+                                    Custom Brief
+                                </Link>
+                                <Link href="/aquarium" className="border-transparent text-gray-500 dark:text-gray-300 hover:text-[#00f2ff] hover:border-[#00f2ff] inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium font-mono uppercase">
+                                    Aquarium
                                 </Link>
                                 <span className="border-transparent text-gray-400 dark:text-gray-600 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium font-mono uppercase cursor-not-allowed" title="Coming Soon">
                                     AI Studio (Soon)
@@ -151,6 +157,12 @@ export default function NavbarClient({ session, discount }: { session: any; disc
                             </Link>
                             <Link href="/#about" onClick={() => setIsMobileMenuOpen(false)} className="block pl-3 pr-4 py-4 border-l-4 border-transparent text-lg font-medium text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
                                 About Us
+                            </Link>
+                            <Link href="/custom-brief" onClick={() => setIsMobileMenuOpen(false)} className="block pl-3 pr-4 py-4 border-l-4 border-transparent text-lg font-medium text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
+                                Custom Brief
+                            </Link>
+                            <Link href="/aquarium" onClick={() => setIsMobileMenuOpen(false)} className="block pl-3 pr-4 py-4 border-l-4 border-transparent text-lg font-medium text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
+                                Aquarium
                             </Link>
                             <div className="block pl-3 pr-4 py-4 border-l-4 border-transparent text-lg font-medium text-gray-400 dark:text-gray-600 cursor-not-allowed">
                                 AI Studio (Coming Soon)

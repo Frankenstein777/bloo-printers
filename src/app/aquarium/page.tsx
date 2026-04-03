@@ -1,29 +1,15 @@
-import { AquariumBackground } from '@/components/aquarium-background'
-import Link from 'next/link'
-import type { Metadata } from 'next'
-
-export const metadata: Metadata = {
-    title: 'Aquarium — Octoplans',
-    description: 'Sit back and enjoy the deep.',
-}
+import { AquariumBackground } from "@/components/aquarium-background"
 
 export default function AquariumPage() {
     return (
-        <div className="relative min-h-screen flex flex-col items-center justify-center select-none">
-            {/* Subtle centre prompt */}
-            <div className="relative z-10 text-center pointer-events-none">
-                <p className="font-mono text-xs tracking-[0.4em] text-[#00f2ff]/30 uppercase animate-pulse">
-                    Enjoy the deep
-                </p>
+        <div className="relative min-h-screen">
+            <AquariumBackground />
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                <div className="text-center bg-black/40 backdrop-blur px-8 py-4 rounded-2xl border border-[#00f2ff]/20 pointer-events-auto">
+                    <h1 className="text-4xl font-black text-[#00f2ff] font-mono tracking-tighter uppercase">Aquarium</h1>
+                    <p className="text-gray-300 font-mono mt-2 text-sm">Relax and interact with the aquatic environment.</p>
+                </div>
             </div>
-
-            {/* Unobtrusive back link */}
-            <Link
-                href="/"
-                className="fixed bottom-6 left-1/2 -translate-x-1/2 z-10 font-mono text-[10px] tracking-[0.3em] text-[#00f2ff]/30 hover:text-[#00f2ff]/70 transition-colors uppercase"
-            >
-                ← surface
-            </Link>
         </div>
     )
 }

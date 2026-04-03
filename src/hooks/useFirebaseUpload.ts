@@ -1,9 +1,9 @@
 /**
  * useFirebaseUpload — React hook for uploading files to Firebase Storage
- * via the server-side proxy route at POST /api/upload/file.
+ * via the server-side proxy route at POST /api/upload/presigned-url.
  *
- * Files go: Browser → Next.js server → Firebase Storage Admin SDK
- * This avoids any CORS issues (no browser→Firebase direct connection needed).
+ * Files go: Browser → Firebase Storage directly!
+ * This avoids any Next.js size limits or 413 File Too Large errors.
  *
  * Usage:
  *   const { uploadFile, uploading, progress } = useFirebaseUpload()
@@ -45,15 +45,31 @@ export function useFirebaseUpload() {
       setProgress(0)
 
       try {
-        const body = new FormData()
-        body.append('file', file)
-        body.append('designId', designId)
-        body.append('fileType', fileType)
+        // 1. Get Presigned URL
+        const presignedRes = await fetch('/api/upload/presigned-url', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            designId,
+            fileType,
+            originalName: file.name,
+            contentType: file.type || 'application/octet-stream'
+          })
+        })
 
-        // Use XHR so we can track upload progress
-        const result = await new Promise<UploadResult>((resolve, reject) => {
+        if (!presignedRes.ok) {
+          const errData = await presignedRes.json().catch(() => ({}))
+          throw new Error(errData.error || 'Failed to get upload URL')
+        }
+
+        const { uploadUrl, key, publicUrl } = await presignedRes.json()
+
+        // 2. Upload directly to Firebase Storage using XHR for progress tracking
+        await new Promise<void>((resolve, reject) => {
           const xhr = new XMLHttpRequest()
-          xhr.open('POST', '/api/upload/file')
+          xhr.open('PUT', uploadUrl)
+          // Essential for Firebase Storage / S3 signed URLs
+          xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream')
 
           xhr.upload.onprogress = (event) => {
             if (event.lengthComputable) {
@@ -65,26 +81,18 @@ export function useFirebaseUpload() {
 
           xhr.onload = () => {
             if (xhr.status >= 200 && xhr.status < 300) {
-              try {
-                const data = JSON.parse(xhr.responseText)
-                if (data.error) reject(new Error(data.error))
-                else resolve(data as UploadResult)
-              } catch {
-                reject(new Error('Invalid server response'))
-              }
+              resolve()
             } else {
-              let msg = `Upload failed (HTTP ${xhr.status})`
-              try { msg = JSON.parse(xhr.responseText).error || msg } catch { /* keep msg */ }
-              reject(new Error(msg))
+              reject(new Error(`Direct upload failed (HTTP ${xhr.status})`))
             }
           }
 
           xhr.onerror = () => reject(new Error('Network error — check your internet connection'))
-          xhr.send(body)
+          xhr.send(file)
         })
 
         setProgress(100)
-        return result
+        return { key, publicUrl }
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Upload failed'
         setError(message)

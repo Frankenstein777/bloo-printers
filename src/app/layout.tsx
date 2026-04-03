@@ -21,6 +21,7 @@ export const metadata: Metadata = {
 import { Providers } from "@/components/providers"
 
 import GuidedChatbot from "@/components/GuidedChatbot"
+import { PushNotificationProvider } from '@/components/PushNotificationProvider'
 
 export default async function RootLayout({
     children,
@@ -35,28 +36,30 @@ export default async function RootLayout({
 
     return (
         <html lang="en" suppressHydrationWarning>
-            <body className={inter.className}>
+            <body className={`${inter.className} antialiased min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 overflow-x-hidden selection:bg-[#00f2ff]/30`}>
                 <Providers>
-                    <ThemeProvider
-                        attribute="class"
-                        defaultTheme="dark"
-                        forcedTheme="dark"
-                        enableSystem={false}
-                        disableTransitionOnChange
-                    >
-                        <AquariumBackground />
-                        <CustomCursor />
-                        <GlobalProtection />
-                        <AmbientAudio />
-                        <Navbar />
-                        {announcements.length > 0 && (
-                            <AnnouncementBar announcements={announcements} isAdmin={isAdmin} />
-                        )}
-                        <GuidedChatbot />
-                        <main className="pt-16">
-                            {children}
-                        </main>
-                    </ThemeProvider>
+                    <PushNotificationProvider>
+                        <ThemeProvider
+                            attribute="class"
+                            defaultTheme="dark"
+                            forcedTheme="dark"
+                            enableSystem={false}
+                            disableTransitionOnChange
+                        >
+                            <AquariumBackground />
+                            <CustomCursor />
+                            <GlobalProtection />
+                            <AmbientAudio />
+                            <Navbar />
+                            {announcements.length > 0 && (
+                                <AnnouncementBar announcements={announcements} isAdmin={isAdmin} />
+                            )}
+                            <GuidedChatbot />
+                            <main className="pt-16">
+                                {children}
+                            </main>
+                        </ThemeProvider>
+                    </PushNotificationProvider>
                 </Providers>
             </body>
         </html>

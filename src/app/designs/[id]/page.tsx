@@ -106,7 +106,7 @@ export default async function DesignDetailPage({ params, searchParams }: { param
 
     // Fetch active discount and compute seeded % for this design
     const activeDiscount = await getActiveDiscount()
-    const discountPct = activeDiscount
+    const discountPct = activeDiscount && design.tier !== 'FREE'
         ? getSeededDiscountPct(activeDiscount.id, design.id, activeDiscount.percentageMin, activeDiscount.percentageMax)
         : 0
     const hasDiscount = discountPct > 0

@@ -17,6 +17,7 @@ interface CheckoutClientProps {
         struct: number
     }
     userEmail?: string | null
+    isSubscriber?: boolean
 }
 
 // Maps the item labels returned by DesignConfigurator → their price
@@ -29,17 +30,40 @@ const LABEL_PRICE_MAP: Record<string, string> = {
     'Structural Plans': 'priceStruct',
 }
 
-export default function CheckoutClient({ design, prices, userEmail }: CheckoutClientProps) {
-    const [total, setTotal] = useState(prices.render)
+export default function CheckoutClient({ design, prices, userEmail, isSubscriber }: CheckoutClientProps) {
     const [selectedItems, setSelectedItems] = useState<string[]>(['3D Renderings (High Res)'])
 
-    // Build invoice lines from selected items
-    const invoiceItems = selectedItems.map(label => ({
-        description: label,
-        quantity: 1,
-        price: prices[LABEL_PRICE_MAP[label]?.replace('price', '').toLowerCase() as keyof typeof prices]
-            ?? 0
-    }))
+    // Wait, DesignConfigurator handles total internally right now. Let's fix that.
+    // We should compute total here instead, since we need to apply subscriber discounts.
+    // Actually, DesignConfigurator also needs to show the free DWG stuff.
+    // I will refactor DesignConfigurator to just report selected items, or we compute total here.
+    
+    // Instead of state for total, we compute it below:
+    let baseTotal = 0;
+    
+    // Check if we have PDF selected and user is subscriber, to give free DWG
+    const hasPdf = selectedItems.includes('Complete Design PDF')
+    
+    const invoiceItems = selectedItems.map(label => {
+        let price = prices[LABEL_PRICE_MAP[label]?.replace('price', '').toLowerCase() as keyof typeof prices] ?? 0
+        
+        // Subscriber benefit: CAD DWG is free if PDF is also being purchased
+        if (isSubscriber && label === 'Source CAD Files (DWG/RVT)' && hasPdf) {
+            price = 0
+        }
+        
+        baseTotal += price
+        return {
+            description: label,
+            quantity: 1,
+            price
+        }
+    })
+
+    const subscriberDiscountAmount = isSubscriber ? baseTotal * 0.15 : 0
+    let finalTotal = baseTotal - subscriberDiscountAmount
+    if (finalTotal < 0) finalTotal = 0
+    if (design.tier === 'FREE') finalTotal = 0 // override for free tier
 
     return (
         <div className="min-h-screen bg-neutral-900 text-white pt-24 pb-12 px-4 sm:px-6 lg:px-8 font-mono">
@@ -62,8 +86,16 @@ export default function CheckoutClient({ design, prices, userEmail }: CheckoutCl
 
                     <DesignConfigurator
                         prices={prices}
-                        onTotalChange={(newTotal, items) => {
-                            setTotal(newTotal)
+                        isSubscriber={isSubscriber}
+                        availableFiles={design.fileTypes || []}
+                        urls={{
+                            dwg: design.dwgUrl,
+                            pdf: design.pdfUrl,
+                            elec: design.electricalUrl,
+                            mech: design.mechanicalUrl,
+                            struct: design.structuralUrl
+                        }}
+                        onItemsChange={(items) => {
                             setSelectedItems(items)
                         }}
                     />
@@ -88,15 +120,22 @@ export default function CheckoutClient({ design, prices, userEmail }: CheckoutCl
                         )}
                     </div>
 
-                    <div className="flex justify-between items-center text-3xl font-bold mb-10">
+                    {isSubscriber && baseTotal > 0 && (
+                        <div className="flex justify-between items-center text-sm font-bold text-[#00f2ff] mb-2 px-4 py-2 bg-[#00f2ff]/10 rounded border border-[#00f2ff]/20">
+                            <span>Subscriber Discount (15%)</span>
+                            <span>-₦{subscriberDiscountAmount.toLocaleString()}</span>
+                        </div>
+                    )}
+
+                    <div className="flex justify-between items-center text-3xl font-bold mb-10 mt-4">
                         <span>Total</span>
-                        <span className="text-[#00f2ff]">₦{total.toLocaleString()}</span>
+                        <span className="text-[#00f2ff]">₦{finalTotal.toLocaleString()}</span>
                     </div>
 
-                    {total > 0 ? (
+                    {finalTotal > 0 || (design.tier === 'FREE' && invoiceItems.length > 0) ? (
                         <PaystackCheckout
                             email={userEmail || 'guest@example.com'}
-                            amount={total * 100}
+                            amount={finalTotal * 100}
                             designId={design.id}
                             designTitle={design.title}
                             invoiceItems={invoiceItems}

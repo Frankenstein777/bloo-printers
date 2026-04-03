@@ -28,13 +28,23 @@ export async function POST(req: NextRequest) {
     const description  = body.description as string
     const tier         = body.tier as DesignTier
 
-    const priceRender  = parseFloat(body.priceRender)  || 0
-    const priceDwg     = parseFloat(body.priceDwg)     || 0
-    const pricePdf     = parseFloat(body.pricePdf)     || 0
-    const priceElec    = parseFloat(body.priceElec)    || 0
-    const priceMech    = parseFloat(body.priceMech)    || 0
-    const priceStruct  = parseFloat(body.priceStruct)  || 0
-    const price        = priceRender  // legacy field
+    let priceRender  = parseFloat(body.priceRender)  || 0
+    let priceDwg     = parseFloat(body.priceDwg)     || 0
+    let pricePdf     = parseFloat(body.pricePdf)     || 0
+    let priceElec    = parseFloat(body.priceElec)    || 0
+    let priceMech    = parseFloat(body.priceMech)    || 0
+    let priceStruct  = parseFloat(body.priceStruct)  || 0
+    let price        = priceRender  // legacy field
+
+    if (tier === 'FREE') {
+        priceRender = 0
+        priceDwg = 0
+        pricePdf = 0
+        priceElec = 0
+        priceMech = 0
+        priceStruct = 0
+        price = 0
+    }
 
     const floors       = parseInt(body.floors)      || 0
     const bedrooms     = parseInt(body.bedrooms)    || 0

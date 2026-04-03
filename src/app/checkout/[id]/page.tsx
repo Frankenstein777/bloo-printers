@@ -43,6 +43,7 @@ export default async function CheckoutPage({ params }: { params: { id: string } 
             }}
             prices={prices}
             userEmail={session.user.email || undefined}
+            isSubscriber={(session.user as any).subscriptionStatus === 'PREMIUM' || (session.user as any).role === 'ADMIN'}
         />
     )
 }

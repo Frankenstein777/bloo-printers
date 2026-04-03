@@ -16,6 +16,7 @@ interface Design {
     tier: string
     bedrooms: number
     floors: number
+    plotSize?: string
     price: number | null
     priceRender?: number
     priceDwg?: number
@@ -40,7 +41,7 @@ export default function DesignCard({ design, initialLikes, isLiked, userEmail, d
     const [newComment, setNewComment] = useState('')
     const [isPosting, setIsPosting] = useState(false)
 
-    const hasDiscount = !!discountPct && discountPct > 0
+    const hasDiscount = !!discountPct && discountPct > 0 && design.tier !== 'FREE'
     const basePrice = design.priceRender || design.price || 0
     const discountedPrice = hasDiscount ? Math.round(basePrice * (1 - discountPct! / 100)) : basePrice
 
@@ -115,8 +116,25 @@ export default function DesignCard({ design, initialLikes, isLiked, userEmail, d
 
                 <div className="mt-4">
                     <div className="flex items-center mb-2 gap-3">
-                        <div className="text-sm text-gray-500 dark:text-gray-400 font-mono">
-                            {design.bedrooms} Beds • {design.floors} Floors
+                        <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 dark:text-gray-400 font-mono">
+                            {design.bedrooms > 0 && (
+                                <div className="flex items-center gap-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>
+                                    <span>{design.bedrooms} Beds</span>
+                                </div>
+                            )}
+                            {design.floors > 0 && (
+                                <div className="flex items-center gap-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l10 6-10 6L2 8l10-6z"/><path d="M2 14l10 6 10-6"/></svg>
+                                    <span>{design.floors} Floors</span>
+                                </div>
+                            )}
+                            {design.plotSize && (
+                                <div className="flex items-center gap-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3h18v18H3z"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>
+                                    <span>{design.plotSize} Plot</span>
+                                </div>
+                            )}
                         </div>
                         {/* Price display */}
                         {basePrice > 0 && (
