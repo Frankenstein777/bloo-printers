@@ -18,6 +18,7 @@ interface CheckoutClientProps {
     }
     userEmail?: string | null
     isSubscriber?: boolean
+    globalDiscountPct?: number
 }
 
 // Maps the item labels returned by DesignConfigurator → their price
@@ -30,7 +31,7 @@ const LABEL_PRICE_MAP: Record<string, string> = {
     'Structural Plans': 'priceStruct',
 }
 
-export default function CheckoutClient({ design, prices, userEmail, isSubscriber }: CheckoutClientProps) {
+export default function CheckoutClient({ design, prices, userEmail, isSubscriber, globalDiscountPct = 0 }: CheckoutClientProps) {
     const [selectedItems, setSelectedItems] = useState<string[]>(['3D Renderings (High Res)'])
 
     // Wait, DesignConfigurator handles total internally right now. Let's fix that.
@@ -50,6 +51,8 @@ export default function CheckoutClient({ design, prices, userEmail, isSubscriber
         // Subscriber benefit: CAD DWG is free if PDF is also being purchased
         if (isSubscriber && label === 'Source CAD Files (DWG/RVT)' && hasPdf) {
             price = 0
+        } else if (globalDiscountPct > 0 && design.tier !== 'FREE') {
+            price = price - (price * (globalDiscountPct / 100))
         }
         
         baseTotal += price

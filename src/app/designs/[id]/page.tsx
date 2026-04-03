@@ -219,7 +219,7 @@ export default async function DesignDetailPage({ params, searchParams }: { param
                             {hasDiscount ? (
                                 <div className="flex items-baseline gap-3">
                                     <p className="text-2xl text-[#00f2ff] font-black font-mono">
-                                        ₦{discountedRender.toLocaleString()}
+                                        Buy One-Off
                                     </p>
                                     <p className="text-lg text-gray-400 line-through font-mono">
                                         ₦{sanitizedDesign.priceRender.toLocaleString()}
@@ -310,8 +310,8 @@ export default async function DesignDetailPage({ params, searchParams }: { param
                                 <div className="space-y-4">
                                     {design.tier === 'PREMIUM' && (
                                         <div className="space-y-3">
-                                            <PaystackSubscribeButton 
-                                                email={session?.user?.email || ''} 
+                                            <PaystackSubscribeButton
+                                                email={session?.user?.email || ''}
                                             />
                                             <div className="relative flex py-2 items-center">
                                                 <div className="flex-grow border-t border-gray-400"></div>
@@ -319,7 +319,7 @@ export default async function DesignDetailPage({ params, searchParams }: { param
                                                 <div className="flex-grow border-t border-gray-400"></div>
                                             </div>
                                             <Link href={`/checkout/${design.id}`} className="w-full bg-[#00a3ad] dark:bg-[#00f2ff] text-black font-bold py-3 px-8 rounded-md flex items-center justify-center hover:shadow-[0_0_20px_rgba(0,242,255,0.5)] transition-all uppercase tracking-widest">
-                                                Buy One-Off (₦{(Number(design.price) || 2000).toLocaleString()})
+                                                Buy One-Off
                                             </Link>
                                             <p className="text-center text-xs text-gray-500">Buy just this design</p>
                                         </div>

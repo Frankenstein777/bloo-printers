@@ -4,6 +4,8 @@ import { notFound, redirect } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import CheckoutClient from '@/components/CheckoutClient'
+import { getActiveDiscount } from '@/app/actions'
+import { getSeededDiscountPct } from '@/lib/discount'
 
 export default async function CheckoutPage({ params }: { params: { id: string } }) {
     const { id } = await params
@@ -29,6 +31,11 @@ export default async function CheckoutPage({ params }: { params: { id: string } 
         struct: Number(design.priceStruct || 0)
     }
 
+    const activeDiscount = await getActiveDiscount()
+    const activeDiscountPct = activeDiscount && design.tier !== 'FREE' 
+        ? getSeededDiscountPct(activeDiscount.id, design.id, activeDiscount.minPct, activeDiscount.maxPct) 
+        : 0
+
     return (
         <CheckoutClient
             design={{
@@ -44,6 +51,7 @@ export default async function CheckoutPage({ params }: { params: { id: string } 
             prices={prices}
             userEmail={session.user.email || undefined}
             isSubscriber={(session.user as any).subscriptionStatus === 'PREMIUM' || (session.user as any).role === 'ADMIN'}
+            globalDiscountPct={design.tier === 'FREE' ? 0 : activeDiscountPct}
         />
     )
 }

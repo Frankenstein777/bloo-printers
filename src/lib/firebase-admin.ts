@@ -13,6 +13,8 @@
 
 import { initializeApp, getApps, cert, App } from 'firebase-admin/app'
 import { getStorage, Storage } from 'firebase-admin/storage'
+import { getFirestore, Firestore } from 'firebase-admin/firestore'
+import { getAuth, Auth } from 'firebase-admin/auth'
 
 function createFirebaseAdminApp(): App {
   if (getApps().length > 0) return getApps()[0]
@@ -31,3 +33,22 @@ function createFirebaseAdminApp(): App {
 const app = createFirebaseAdminApp()
 
 export const adminStorage: Storage = getStorage(app)
+export const adminDb: Firestore = getFirestore(app)
+
+function createGbsAdminApp(): App {
+  const apps = getApps()
+  const currentApp = apps.find(a => a.name === 'gbs-ai-studio')
+  if (currentApp) return currentApp
+
+  return initializeApp({
+    credential: cert({
+      projectId:   process.env.GBS_AI_STUDIO_PROJECT_ID!,
+      clientEmail: process.env.GBS_AI_STUDIO_CLIENT_EMAIL!,
+      privateKey:  process.env.GBS_AI_STUDIO_PRIVATE_KEY!.replace(/\\n/g, '\n'),
+    }),
+  }, 'gbs-ai-studio')
+}
+
+const gbsApp = createGbsAdminApp()
+export const gbsAdminDb: Firestore = getFirestore(gbsApp)
+export const gbsAuth: Auth = getAuth(gbsApp)

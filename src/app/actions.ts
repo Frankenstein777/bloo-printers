@@ -7,6 +7,8 @@ import { writeFile, mkdir } from 'fs/promises'
 import { randomUUID } from 'crypto'
 import path from 'path'
 import { prisma } from '@/lib/prisma'
+import { gbsAdminDb, gbsAuth } from '@/lib/firebase-admin'
+import { FieldValue } from 'firebase-admin/firestore'
 
 // ── Auth Actions ─────────────────────────────────────────────────────────────
 
@@ -419,6 +421,61 @@ export async function verifySubscriptionAction(reference: string): Promise<{ suc
         currentPeriodEnd: thirtyDaysFromNow
       }
     })
+
+    // Automatically 500 credits on GBS AI Studio
+    try {
+      const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
+      const batch = {
+        amount: 500,
+        expiresAt: Date.now() + ONE_YEAR_MS,
+        createdAt: Date.now()
+      };
+
+      const userEmail = session.user.email;
+      if (userEmail) {
+        try {
+          const gbsUser = await gbsAuth.getUserByEmail(userEmail);
+          const userRef = gbsAdminDb.collection('users').doc(gbsUser.uid);
+          const docSnap = await userRef.get();
+
+          if (docSnap.exists) {
+            await userRef.update({
+              creditBatches: FieldValue.arrayUnion(batch)
+            });
+          } else {
+            // Document doesn't exist but auth user does, create document natively
+            await userRef.set({
+              email: userEmail,
+              createdAt: FieldValue.serverTimestamp(),
+              creditBatches: [batch]
+            });
+          }
+        } catch (e: any) {
+          // User might not exist in GBS AI Auth yet.
+          if (e.code === 'auth/user-not-found') {
+            // We can pre-create the document keyed by email so they receive credits when they sign up 
+            // (Note: Since Archai-Studio keys by UID, this might require them to contact support or we adapt Archai-Studio)
+            // Or we could create an auth user for them here!
+            const newGbsUser = await gbsAuth.createUser({
+              email: userEmail,
+              // Without password they will have to sign in with Google or perform forgot password
+            });
+            const userRef = gbsAdminDb.collection('users').doc(newGbsUser.uid);
+            await userRef.set({
+              email: userEmail,
+              createdAt: FieldValue.serverTimestamp(),
+              creditBatches: [batch]
+            });
+          } else {
+            console.error('Error fetching/creating GBS Auth User:', e);
+          }
+        }
+      }
+    } catch (gbsError) {
+      console.error('Failed to grant GBS AI Studio credits:', gbsError);
+      // We don't return error here because the subscription itself succeeded.
+    }
+
     revalidatePath('/')
     revalidatePath('/profile')
     return { success: true }

@@ -95,6 +95,9 @@ export default function NavbarClient({ session, discount }: { session: any; disc
                                 <Link href="/aquarium" className="border-transparent text-gray-500 dark:text-gray-300 hover:text-[#00f2ff] hover:border-[#00f2ff] inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium font-mono uppercase">
                                     Aquarium
                                 </Link>
+                                <Link href="/subscribe" className="border-transparent text-[#00f2ff] dark:text-[#00f2ff] hover:text-white hover:border-white inline-flex items-center px-1 pt-1 border-b-2 text-sm font-black font-mono uppercase tracking-widest drop-shadow-[0_0_8px_rgba(0,242,255,0.4)]">
+                                    Premium
+                                </Link>
                                 <span className="border-transparent text-gray-400 dark:text-gray-600 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium font-mono uppercase cursor-not-allowed" title="Coming Soon">
                                     AI Studio (Soon)
                                 </span>
@@ -163,6 +166,9 @@ export default function NavbarClient({ session, discount }: { session: any; disc
                             </Link>
                             <Link href="/aquarium" onClick={() => setIsMobileMenuOpen(false)} className="block pl-3 pr-4 py-4 border-l-4 border-transparent text-lg font-medium text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
                                 Aquarium
+                            </Link>
+                            <Link href="/subscribe" onClick={() => setIsMobileMenuOpen(false)} className="block pl-3 pr-4 py-4 border-l-4 border-transparent text-lg font-black text-[#00f2ff] hover:bg-[#00f2ff]/10 hover:border-[#00f2ff] dark:text-[#00f2ff] uppercase tracking-widest bg-black/5">
+                                Premium Subscription
                             </Link>
                             <div className="block pl-3 pr-4 py-4 border-l-4 border-transparent text-lg font-medium text-gray-400 dark:text-gray-600 cursor-not-allowed">
                                 AI Studio (Coming Soon)

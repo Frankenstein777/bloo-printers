@@ -3,9 +3,6 @@
 import { useState } from 'react'
 
 const testimonials = [
-  { u: "Architect X", c: "The precision is unmatched. Downloaded a villa plan and printed it directly to the site." },
-  { u: "Builder 88", c: "Zero latency. Instant delivery. The future of construction is here." },
-  { u: "Design Core", c: "Aesthetic and functional. Octoplans is the only resource we trust." },
   { u: "Tunde O.", c: "Omo, the structural details are so clear. My bricklayers didn't even ask questions." },
   { u: "Ngozi A.", c: "I was skeptical about buying blueprints online but Octoplans proved me wrong. Beautiful designs!" },
   { u: "Femi Built It", c: "I use their 3D renderings to convince my clients. The ROI is just crazy." },
