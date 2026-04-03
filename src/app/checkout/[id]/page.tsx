@@ -32,8 +32,8 @@ export default async function CheckoutPage({ params }: { params: { id: string } 
     }
 
     const activeDiscount = await getActiveDiscount()
-    const activeDiscountPct = activeDiscount && design.tier !== 'FREE' 
-        ? getSeededDiscountPct(activeDiscount.id, design.id, activeDiscount.minPct, activeDiscount.maxPct) 
+    const activeDiscountPct = activeDiscount && design.tier !== 'FREE'
+        ? getSeededDiscountPct(activeDiscount.id, design.id, activeDiscount.percentageMin, activeDiscount.percentageMax)
         : 0
 
     return (
