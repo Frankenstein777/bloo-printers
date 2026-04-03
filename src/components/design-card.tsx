@@ -30,11 +30,12 @@ interface DesignCardProps {
     design: Design
     initialLikes: number
     isLiked: boolean
+    isSaved?: boolean
     userEmail?: string
     discountPct?: number // seeded discount % for this card (0 = no discount)
 }
 
-export default function DesignCard({ design, initialLikes, isLiked, userEmail, discountPct }: DesignCardProps) {
+export default function DesignCard({ design, initialLikes, isLiked, isSaved, userEmail, discountPct }: DesignCardProps) {
     const [showComments, setShowComments] = useState(false)
     const [comments, setComments] = useState<any[]>([])
     const [isLoadingComments, setIsLoadingComments] = useState(false)
@@ -162,6 +163,7 @@ export default function DesignCard({ design, initialLikes, isLiked, userEmail, d
                             designId={design.id}
                             initialLikes={initialLikes}
                             isLiked={isLiked}
+                            isSaved={isSaved}
                         />
                         <button
                             onClick={handleToggleComments}

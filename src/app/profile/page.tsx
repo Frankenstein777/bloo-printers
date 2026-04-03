@@ -22,7 +22,13 @@ export default async function UserProfilePage() {
                 orderBy: { createdAt: 'desc' }
             },
             collections: {
-                include: { _count: { select: { items: true } } }
+                where: { name: 'Favorites' },
+                include: {
+                    items: {
+                        include: { design: true },
+                        orderBy: { createdAt: 'desc' }
+                    }
+                }
             }
         }
     })
@@ -30,6 +36,19 @@ export default async function UserProfilePage() {
     if (!user) redirect('/')
 
     const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+
+    // Merge liked designs + saved (Favorites) designs, deduplicated by design ID
+    const likedDesigns = user.likes.map(l => l.design)
+    const savedDesigns = user.collections[0]?.items.map(i => i.design) ?? []
+
+    const seenIds = new Set<string>()
+    const mergedDesigns: typeof likedDesigns = []
+    for (const d of [...savedDesigns, ...likedDesigns]) {
+        if (!seenIds.has(d.id)) {
+            seenIds.add(d.id)
+            mergedDesigns.push(d)
+        }
+    }
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-12 px-4">
@@ -53,7 +72,7 @@ export default async function UserProfilePage() {
                             {user.bio && <p className="text-slate-600 dark:text-slate-400 max-w-2xl">{user.bio}</p>}
                         </div>
 
-                        {/* Edit Button (Trigger for Client Wrapper) */}
+                        {/* Edit Button */}
                         <button
                             data-edit-trigger
                             className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-900 dark:text-white px-4 py-2 rounded-lg font-bold text-sm transition-colors"
@@ -105,46 +124,50 @@ export default async function UserProfilePage() {
                         ) : (
                             <div className="bg-white dark:bg-slate-900 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 p-8 text-center">
                                 <p className="text-slate-500 mb-4">You haven't purchased any designs yet.</p>
-                                <Link href="/browse" className="text-indigo-600 font-bold hover:underline">Browse Catalog</Link>
+                                <Link href="/catalog" className="text-indigo-600 font-bold hover:underline">Browse Catalog</Link>
                             </div>
                         )}
                     </section>
 
-                    {/* Saved / Liked Section */}
+                    {/* Saved Designs Section (merged: liked + bookmarked, deduplicated) */}
                     <section>
                         <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                            <span className="bg-red-100 dark:bg-red-900/30 text-red-600 p-1.5 rounded-lg">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                            <span className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 p-1.5 rounded-lg">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
                             </span>
                             Saved Designs
+                            {mergedDesigns.length > 0 && (
+                                <span className="ml-2 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 text-xs font-mono px-2 py-0.5 rounded-full">
+                                    {mergedDesigns.length}
+                                </span>
+                            )}
                         </h2>
 
-                        {user.likes.length > 0 ? (
+                        {mergedDesigns.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                                {user.likes.map(like => (
+                                {mergedDesigns.map(design => (
                                     <Link
-                                        key={like.id}
-                                        href={`/designs/${like.design.id}`}
-                                        className="group bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-md transition-all relative"
+                                        key={design.id}
+                                        href={`/designs/${design.id}`}
+                                        className="group bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-700 transition-all relative"
                                     >
                                         <div className="aspect-square bg-slate-100 dark:bg-slate-800 relative overflow-hidden">
-                                            {like.design.previewImages?.[0] && (
-                                                <img src={like.design.previewImages[0]} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                            {design.previewImages?.[0] && (
+                                                <img src={design.previewImages[0]} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                             )}
-                                            {/* Watermark Overlay for Saved Designs */}
                                             <WatermarkOverlay />
                                         </div>
                                         <div className="p-3">
-                                            <h3 className="text-sm font-bold text-slate-900 dark:text-white truncate">{like.design.title}</h3>
-                                            <p className="text-xs text-slate-500 mt-1">{like.design.bedrooms} Beds • {like.design.floors} Floors</p>
+                                            <h3 className="text-sm font-bold text-slate-900 dark:text-white truncate">{design.title}</h3>
+                                            <p className="text-xs text-slate-500 mt-1">{design.bedrooms} Beds • {design.floors} Floors</p>
                                         </div>
                                     </Link>
                                 ))}
                             </div>
                         ) : (
                             <div className="bg-white dark:bg-slate-900 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 p-8 text-center">
-                                <p className="text-slate-500 mb-4">No saved designs.</p>
-                                <Link href="/browse" className="text-indigo-600 font-bold hover:underline">Start Exploring</Link>
+                                <p className="text-slate-500 mb-4">No saved designs yet. Like ❤️ or bookmark 🔖 designs from the catalog.</p>
+                                <Link href="/catalog" className="text-indigo-600 font-bold hover:underline">Start Exploring</Link>
                             </div>
                         )}
                     </section>

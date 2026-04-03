@@ -61,7 +61,7 @@ export default function SearchBar() {
         ['REVIT', 'ARCHICAD', 'SKETCHUP', 'AUTOCAD', 'PDF'].forEach(sw => {
             (filters as any)[`sw_${sw}`] ? params.set(`sw_${sw}`, 'true') : params.delete(`sw_${sw}`)
         })
-        push(`/browse?${params.toString()}`)
+        push(`/catalog?${params.toString()}`)
         setFiltersOpen(false)
     }
 
@@ -69,7 +69,7 @@ export default function SearchBar() {
         const params = new URLSearchParams()
         const q = searchParams.get('q')
         if (q) params.set('q', q)
-        push(`/browse?${params.toString()}`)
+        push(`/catalog?${params.toString()}`)
         setFilters({ minBedrooms: '0', minFloors: '0', matchMode: 'min', minArea: '', maxArea: '', hasPenthouse: false, hasBQ: false, sw_REVIT: false, sw_ARCHICAD: false, sw_SKETCHUP: false, sw_AUTOCAD: false, sw_PDF: false })
         setFiltersOpen(false)
     }

@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
 
     await prisma.announcement.update({ where: { id }, data: { isActive: false } })
     revalidatePath('/')
-    revalidatePath('/browse')
+    revalidatePath('/catalog')
     revalidatePath('/admin')
     return NextResponse.json({ success: true })
 }

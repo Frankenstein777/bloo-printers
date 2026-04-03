@@ -31,7 +31,7 @@ export function OnboardingTour() {
         {
             title: "Browse Designs",
             content: "Click 'Browse' to explore our catalog of professional blueprints.",
-            target: "nav a[href='/browse']"
+            target: "nav a[href='/catalog']"
         },
         {
             title: "Like & Save",

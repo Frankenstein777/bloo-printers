@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation'
 // Context: extra options injected based on current page
 // ──────────────────────────────────────────
 function getPageContext(pathname: string): { hint?: string; extraOptions?: Option[] } {
-    if (pathname.startsWith('/browse')) {
+    if (pathname.startsWith('/catalog')) {
         return {
             hint: "🔍 You're browsing the **catalog**.",
             extraOptions: [
@@ -295,7 +295,7 @@ export default function GuidedChatbot() {
 
         if (opt.action) {
             switch (opt.action) {
-                case 'browse': window.location.href = '/browse'; return
+                case 'browse': window.location.href = '/catalog'; return
                 case 'login': window.location.href = '/login'; return
                 case 'dashboard': window.location.href = '/dashboard'; return
                 case 'contact': window.location.href = '/#contact'; return

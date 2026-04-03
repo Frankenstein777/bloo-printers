@@ -272,7 +272,7 @@ export async function updateDesignAction(designId: string, formData: FormData): 
     await prisma.design.update({ where: { id: designId }, data })
     revalidatePath('/admin/designs')
     revalidatePath(`/admin/designs/${designId}`)
-    revalidatePath('/browse')
+    revalidatePath('/catalog')
     revalidatePath('/')
     return { success: true }
   } catch (e) {
@@ -295,7 +295,7 @@ export async function deleteDesignAction(designId: string): Promise<ActionState>
     await prisma.purchase.deleteMany({ where: { designId } })
     await prisma.design.delete({ where: { id: designId } })
     revalidatePath('/admin/designs')
-    revalidatePath('/browse')
+    revalidatePath('/catalog')
     revalidatePath('/')
     return { success: true }
   } catch (e) {
@@ -498,7 +498,8 @@ export async function toggleLikeAction(designId: string): Promise<void> {
     await prisma.like.create({ data: { userId, designId } })
   }
   revalidatePath('/')
-  revalidatePath('/browse')
+  revalidatePath('/catalog')
+  revalidatePath('/profile')
   revalidatePath(`/designs/${designId}`)
 }
 
@@ -519,7 +520,8 @@ export async function addToCollectionAction(designId: string): Promise<void> {
     await prisma.collectionItem.create({ data: { collectionId: collection.id, designId } })
   }
   revalidatePath('/')
-  revalidatePath('/browse')
+  revalidatePath('/catalog')
+  revalidatePath('/profile')
   revalidatePath(`/designs/${designId}`)
 }
 
@@ -619,7 +621,7 @@ export async function createDiscountAction(formData: FormData): Promise<ActionSt
     await prisma.discount.create({ data: { label, percentageMin, percentageMax, isActive: true, expiresAt } })
 
     revalidatePath('/')
-    revalidatePath('/browse')
+    revalidatePath('/catalog')
     revalidatePath('/admin')
     return { success: true }
   } catch (e) {
@@ -636,7 +638,7 @@ export async function deactivateDiscountAction(): Promise<ActionState> {
   try {
     await prisma.discount.updateMany({ where: { isActive: true }, data: { isActive: false } })
     revalidatePath('/')
-    revalidatePath('/browse')
+    revalidatePath('/catalog')
     revalidatePath('/admin')
     return { success: true }
   } catch (e) {
@@ -694,7 +696,7 @@ export async function createAnnouncementAction(formData: FormData): Promise<Acti
       : null
     await prisma.announcement.create({ data: { title, body, isActive: true, expiresAt } })
     revalidatePath('/')
-    revalidatePath('/browse')
+    revalidatePath('/catalog')
     revalidatePath('/admin')
     return { success: true }
   } catch (e) {
@@ -715,7 +717,7 @@ export async function deactivateAnnouncementAction(formData: FormData): Promise<
   try {
     await prisma.announcement.update({ where: { id }, data: { isActive: false } })
     revalidatePath('/')
-    revalidatePath('/browse')
+    revalidatePath('/catalog')
     revalidatePath('/admin')
   } catch (e) {
     console.error('Deactivate announcement error:', e)

@@ -12,10 +12,10 @@ interface SocialActionsProps {
     isSaved?: boolean
 }
 
-export function SocialActions({ designId, initialLikes, isLiked: initialIsLiked }: SocialActionsProps) {
+export function SocialActions({ designId, initialLikes, isLiked: initialIsLiked, isSaved: initialIsSaved }: SocialActionsProps) {
     const [likes, setLikes] = useState(initialLikes)
     const [isLiked, setIsLiked] = useState(initialIsLiked)
-    const [isSaved, setIsSaved] = useState(false) // Simplified for MVP
+    const [isSaved, setIsSaved] = useState(initialIsSaved ?? false)
 
     const handleLike = async () => {
         // Optimistic update

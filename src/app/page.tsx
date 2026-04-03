@@ -22,7 +22,7 @@ export default function Home() {
           </p>
 
           <div className="pt-8">
-            <Link href="/browse">
+            <Link href="/catalog">
               <button className="px-10 py-4 text-xl font-bold font-mono tracking-widest text-black bg-[#00f2ff] hover:bg-white hover:shadow-[0_0_30px_rgba(0,242,255,0.8)] transition-all duration-300 border-2 border-transparent hover:border-[#00f2ff] uppercase">
                 Browse Catalog &gt;&gt;
               </button>

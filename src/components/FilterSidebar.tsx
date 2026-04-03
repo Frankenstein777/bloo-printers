@@ -64,7 +64,7 @@ export function FilterSidebar() {
                 else params.delete(`sw_${sw}`)
             })
 
-        router.push(`/browse?${params.toString()}`)
+        router.push(`/catalog?${params.toString()}`)
         setIsOpen(false)
     }
 
