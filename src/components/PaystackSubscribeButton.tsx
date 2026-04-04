@@ -32,53 +32,67 @@ export default function PaystackSubscribeButton({
     const handleSubscribe = () => {
         setLoading(true)
 
-        if (!window.PaystackPop) {
-            toast('Payment system is initializing... please wait.', 'info')
-            setLoading(false)
-            return
-        }
-
-        const paystackConfig: any = {
-            key: publicKey,
-            email,
-            currency: 'NGN',
-            ref: 'SUB-' + Math.floor((Math.random() * 1000000000) + 1),
-            callback: async function (response: any) {
-                try {
-                    const result = await verifySubscriptionAction(response.reference)
-                    if (result.success) {
-                        toast('Subscription successful! Welcome to Premium.', 'success', 6000)
-                        router.push('/profile')
-                    } else {
-                        toast('Subscription verification failed. Contact support.', 'error')
+        // Resilient loader: if PaystackPop is already available, go immediately.
+        // Otherwise poll for up to 5 seconds (covers lazyOnload / slow networks).
+        const run = () => {
+            const paystackConfig: any = {
+                key: publicKey,
+                email,
+                currency: 'NGN',
+                ref: 'SUB-' + Math.floor((Math.random() * 1000000000) + 1),
+                callback: async function (response: any) {
+                    try {
+                        const result = await verifySubscriptionAction(response.reference)
+                        if (result.success) {
+                            toast('Subscription successful! Welcome to Premium.', 'success', 6000)
+                            router.push('/profile')
+                        } else {
+                            toast('Subscription verification failed. Contact support.', 'error')
+                        }
+                    } catch (err) {
+                        console.error('Subscription Error', err)
+                        toast('An error occurred during verification.', 'error')
+                    } finally {
+                        setLoading(false)
                     }
-                } catch (err) {
-                    console.error("Subscription Error", err)
-                    toast('An error occurred during verification.', 'error')
-                } finally {
+                },
+                onClose: function () {
                     setLoading(false)
-                }
-            },
-            onClose: function () {
+                },
+            }
+
+            if (planId) {
+                paystackConfig.plan = planId
+            } else {
+                paystackConfig.amount = amount
+            }
+
+            try {
+                const handler = window.PaystackPop.setup(paystackConfig)
+                handler.openIframe()
+            } catch (e) {
                 setLoading(false)
-            },
+                toast('Could not open payment window.', 'error')
+            }
         }
 
-        if (planId) {
-            paystackConfig.plan = planId
-            // Optional: amount is ignored by Paystack if a valid plan is passed,
-            // but providing it might be required by the popup depending on configuration.
-            // Leaving it out forces Paystack to fetch the plan amount.
+        if (window.PaystackPop) {
+            run()
         } else {
-            paystackConfig.amount = amount
-        }
-
-        try {
-            const handler = window.PaystackPop.setup(paystackConfig)
-            handler.openIframe()
-        } catch (e) {
-            setLoading(false)
-            toast("Could not open payment window.", 'error')
+            // Poll for PaystackPop availability (max 5 s)
+            let elapsed = 0
+            const interval = setInterval(() => {
+                elapsed += 200
+                if (window.PaystackPop) {
+                    clearInterval(interval)
+                    setScriptLoaded(true)
+                    run()
+                } else if (elapsed >= 5000) {
+                    clearInterval(interval)
+                    setLoading(false)
+                    toast('Payment system failed to load. Please refresh and try again.', 'error')
+                }
+            }, 200)
         }
     }
 
@@ -86,8 +100,9 @@ export default function PaystackSubscribeButton({
         <div className="w-full">
             <Script 
                 src="https://js.paystack.co/v1/inline.js" 
-                strategy="lazyOnload" 
+                strategy="afterInteractive" 
                 onLoad={() => setScriptLoaded(true)}
+                onError={() => toast('Failed to load payment system. Please refresh.', 'error')}
             />
             
             <button
