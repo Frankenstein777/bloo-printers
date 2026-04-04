@@ -52,7 +52,8 @@ export default async function SubscribePage() {
                         
                         <div className="bg-[#00f2ff] text-black text-xs font-black uppercase tracking-widest px-3 py-1 inline-block rounded mb-4">Recommended</div>
                         <h2 className="text-2xl font-black font-mono text-white uppercase mb-2">Premium Member</h2>
-                        <div className="text-3xl font-black font-mono text-[#00f2ff] mb-8">₦40,000 <span className="text-lg opacity-60">/ year</span></div>
+                        <div className="text-3xl font-black font-mono text-[#00f2ff] mb-2">₦80,000 <span className="text-lg opacity-60">/ month</span></div>
+                        <div className="text-sm font-mono text-[#00f2ff]/50 mb-8">or ₦800,000 <span className="opacity-70">/ year</span> — save ₦160,000</div>
                         
                         <ul className="space-y-4 font-mono text-sm text-gray-300 mb-8 max-w-md relative z-10">
                             <li className="flex gap-3">
