@@ -174,10 +174,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="relative z-10 py-8 text-center text-xs font-mono opacity-50 border-t border-gray-800 uppercase text-gray-300 dark:text-gray-500">
-        <p>Octoplans © 2026. All rights reserved.</p>
-      </footer>
     </div>
   )
 }

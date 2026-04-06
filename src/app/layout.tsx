@@ -22,6 +22,7 @@ import { Providers } from "@/components/providers"
 
 import GuidedChatbot from "@/components/GuidedChatbot"
 import { PushNotificationProvider } from '@/components/PushNotificationProvider'
+import Footer from '@/components/Footer'
 
 export default async function RootLayout({
     children,
@@ -36,7 +37,7 @@ export default async function RootLayout({
 
     return (
         <html lang="en" suppressHydrationWarning>
-            <body className={`${inter.className} antialiased min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 overflow-x-hidden selection:bg-[#00f2ff]/30`}>
+            <body className={`${inter.className} antialiased min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 overflow-x-hidden selection:bg-[#00f2ff]/30`}>
                 <Providers>
                     <PushNotificationProvider>
                         <ThemeProvider
@@ -55,9 +56,10 @@ export default async function RootLayout({
                                 <AnnouncementBar announcements={announcements} isAdmin={isAdmin} />
                             )}
                             <GuidedChatbot />
-                            <main className="pt-16">
+                            <main className="pt-16 flex-grow">
                                 {children}
                             </main>
+                            <Footer />
                         </ThemeProvider>
                     </PushNotificationProvider>
                 </Providers>
