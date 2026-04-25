@@ -494,6 +494,92 @@ export async function verifySubscriptionAction(reference: string): Promise<{ suc
   }
 }
 
+export async function submitArchitectApplicationAction(formData: FormData) {
+  try {
+    const session = await getSession()
+    if (!session) return { success: false, error: 'User not logged in' }
+
+    const portfolioUrl = formData.get('portfolioUrl') as string
+    const experienceText = formData.get('experienceText') as string
+
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: {
+        architectStatus: 'PENDING',
+        portfolioUrl,
+        experienceText
+      }
+    })
+
+    revalidatePath('/become-architect')
+    return { success: true }
+  } catch (err) {
+    return { success: false, error: 'Failed to submit application' }
+  }
+}
+
+export async function resolveArchitectApplicationAction(formData: FormData) {
+  try {
+    const session = await getSession()
+    if (!session || session.user.role !== 'ADMIN') return { success: false }
+
+    const userId = formData.get('userId') as string
+    const status = formData.get('status') as string
+
+    if (status === 'APPROVED') {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { architectStatus: 'APPROVED', role: 'ARCHITECT' }
+      })
+    } else {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { architectStatus: 'REJECTED' }
+      })
+    }
+
+    revalidatePath('/admin/architect-applications')
+    return { success: true }
+  } catch (err) {
+    return { success: false }
+  }
+}
+
+export async function updatePayoutSettingsAction({ bankName, accountName, accountNumber }: { bankName: string, accountName: string, accountNumber: string }) {
+  try {
+    const session = await getSession()
+    if (!session) return { success: false, error: 'Not logged in' }
+
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: { bankName, accountName, accountNumber }
+    })
+    return { success: true }
+  } catch (err) {
+    return { success: false, error: 'Failed' }
+  }
+}
+
+export async function requestPayoutAction() {
+  try {
+    const session = await getSession()
+    if (!session) return { success: false, error: 'Not logged in' }
+
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: { payoutRequestedAt: new Date() }
+    })
+    
+    console.log(`[PAYOUT NOTIFICATION] Architect ${session.user.email} requested a payout! Please process within 24 hours.`)
+
+    revalidatePath('/architect/dashboard')
+    revalidatePath('/admin/payouts')
+    return { success: true }
+  } catch (err) {
+    return { success: false, error: 'Failed' }
+  }
+}
+
 export async function initializeArchitectFeeAction(email: string) {
   try {
     const session = await getSession()

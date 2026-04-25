@@ -22,6 +22,7 @@ enum DesignTier {
   FREE
   PREMIUM
   EXCLUSIVE
+  ONETIME
 }
 
 model User {
@@ -50,6 +51,17 @@ model User {
   collections       Collection[]
   designs           Design[]          @relation("DesignAuthor")
   hasPaidArchitectFee Boolean         @default(false)
+
+  // Architect Application & Status
+  architectStatus   String            @default("NONE") // NONE, PENDING, APPROVED, REJECTED
+  portfolioUrl      String?
+  experienceText    String?
+
+  // Payout Details
+  bankName          String?
+  accountName       String?
+  accountNumber     String?
+  payoutRequestedAt DateTime?         
 }
 
 model Account {

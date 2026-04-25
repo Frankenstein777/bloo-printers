@@ -248,25 +248,6 @@ export default async function DesignDetailPage({ params, searchParams }: { param
                             </div>
                         )}
 
-                        <div className="mt-3">
-                            <h2 className="sr-only">Product information</h2>
-                            {hasDiscount ? (
-                                <div className="flex items-baseline gap-3">
-                                    <p className="text-2xl text-[#00f2ff] font-black font-mono">
-                                        Buy One-Off
-                                    </p>
-                                    <p className="text-lg text-gray-400 line-through font-mono">
-                                        ₦{sanitizedDesign.priceRender.toLocaleString()}
-                                    </p>
-                                    <span className="text-xs text-gray-500 font-mono">(3D Renders)</span>
-                                </div>
-                            ) : (
-                                <p className="text-3xl text-gray-900 dark:text-white text-[#00a3ad] dark:text-[#00f2ff] font-mono">
-                                    {design.price ? `₦${Number(design.price).toLocaleString()}` : design.tier}
-                                </p>
-                            )}
-                        </div>
-
                         <div className="mt-6">
                             <h3 className="sr-only">Description</h3>
                             <div className="text-base text-gray-700 dark:text-gray-300 space-y-6" dangerouslySetInnerHTML={{ __html: design.description }} />

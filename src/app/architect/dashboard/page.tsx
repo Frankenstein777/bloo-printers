@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import ArchitectDashboardClient from '@/components/architect/ArchitectDashboardClient'
+import PayoutFlowClient from '@/components/architect/PayoutFlowClient'
 
 export default async function ArchitectDashboardPage({ searchParams }: { searchParams: { verify_fee?: string } }) {
   const session = await getSession()
@@ -70,6 +71,16 @@ export default async function ArchitectDashboardPage({ searchParams }: { searchP
                   Upload New Design
                 </Link>
               </div>
+            </div>
+
+            <div className="mt-8">
+               <PayoutFlowClient 
+                 defaultBankName={userPostVerify?.bankName || ''}
+                 defaultAccountName={userPostVerify?.accountName || ''}
+                 defaultAccountNumber={userPostVerify?.accountNumber || ''}
+                 hasRequested={!!userPostVerify?.payoutRequestedAt}
+                 totalEarnings={totalEarnings}
+               />
             </div>
 
             <div className="mt-12 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-lg">

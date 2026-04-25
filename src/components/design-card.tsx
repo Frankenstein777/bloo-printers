@@ -137,25 +137,6 @@ export default function DesignCard({ design, initialLikes, isLiked, isSaved, use
                                 </div>
                             )}
                         </div>
-                        {/* Price display */}
-                        {basePrice > 0 && (
-                            <div className="ml-auto text-right">
-                                {hasDiscount ? (
-                                    <div className="flex flex-col items-end">
-                                        <span className="text-xs text-gray-400 line-through font-mono">
-                                            ₦{basePrice.toLocaleString()}
-                                        </span>
-                                        <span className="text-sm text-[#00f2ff] font-black font-mono">
-                                            ₦{discountedPrice.toLocaleString()}
-                                        </span>
-                                    </div>
-                                ) : (
-                                    <span className="text-sm text-gray-700 dark:text-gray-300 font-mono">
-                                        ₦{basePrice.toLocaleString()}
-                                    </span>
-                                )}
-                            </div>
-                        )}
                     </div>
 
                     <div className="relative z-10 border-t border-gray-100 dark:border-gray-800 pt-2 flex items-center justify-between">

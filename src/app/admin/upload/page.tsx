@@ -373,6 +373,7 @@ export default function AdminUploadPage() {
               <option value="FREE">Free</option>
               <option value="PREMIUM">Premium</option>
               <option value="EXCLUSIVE">Exclusive</option>
+              <option value="ONETIME">One-Time Sale</option>
             </select>
           </div>
 
@@ -472,7 +473,7 @@ export default function AdminUploadPage() {
                     type="file"
                     accept={accept}
                     onChange={e => setDesignFiles(prev => ({ ...prev, [name]: e.target.files?.[0] ?? null }))}
-                    className="block w-full text-xs text-gray-500 dark:text-gray-400"
+                    className="block w-full text-sm text-gray-500 dark:text-gray-400 file:cursor-pointer file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-bold file:bg-[#00f2ff]/10 file:text-[#00a3ad] dark:file:text-[#00f2ff] hover:file:bg-[#00f2ff]/20 transition-all cursor-pointer border border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-3 bg-white dark:bg-slate-800"
                   />
                 </div>
               ))}

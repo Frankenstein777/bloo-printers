@@ -32,6 +32,11 @@ export async function POST(req: NextRequest) {
     const description  = body.description as string
     const tier         = body.tier as DesignTier
 
+    const urlRegex = /(https?:\/\/[^\s]+)|(www\.[^\s]+)/i;
+    if (urlRegex.test(title) || urlRegex.test(description)) {
+      return NextResponse.json({ error: 'URL links are not permitted in titles or descriptions.' }, { status: 400 })
+    }
+
     let priceRender  = parseFloat(body.priceRender)  || 0
     let priceDwg     = parseFloat(body.priceDwg)     || 0
     let pricePdf     = parseFloat(body.pricePdf)     || 0

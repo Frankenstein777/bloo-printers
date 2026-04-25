@@ -3,9 +3,12 @@
 import { Suspense } from 'react'
 import { signupAction } from '../actions'
 import Link from 'next/link'
+import { useState } from 'react'
 import { GoogleSignInButton } from '@/components/auth/GoogleSignInButton'
 
 export default function SignupPage() {
+    const [mode, setMode] = useState<'USER' | 'ARCHITECT'>('USER')
+
     return (
         <Suspense>
             <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-950">
@@ -18,8 +21,30 @@ export default function SignupPage() {
                             Join Octoplans to access premium architectural designs.
                         </p>
                     </div>
+
+                    {/* Mode Toggle */}
+                    <div className="flex bg-gray-100 dark:bg-slate-800 p-1 rounded-lg mt-6">
+                        <button 
+                            type="button" 
+                            onClick={() => setMode('USER')}
+                            className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${mode === 'USER' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'}`}
+                        >
+                            Sign up as User
+                        </button>
+                        <button 
+                            type="button" 
+                            onClick={() => setMode('ARCHITECT')}
+                            className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${mode === 'ARCHITECT' ? 'bg-white dark:bg-slate-700 text-[#00a3ad] dark:text-[#00f2ff] shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'}`}
+                        >
+                            Partner as Architect
+                        </button>
+                    </div>
+
                     <div className="mt-8">
-                        <GoogleSignInButton text="Sign up with Google" />
+                        <GoogleSignInButton 
+                            text={mode === 'USER' ? "Sign up with Google" : "Apply with Google"} 
+                            callbackUrl={mode === 'ARCHITECT' ? "/become-architect" : "/"}
+                        />
 
                         <div className="mt-6 relative">
                             <div className="absolute inset-0 flex items-center" aria-hidden="true">

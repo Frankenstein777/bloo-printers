@@ -79,6 +79,34 @@ export default function Home() {
         </div>
       </section>
 
+      {/* PARTNER AS ARCHITECT SECTION */}
+      <section id="partner" className="relative z-10 py-24 px-6 md:px-20 bg-slate-900/50 backdrop-blur-sm border-t border-[#00f2ff]/20">
+        <div className="max-w-4xl mx-auto text-center space-y-8">
+          <h2 className="text-4xl font-bold font-mono text-[#00a3ad] dark:text-[#00f2ff] uppercase">
+            Partner With Octoplans
+          </h2>
+          <p className="font-mono text-lg text-gray-700 dark:text-gray-300">
+            Are you a certified architect? Monetize your blueprints globally. Partner with Octoplans and sell your layouts on our platform seamlessly. Join the vanguard today!
+          </p>
+          <div className="bg-gradient-to-r from-[#00f2ff]/10 to-transparent p-6 border border-[#00f2ff]/30 rounded-xl inline-block text-left shadow-lg">
+            <h3 className="font-bold text-xl mb-4 text-[#00f2ff]">Benefits of partnership:</h3>
+            <ul className="list-inside list-disc space-y-2 mb-6 font-mono text-sm opacity-90 text-white">
+              <li>Keep 85% of every single sale from your catalog.</li>
+              <li>Global audience for your floor plans and models.</li>
+              <li>Robust AI and layout tools at your disposal.</li>
+            </ul>
+            <p className="text-xs bg-indigo-900/50 text-indigo-200 border border-indigo-700 px-4 py-2 uppercase tracking-widest font-black inline-block rounded">
+              🎉 Registration fee is WAIVED until July 1st, 2026!
+            </p>
+          </div>
+          <div className="pt-4">
+            <Link href="/become-architect" className="bg-[#00f2ff] hover:bg-white text-black drop-shadow-[0_0_15px_rgba(0,242,255,0.4)] px-8 py-3 rounded uppercase tracking-widest font-bold transition-all">
+              Apply to Partner 
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* TESTIMONIALS SECTION */}
       <section id="testimonials" className="relative z-10 py-24 px-6 md:px-20 border-t border-[#00f2ff]/20">
         <div className="max-w-7xl mx-auto">

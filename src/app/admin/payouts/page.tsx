@@ -38,9 +38,13 @@ export default async function AdminPayoutsPage() {
       rawTotal,
       architectShare,
       octoplansShare,
-      salesCount
+      salesCount,
+      payoutRequestedAt: arch.payoutRequestedAt,
+      bankName: arch.bankName,
+      accountName: arch.accountName,
+      accountNumber: arch.accountNumber
     }
-  }).filter(stat => stat.salesCount > 0)
+  })
 
   return (
     <div className="max-w-6xl mx-auto py-12 px-4">
@@ -54,16 +58,34 @@ export default async function AdminPayoutsPage() {
               <th className="px-6 py-4 text-left text-xs text-gray-500 uppercase tracking-widest">Gross Total</th>
               <th className="px-6 py-4 text-left text-xs text-green-600 dark:text-green-400 uppercase font-bold tracking-widest">Octoplans 15%</th>
               <th className="px-6 py-4 text-left text-xs text-blue-600 dark:text-blue-400 uppercase font-bold tracking-widest">Architect 85%</th>
+              <th className="px-6 py-4 text-left text-xs text-gray-500 uppercase tracking-widest">Payout Info</th>
+              <th className="px-6 py-4 text-left text-xs text-gray-500 uppercase tracking-widest">Status</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
             {payoutStats.map((stat, i) => (
-              <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+              <tr key={i} className={`hover:bg-gray-50 dark:hover:bg-gray-800/50 ${stat.payoutRequestedAt && stat.architectShare > 0 ? 'bg-yellow-50 dark:bg-yellow-900/10' : ''}`}>
                 <td className="px-6 py-5 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-white">{stat.archName}</td>
                 <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-500 font-mono">{stat.salesCount}</td>
                 <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-500 font-mono">₦{stat.rawTotal.toLocaleString()}</td>
                 <td className="px-6 py-5 whitespace-nowrap text-sm text-green-600 font-black font-mono">₦{stat.octoplansShare.toLocaleString()}</td>
                 <td className="px-6 py-5 whitespace-nowrap text-sm text-blue-600 font-black font-mono">₦{stat.architectShare.toLocaleString()}</td>
+                <td className="px-6 py-5 whitespace-nowrap text-xs text-gray-500">
+                   {stat.bankName ? (
+                     <>
+                       <strong>{stat.bankName}</strong><br/>
+                       {stat.accountName}<br/>
+                       {stat.accountNumber}
+                     </>
+                   ) : 'No info provided'}
+                </td>
+                <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-500">
+                   {stat.payoutRequestedAt && stat.architectShare > 0 ? (
+                      <span className="inline-block px-2 py-1 bg-yellow-200 text-yellow-800 rounded font-bold text-xs uppercase">
+                        Requested on {new Date(stat.payoutRequestedAt).toLocaleDateString()}
+                      </span>
+                   ) : '—'}
+                </td>
               </tr>
             ))}
             {payoutStats.length === 0 && (

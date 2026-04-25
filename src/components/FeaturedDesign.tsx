@@ -5,12 +5,18 @@ import { WatermarkOverlay } from './WatermarkOverlay'
 
 async function getFeaturedDesign() {
     const featured = await prisma.design.findFirst({
-        where: { isFeatured: true },
+        where: { 
+            isFeatured: true,
+            OR: [ { tier: { not: 'ONETIME' } }, { purchases: { none: {} } } ]
+        },
     })
 
     // Fallback if no featured design is set
     if (!featured) {
         return await prisma.design.findFirst({
+            where: {
+                OR: [ { tier: { not: 'ONETIME' } }, { purchases: { none: {} } } ]
+            },
             orderBy: { createdAt: 'desc' }
         })
     }
@@ -70,9 +76,6 @@ export async function FeaturedDesign() {
                                     View Specs
                                 </button>
                             </Link>
-                            <span className="font-mono text-2xl text-white font-bold">
-                                {design.price ? `$${design.price}` : 'FREE'}
-                            </span>
                         </div>
                     </div>
                 </div>

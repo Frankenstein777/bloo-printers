@@ -3,11 +3,11 @@
 import { signIn } from "next-auth/react"
 import { useSearchParams } from "next/navigation"
 
-export function GoogleSignInButton({ text = "Sign in with Google" }: { text?: string }) {
+export function GoogleSignInButton({ text = "Sign in with Google", callbackUrl: propCallbackUrl }: { text?: string, callbackUrl?: string }) {
     const searchParams = useSearchParams()
     // Read callbackUrl from the URL (passed by NextAuth or by our page guards)
     // Fall back to "/" if not present
-    const callbackUrl = searchParams.get("callbackUrl") || "/"
+    const callbackUrl = propCallbackUrl || searchParams.get("callbackUrl") || "/"
 
     const handleGoogleSignIn = () => {
         signIn("google", { callbackUrl })

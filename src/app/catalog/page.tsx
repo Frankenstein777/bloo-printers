@@ -66,6 +66,7 @@ export default async function CatalogPage({
                 { plotArea: { gte: minArea, lte: maxArea } },
                 hasPenthouse ? { hasPenthouse: true } : {},
                 hasBQ ? { hasBQ: true } : {},
+                { OR: [ { tier: { not: 'ONETIME' } }, { purchases: { none: {} } } ] },
                 ...(activeSoftware.length > 0
                     ? [{ fileTypes: { hasSome: activeSoftware } }]
                     : []),
