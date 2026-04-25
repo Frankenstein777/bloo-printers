@@ -3,7 +3,7 @@
  * Reads an image File, draws it onto a canvas, overlays a repeating diagonal watermark, 
  * and returns the manipulated image as a Blob (wrapped in a File).
  */
-export async function applyWatermark(file: File, watermarkText: string = 'OCTOPLANS'): Promise<File> {
+export async function applyWatermark(file: File, watermarkText: string = 'Made by Octoplans'): Promise<File> {
   return new Promise((resolve, reject) => {
     const img = new Image()
     img.src = URL.createObjectURL(file)
@@ -19,25 +19,27 @@ export async function applyWatermark(file: File, watermarkText: string = 'OCTOPL
       // Draw original image
       ctx.drawImage(img, 0, 0)
 
-      // Calculate dynamic font size based on image width
-      const fontSize = Math.max(Math.floor(img.width * 0.05), 36)
-      ctx.font = `900 ${fontSize}px sans-serif`
+      // Calculate dynamic font size based on image width (much smaller now)
+      const fontSize = Math.max(Math.floor(img.width * 0.018), 16)
+      ctx.font = `500 ${fontSize}px sans-serif`
       
-      // Semi-transparent white
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)'
+      // Very faint semi-transparent white
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.25)'
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
       
-      // Shadow to make it pop against any background
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.6)'
-      ctx.shadowBlur = 6
-      ctx.shadowOffsetX = 2
-      ctx.shadowOffsetY = 2
+      // Extremely subtle shadow for faint contrast
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.3)'
+      ctx.shadowBlur = 2
+      ctx.shadowOffsetX = 1
+      ctx.shadowOffsetY = 1
 
       // Set up diagonal transform
       const diagonalLength = Math.sqrt(img.width * img.width + img.height * img.height)
-      const stepX = fontSize * 5
-      const stepY = fontSize * 3
+      
+      // Widely spread out grid pattern
+      const stepX = img.width * 0.25
+      const stepY = img.height * 0.25
 
       ctx.translate(img.width / 2, img.height / 2)
       ctx.rotate(-Math.PI / 4)
