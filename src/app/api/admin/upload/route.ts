@@ -16,8 +16,11 @@ import { DesignTier } from '@prisma/client'
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions)
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
   const userRole = (session.user as any).role
-  if (!session || (userRole !== 'ADMIN' && userRole !== 'ARCHITECT')) {
+  if (userRole !== 'ADMIN' && userRole !== 'ARCHITECT') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
