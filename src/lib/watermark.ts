@@ -23,16 +23,16 @@ export async function applyWatermark(file: File, watermarkText: string = 'Made b
       const fontSize = Math.max(Math.floor(img.width * 0.018), 16)
       ctx.font = `500 ${fontSize}px sans-serif`
       
-      // Very faint semi-transparent white
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.25)'
+      // White text with medium opacity
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.45)'
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
       
-      // Extremely subtle shadow for faint contrast
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.3)'
-      ctx.shadowBlur = 2
-      ctx.shadowOffsetX = 1
-      ctx.shadowOffsetY = 1
+      // Strong, sharp black shadow ensures perfect readability on 100% white floor plans
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.8)'
+      ctx.shadowBlur = 4
+      ctx.shadowOffsetX = 2
+      ctx.shadowOffsetY = 2
 
       // Set up diagonal transform
       const diagonalLength = Math.sqrt(img.width * img.width + img.height * img.height)
