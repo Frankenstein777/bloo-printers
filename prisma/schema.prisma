@@ -182,6 +182,8 @@ model Design {
   
   previewImages   String[]    // Array of S3 URLs
   floorPlanImages String[]    // Array of S3 URLs for Floor Plans
+  cleanPreviewImages   String[]    @default([])
+  cleanFloorPlanImages String[]    @default([])
   
   authorId        String?
   author          User?       @relation("DesignAuthor", fields: [authorId], references: [id])

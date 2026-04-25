@@ -95,7 +95,9 @@ export async function POST(req: NextRequest) {
 
     // ── S3 keys (sent by the client after direct S3 uploads) ──────
     const previewImages   = Array.isArray(body.previewImages)  ? body.previewImages  : []
+    const cleanPreviewImages = Array.isArray(body.cleanPreviewImages) ? body.cleanPreviewImages : []
     const floorPlanImages = Array.isArray(body.floorPlanImages)? body.floorPlanImages: []
+    const cleanFloorPlanImages = Array.isArray(body.cleanFloorPlanImages) ? body.cleanFloorPlanImages : []
     const rvtUrl          = body.rvtUrl          || null
     const plnUrl          = body.plnUrl          || null
     const skpUrl          = body.skpUrl          || null
@@ -123,7 +125,9 @@ export async function POST(req: NextRequest) {
       rvtUrl, plnUrl, skpUrl, pdfUrl, dwgUrl,
       electricalUrl, mechanicalUrl, structuralUrl,
       previewImages,
+      cleanPreviewImages,
       floorPlanImages,
+      cleanFloorPlanImages,
       ...boolData,
     } as any
 

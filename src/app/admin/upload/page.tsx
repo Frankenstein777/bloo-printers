@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { FootprintEditor, EditorVertex } from '@/components/admin/FootprintEditor'
 import { useRouter } from 'next/navigation'
 import { useFirebaseUpload } from '@/hooks/useFirebaseUpload'
+import { applyWatermark } from '@/lib/watermark'
 
 // Design file inputs (fileType → input name → accept)
 const DESIGN_FILE_INPUTS = [
@@ -65,19 +66,35 @@ export default function AdminUploadPage() {
 
       setUploadStatus('Uploading preview images…')
       const previewUrls: string[] = []
+      const cleanPreviewUrls: string[] = []
       for (let i = 0; i < previewFiles.length; i++) {
+        setUploadStatus(`Watermarking preview image ${i + 1} of ${previewFiles.length}…`)
+        const watermarkedFile = await applyWatermark(previewFiles[i])
+        
         setUploadStatus(`Uploading preview image ${i + 1} of ${previewFiles.length}…`)
-        const { publicUrl } = await uploadFile({ file: previewFiles[i], designId: tempDesignId, fileType: `preview-${i}` })
-        previewUrls.push(publicUrl)
+        const { publicUrl: wmUrl } = await uploadFile({ file: watermarkedFile, designId: tempDesignId, fileType: `preview-${i}` })
+        previewUrls.push(wmUrl)
+        
+        const { publicUrl: clUrl } = await uploadFile({ file: previewFiles[i], designId: tempDesignId, fileType: `clean-preview-${i}` })
+        cleanPreviewUrls.push(clUrl)
+        
         updateProgress()
       }
 
       setUploadStatus('Uploading floor plan images…')
       const floorPlanUrls: string[] = []
+      const cleanFloorPlanUrls: string[] = []
       for (let i = 0; i < floorPlanFiles.length; i++) {
+        setUploadStatus(`Watermarking floor plan ${i + 1} of ${floorPlanFiles.length}…`)
+        const watermarkedFile = await applyWatermark(floorPlanFiles[i])
+        
         setUploadStatus(`Uploading floor plan ${i + 1} of ${floorPlanFiles.length}…`)
-        const { publicUrl } = await uploadFile({ file: floorPlanFiles[i], designId: tempDesignId, fileType: `floorplan-${i}` })
-        floorPlanUrls.push(publicUrl)
+        const { publicUrl: wmUrl } = await uploadFile({ file: watermarkedFile, designId: tempDesignId, fileType: `floorplan-${i}` })
+        floorPlanUrls.push(wmUrl)
+
+        const { publicUrl: clUrl } = await uploadFile({ file: floorPlanFiles[i], designId: tempDesignId, fileType: `clean-floorplan-${i}` })
+        cleanFloorPlanUrls.push(clUrl)
+        
         updateProgress()
       }
 
@@ -155,7 +172,9 @@ export default function AdminUploadPage() {
         software_PDF:      formData.get('software_PDF') === 'on',
         // S3 keys (not file content)
         previewImages: previewUrls,
+        cleanPreviewImages: cleanPreviewUrls,
         floorPlanImages: floorPlanUrls,
+        cleanFloorPlanImages: cleanFloorPlanUrls,
         rvtUrl:         fileKeys['rvt']         ?? null,
         plnUrl:         fileKeys['pln']         ?? null,
         skpUrl:         fileKeys['skp']         ?? null,
