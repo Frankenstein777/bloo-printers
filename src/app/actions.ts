@@ -497,7 +497,7 @@ export async function verifySubscriptionAction(reference: string): Promise<{ suc
 export async function submitArchitectApplicationAction(formData: FormData) {
   try {
     const session = await getSession()
-    if (!session) return { success: false, error: 'User not logged in' }
+    if (!session) return
 
     const portfolioUrl = formData.get('portfolioUrl') as string
     const experienceText = formData.get('experienceText') as string
@@ -512,16 +512,15 @@ export async function submitArchitectApplicationAction(formData: FormData) {
     })
 
     revalidatePath('/become-architect')
-    return { success: true }
   } catch (err) {
-    return { success: false, error: 'Failed to submit application' }
+    console.error('Failed to submit application', err)
   }
 }
 
 export async function resolveArchitectApplicationAction(formData: FormData) {
   try {
     const session = await getSession()
-    if (!session || session.user.role !== 'ADMIN') return { success: false }
+    if (!session || session.user.role !== 'ADMIN') return
 
     const userId = formData.get('userId') as string
     const status = formData.get('status') as string
@@ -539,9 +538,8 @@ export async function resolveArchitectApplicationAction(formData: FormData) {
     }
 
     revalidatePath('/admin/architect-applications')
-    return { success: true }
   } catch (err) {
-    return { success: false }
+    console.error('Failed to resolve architect application', err)
   }
 }
 
