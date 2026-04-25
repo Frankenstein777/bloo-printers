@@ -10,6 +10,7 @@ datasource db {
 enum Role {
   USER
   ADMIN
+  ARCHITECT
 }
 
 enum SubscriptionTier {
@@ -47,6 +48,8 @@ model User {
   likes             Like[]
   comments          Comment[]
   collections       Collection[]
+  designs           Design[]          @relation("DesignAuthor")
+  hasPaidArchitectFee Boolean         @default(false)
 }
 
 model Account {
@@ -166,6 +169,10 @@ model Design {
   fileTypes       String[]    // e.g. ["REVIT", "SKETCHUP", "PDF"]
   
   previewImages   String[]    // Array of S3 URLs
+  floorPlanImages String[]    // Array of S3 URLs for Floor Plans
+  
+  authorId        String?
+  author          User?       @relation("DesignAuthor", fields: [authorId], references: [id])
   
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt

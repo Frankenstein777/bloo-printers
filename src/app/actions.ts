@@ -387,6 +387,15 @@ export async function verifyPurchaseAction(reference: string, designId: string, 
         currency: 'NGN', status: 'succeeded', provider: 'PAYSTACK', reference
       }
     })
+
+    const designWithAuthor = await prisma.design.findUnique({
+      where: { id: designId },
+      include: { author: true }
+    })
+    if (designWithAuthor?.author?.email) {
+      console.log(`[NOTIFICATION] Sending email to ${designWithAuthor.author.email}: Your design "${designWithAuthor.title}" was just purchased for ₦${amount / 100}!`)
+    }
+
     revalidatePath(`/designs/${designId}`)
     revalidatePath('/profile')
     return { success: true }
@@ -482,6 +491,64 @@ export async function verifySubscriptionAction(reference: string): Promise<{ suc
   } catch (error) {
     console.error('Subscription Verification Error:', error)
     return { success: false, error: 'Subscription verification failed' }
+  }
+}
+
+export async function initializeArchitectFeeAction(email: string) {
+  try {
+    const session = await getSession()
+    if (!session) return { success: false, error: 'User not logged in' }
+
+    if (new Date() < new Date('2026-07-01')) {
+      await prisma.user.update({ where: { id: session.user.id }, data: { hasPaidArchitectFee: true } })
+      revalidatePath('/architect/dashboard')
+      return { success: true, bypassed: true }
+    }
+
+    const reference = 'FEE-' + randomUUID().replace(/-/g, '').substring(0, 20).toUpperCase()
+    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
+    const callbackUrl = `${baseUrl}/architect/dashboard?verify_fee=${reference}`
+
+    const res = await fetch('https://api.paystack.co/transaction/initialize', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email, amount: 25000 * 100, reference, callback_url: callbackUrl,
+        metadata: { feeType: 'ARCHITECT' }
+      })
+    })
+
+    const data = await res.json()
+    if (!data.status) {
+      return { success: false, error: data.message || 'Initialization failed' }
+    }
+    return { success: true, url: data.data.authorization_url, reference }
+  } catch (error) {
+    return { success: false, error: 'Payment initialization failed' }
+  }
+}
+
+export async function verifyArchitectFeeAction(reference: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const res = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
+      headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` },
+      cache: 'no-store'
+    })
+    const data = await res.json()
+    if (!data.status || data.data.status !== 'success') return { success: false, error: 'Transaction failed or invalid' }
+
+    const session = await getSession()
+    if (!session) return { success: false, error: 'User not logged in' }
+
+    await prisma.user.update({ where: { id: session.user.id }, data: { hasPaidArchitectFee: true } })
+    revalidatePath('/architect/dashboard')
+    revalidatePath('/architect/upload')
+    return { success: true }
+  } catch (error) {
+    return { success: false, error: 'Verification failed' }
   }
 }
 

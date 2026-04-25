@@ -42,6 +42,9 @@ export default async function SubscribePage() {
                             <li className="flex gap-3 opacity-50">
                                 <span className="text-gray-500">✕</span> Source CAD Files Cost Extra
                             </li>
+                            <li className="flex gap-3 opacity-50">
+                                <span className="text-gray-500">✕</span> Floor Plans Are Blurred
+                            </li>
                         </ul>
                     </div>
 
@@ -75,6 +78,13 @@ export default async function SubscribePage() {
                                 <div>
                                     <strong className="text-white">500 GBS AI Studio Credits</strong><br/>
                                     Instantly generated credits for our partner AI rendering & concept generation suite.
+                                </div>
+                            </li>
+                            <li className="flex gap-3">
+                                <span className="text-[#00f2ff]">✓</span> 
+                                <div>
+                                    <strong className="text-white">Detailed Architectural Floor Plans</strong><br/>
+                                    View high-resolution, unblurred layout plans for all designs to help inform your planning.
                                 </div>
                             </li>
                         </ul>

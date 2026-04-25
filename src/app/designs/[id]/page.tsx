@@ -181,6 +181,40 @@ export default async function DesignDetailPage({ params, searchParams }: { param
                             <SocialActions designId={design.id} initialLikes={initialLikes} isLiked={isLiked} />
                         </div>
 
+                        {design.floorPlanImages && design.floorPlanImages.length > 0 && (
+                            <div className="mt-8 border-t border-gray-200 dark:border-gray-700 pt-8">
+                                <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Floor Plans</h3>
+                                {(isSubscriber || hasPurchased) ? (
+                                    <ImageGallery
+                                        images={design.floorPlanImages}
+                                        title={`${design.title} Floor Plans`}
+                                        showBlur={false}
+                                    />
+                                ) : (
+                                    <div className="relative">
+                                        <div className="pointer-events-none select-none h-64 overflow-hidden rounded-xl">
+                                             {/* Highly blurred preview of the first floor plan */}
+                                            <ProtectedImage
+                                                src={design.floorPlanImages[0]}
+                                                alt="Floor Plan Preview"
+                                                showBlur={true}
+                                                objectFit="cover"
+                                            />
+                                        </div>
+                                        <div className="absolute inset-0 z-50 flex items-center justify-center rounded-xl bg-black/20">
+                                            <div className="text-center bg-white dark:bg-slate-900 p-6 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-800">
+                                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Subscriber Exclusive</h3>
+                                                <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">Upgrade to Premium to view floor plans.</p>
+                                                <Link href="/subscribe" className="mt-4 inline-block bg-[#00a3ad] dark:bg-[#00f2ff] text-black font-semibold py-2 px-6 rounded transition">
+                                                    Subscribe Now
+                                                </Link>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
                         {/* AI Visualization Removed as per user request */}
                         {/* 
                         {(design.tier === 'FREE' || canDownload) && (

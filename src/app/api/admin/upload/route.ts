@@ -16,7 +16,8 @@ import { DesignTier } from '@prisma/client'
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions)
-  if (!session || (session.user as any).role !== 'ADMIN') {
+  const userRole = (session.user as any).role
+  if (!session || (userRole !== 'ADMIN' && userRole !== 'ARCHITECT')) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -86,6 +87,7 @@ export async function POST(req: NextRequest) {
 
     // ── S3 keys (sent by the client after direct S3 uploads) ──────
     const previewImages   = Array.isArray(body.previewImages)  ? body.previewImages  : []
+    const floorPlanImages = Array.isArray(body.floorPlanImages)? body.floorPlanImages: []
     const rvtUrl          = body.rvtUrl          || null
     const plnUrl          = body.plnUrl          || null
     const skpUrl          = body.skpUrl          || null
@@ -113,7 +115,12 @@ export async function POST(req: NextRequest) {
       rvtUrl, plnUrl, skpUrl, pdfUrl, dwgUrl,
       electricalUrl, mechanicalUrl, structuralUrl,
       previewImages,
+      floorPlanImages,
       ...boolData,
+    } as any
+
+    if (userRole === 'ARCHITECT') {
+      data.authorId = session.user.id
     }
 
     let design

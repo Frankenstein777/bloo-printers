@@ -17,7 +17,7 @@ const DESIGN_FILE_INPUTS = [
   { fileType: 'structural', name: 'structuralFile',  label: 'Structural (ZIP/PDF)',     accept: '.zip,.pdf' },
 ] as const
 
-export default function AdminUploadPage() {
+export default function ArchitectUploadPage() {
   const router = useRouter()
   const { uploadFile, uploadFiles } = useFirebaseUpload()
 
@@ -180,7 +180,7 @@ export default function AdminUploadPage() {
 
       setSuccess(true)
       setUploadStatus('Done!')
-      setTimeout(() => router.push('/admin/designs'), 1200)
+      setTimeout(() => router.push('/architect/dashboard'), 1200)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed')
     } finally {

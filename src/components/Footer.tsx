@@ -28,6 +28,9 @@ export default function Footer() {
           <Link href="/refund" className="hover:text-[#00a3ad] dark:hover:text-[#00f2ff] transition-colors">
             Refund Policy
           </Link>
+          <Link href="/disclaimer" className="hover:text-[#00a3ad] dark:hover:text-[#00f2ff] transition-colors">
+            Legal Disclaimer
+          </Link>
         </div>
 
       </div>
