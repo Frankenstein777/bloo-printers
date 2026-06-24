@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { SignOutButton } from '@/components/auth/SignOutButton'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import DiscountBanner from '@/components/DiscountBanner'
+import ThemeToggle from '@/components/ThemeToggle'
 
 // Deterministic color from email string
 function getAvatarColor(str: string) {
@@ -28,9 +29,9 @@ function UserAvatar({ session }: { session: any }) {
     const badge = sub === 'PREMIUM' ? '⭐' : role === 'ADMIN' ? '🔑' : null
 
     return (
-        <Link href="/dashboard" title={email} className="flex items-center gap-1.5 group">
+        <Link href="/profile" title={email} className="flex items-center gap-1.5 group cursor-none">
             <div
-                className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm font-mono border-2 border-transparent group-hover:border-[#00f2ff] transition-all"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm font-sans border-2 border-transparent group-hover:border-brand-teal transition-all"
                 style={{ backgroundColor: bg }}
             >
                 {initial}
@@ -52,7 +53,7 @@ export default function NavbarClient({ session, discount }: { session: any; disc
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
     return (
-        <div className="fixed w-full z-[100] top-0">
+        <div className="fixed w-full z-[100] top-0 font-sans">
             {/* Full-width discount announcement banner */}
             {discount && (
                 <DiscountBanner
@@ -63,87 +64,104 @@ export default function NavbarClient({ session, discount }: { session: any; disc
                 />
             )}
 
-            <nav className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 transition-colors w-full">
-                <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between h-16">
+            <nav className="bg-brand-navy border-b border-slate-800 transition-colors w-full text-white">
+                <div className="max-w-screen-2xl 2xl:max-w-[95rem] w-full mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex justify-between h-20">
+                        {/* Left Side: Brand Logo and Title */}
                         <div className="flex items-center">
-                            <Link href="/" className="flex-shrink-0 flex items-center gap-2">
-                                <Image
-                                    src="/logo.svg"
-                                    alt="Octoplans"
-                                    width={32}
-                                    height={32}
-                                    className="dark:invert dark:brightness-[3] dark:hue-rotate-[160deg] opacity-80 dark:opacity-100 w-8 h-8"
-                                />
-                                <span className="font-black font-mono text-xl tracking-tighter text-[#00a3ad] dark:text-[#00f2ff] hidden sm:block">
-                                    OCTOPLANS
-                                </span>
-                                <span className="font-black font-mono text-base tracking-tighter text-[#00a3ad] dark:text-[#00f2ff] sm:hidden">
-                                    OOP
-                                </span>
+                            <Link href="/" className="flex-shrink-0 flex items-center gap-3 cursor-none">
+                                <div className="relative w-10 h-10 shrink-0">
+                                    <Image
+                                        src="/logo.svg"
+                                        alt="Octoplans Logo"
+                                        fill
+                                        className="invert brightness-[3] hue-rotate-[160deg] object-contain"
+                                    />
+                                </div>
+                                <div className="flex flex-col justify-center leading-none">
+                                    <span className="font-extrabold text-xl tracking-wider text-white">
+                                        OCTOPLANS
+                                    </span>
+                                    <span className="text-[10px] text-slate-400 font-light mt-0.5 tracking-tight hidden sm:block">
+                                        Precision Architectural Blueprints
+                                    </span>
+                                </div>
                             </Link>
-                            <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                                <Link href="/catalog" className="border-transparent text-gray-500 dark:text-gray-300 hover:text-[#00f2ff] hover:border-[#00f2ff] inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium font-mono uppercase">
-                                    Catalog
+
+                            {/* Desktop Links */}
+                            <div className="hidden lg:flex lg:ml-10 lg:space-x-8">
+                                <Link href="/catalog" className="text-slate-300 hover:text-brand-teal inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors cursor-none">
+                                    Browse Plans
                                 </Link>
-                                <Link href="/#about" className="border-transparent text-gray-500 dark:text-gray-300 hover:text-[#00f2ff] hover:border-[#00f2ff] inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium font-mono uppercase">
-                                    About
+                                <Link href="/#categories" className="text-slate-300 hover:text-brand-teal inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors cursor-none">
+                                    Categories
                                 </Link>
-                                <Link href="/custom-brief" className="border-transparent text-gray-500 dark:text-gray-300 hover:text-[#00f2ff] hover:border-[#00f2ff] inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium font-mono uppercase">
+                                <Link href="/become-architect" className="text-slate-300 hover:text-brand-teal inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors cursor-none">
+                                    Sell Your Plans
+                                </Link>
+                                <Link href="/#about" className="text-slate-300 hover:text-brand-teal inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors cursor-none">
+                                    How It Works
+                                </Link>
+                                <Link href="/custom-brief" className="text-slate-300 hover:text-brand-teal inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors cursor-none">
                                     Custom Brief
                                 </Link>
-                                <Link href="/aquarium" className="border-transparent text-gray-500 dark:text-gray-300 hover:text-[#00f2ff] hover:border-[#00f2ff] inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium font-mono uppercase">
-                                    Aquarium
-                                </Link>
-                                <Link href="/subscribe" className="border-transparent text-[#00f2ff] dark:text-[#00f2ff] hover:text-white hover:border-white inline-flex items-center px-1 pt-1 border-b-2 text-sm font-black font-mono uppercase tracking-widest drop-shadow-[0_0_8px_rgba(0,242,255,0.4)]">
+                                <Link href="/subscribe" className="text-brand-teal hover:text-white inline-flex items-center px-1 pt-1 text-sm font-extrabold tracking-wider transition-colors cursor-none">
                                     Premium
                                 </Link>
-                                <span className="border-transparent text-gray-400 dark:text-gray-600 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium font-mono uppercase cursor-not-allowed" title="Coming Soon">
-                                    AI Studio (Soon)
-                                </span>
-                                {(!session || session?.user?.role !== 'ARCHITECT') && (
-                                    <Link href="/become-architect" className="border-transparent text-[#00a3ad] dark:text-[#00f2ff] hover:text-gray-900 dark:hover:text-white inline-flex items-center px-1 pt-1 border-b-2 text-sm font-bold font-mono uppercase tracking-widest">
-                                        Partner as Architect
-                                    </Link>
-                                )}
-                                {session && (
-                                    <Link href="/dashboard" className="border-transparent text-gray-500 dark:text-gray-300 hover:text-[#00f2ff] hover:border-[#00f2ff] inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium font-mono uppercase">
-                                        Dashboard
-                                    </Link>
-                                )}
-                                {session?.user.role === 'ADMIN' && (
-                                    <Link href="/admin" className="border-transparent text-gray-500 hover:text-[#00f2ff] hover:border-[#00f2ff] inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium font-mono uppercase">
-                                        Admin
-                                    </Link>
-                                )}
                             </div>
                         </div>
 
                         {/* Desktop Right Side */}
-                        <div className="hidden sm:flex items-center space-x-4">
+                        <div className="hidden lg:flex items-center space-x-6">
+                            {/* Theme Toggle */}
+                            <ThemeToggle />
+
+                            {/* Cart Icon */}
+                            <Link href="/checkout/cart" className="relative text-slate-300 hover:text-brand-teal transition-colors cursor-none" title="Cart">
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                                <span className="absolute -top-1.5 -right-1.5 bg-brand-teal text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                                    2
+                                </span>
+                            </Link>
+
                             {session ? (
-                                <div className="flex items-center space-x-3">
+                                <div className="flex items-center space-x-4">
                                     <UserAvatar session={session} />
                                     <SignOutButton />
                                 </div>
                             ) : (
                                 <div className="flex items-center space-x-4">
-                                    <Link href="/login" className="text-gray-500 dark:text-gray-300 hover:text-[#00f2ff] text-sm font-medium font-mono uppercase">
+                                    <Link href="/login" className="text-slate-300 hover:text-brand-teal text-sm font-medium transition-colors cursor-none">
                                         Login
                                     </Link>
-                                    <Link href="/signup" className="bg-[#00a3ad] dark:bg-[#00f2ff] text-black px-4 py-2 text-sm font-bold font-mono hover:bg-[#00f2ff] hover:shadow-[0_0_15px_rgba(0,242,255,0.5)] transition-all uppercase">
-                                        Sign up_
+                                    <Link href="/signup" className="bg-brand-teal hover:bg-brand-teal/80 text-white px-5 py-2.5 rounded-md text-sm font-semibold transition-all shadow-md cursor-none">
+                                        Sign Up
                                     </Link>
                                 </div>
                             )}
                         </div>
 
-                        {/* Mobile: Avatar + Hamburger */}
-                        <div className="flex items-center gap-3 sm:hidden">
+                        {/* Mobile Right Side: ThemeToggle + Cart + Burger */}
+                        <div className="flex items-center space-x-3 lg:hidden">
+                            <ThemeToggle />
+
+                            {/* Cart Icon */}
+                            <Link href="/checkout/cart" className="relative text-slate-300 hover:text-brand-teal transition-colors cursor-none" title="Cart">
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                                <span className="absolute -top-1.5 -right-1.5 bg-brand-teal text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                                    2
+                                </span>
+                            </Link>
+
                             {session && <UserAvatar session={session} />}
+
                             <button
                                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+                                className="inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 focus:outline-none cursor-none"
                             >
                                 <span className="sr-only">Open main menu</span>
                                 {isMobileMenuOpen ? (
@@ -156,59 +174,47 @@ export default function NavbarClient({ session, discount }: { session: any; disc
                     </div>
                 </div>
 
-                {/* Mobile Menu */}
+                {/* Mobile Slide-down Menu */}
                 {isMobileMenuOpen && (
-                    <div className="sm:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 h-screen overflow-y-auto pb-20">
-                        <div className="pt-2 pb-3 space-y-1">
-                            <Link href="/catalog" onClick={() => setIsMobileMenuOpen(false)} className="block pl-3 pr-4 py-4 border-l-4 border-transparent text-lg font-medium text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
-                                Catalog
+                    <div className="lg:hidden bg-brand-navy border-t border-slate-800 shadow-2xl transition-all duration-300">
+                        <div className="pt-2 pb-6 space-y-1 px-4">
+                            <Link href="/catalog" onClick={() => setIsMobileMenuOpen(false)} className="block py-3 text-slate-300 hover:text-brand-teal text-base font-medium transition-colors cursor-none">
+                                Browse Plans
                             </Link>
-                            <Link href="/#about" onClick={() => setIsMobileMenuOpen(false)} className="block pl-3 pr-4 py-4 border-l-4 border-transparent text-lg font-medium text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
-                                About Us
+                            <Link href="/#categories" onClick={() => setIsMobileMenuOpen(false)} className="block py-3 text-slate-300 hover:text-brand-teal text-base font-medium transition-colors cursor-none">
+                                Categories
                             </Link>
-                            <Link href="/custom-brief" onClick={() => setIsMobileMenuOpen(false)} className="block pl-3 pr-4 py-4 border-l-4 border-transparent text-lg font-medium text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
+                            <Link href="/become-architect" onClick={() => setIsMobileMenuOpen(false)} className="block py-3 text-slate-300 hover:text-brand-teal text-base font-medium transition-colors cursor-none">
+                                Sell Your Plans
+                            </Link>
+                            <Link href="/#about" onClick={() => setIsMobileMenuOpen(false)} className="block py-3 text-slate-300 hover:text-brand-teal text-base font-medium transition-colors cursor-none">
+                                How It Works
+                            </Link>
+                            <Link href="/custom-brief" onClick={() => setIsMobileMenuOpen(false)} className="block py-3 text-slate-300 hover:text-brand-teal text-base font-medium transition-colors cursor-none">
                                 Custom Brief
                             </Link>
-                            <Link href="/aquarium" onClick={() => setIsMobileMenuOpen(false)} className="block pl-3 pr-4 py-4 border-l-4 border-transparent text-lg font-medium text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
-                                Aquarium
-                            </Link>
-                            <Link href="/subscribe" onClick={() => setIsMobileMenuOpen(false)} className="block pl-3 pr-4 py-4 border-l-4 border-transparent text-lg font-black text-[#00f2ff] hover:bg-[#00f2ff]/10 hover:border-[#00f2ff] dark:text-[#00f2ff] uppercase tracking-widest bg-black/5">
+                            <Link href="/subscribe" onClick={() => setIsMobileMenuOpen(false)} className="block py-3 text-brand-teal text-base font-bold transition-colors cursor-none">
                                 Premium Subscription
                             </Link>
-                            <div className="block pl-3 pr-4 py-4 border-l-4 border-transparent text-lg font-medium text-gray-400 dark:text-gray-600 cursor-not-allowed">
-                                AI Studio (Coming Soon)
-                            </div>
-                            {(!session || session?.user?.role !== 'ARCHITECT') && (
-                                <Link href="/become-architect" onClick={() => setIsMobileMenuOpen(false)} className="block pl-3 pr-4 py-4 border-l-4 border-transparent text-lg font-bold text-[#00a3ad] dark:text-[#00f2ff] uppercase tracking-widest">
-                                    Partner as Architect
-                                </Link>
-                            )}
-                            {session && (
-                                <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="block pl-3 pr-4 py-4 border-l-4 border-transparent text-lg font-medium text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
-                                    Dashboard
-                                </Link>
-                            )}
-                            {session?.user.role === 'ADMIN' && (
-                                <Link href="/admin" onClick={() => setIsMobileMenuOpen(false)} className="block pl-3 pr-4 py-4 border-l-4 border-transparent text-lg font-medium text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
-                                    Admin Panel
-                                </Link>
+
+                            {session ? (
+                                <div className="pt-4 border-t border-slate-800 flex flex-col gap-3">
+                                    <Link href="/profile" onClick={() => setIsMobileMenuOpen(false)} className="text-slate-300 hover:text-brand-teal text-base font-medium cursor-none">
+                                        My Profile
+                                    </Link>
+                                    <SignOutButton />
+                                </div>
+                            ) : (
+                                <div className="pt-4 border-t border-slate-800 space-y-3">
+                                    <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="block text-center w-full py-2.5 border border-slate-700 text-slate-300 hover:text-white rounded-md text-sm font-medium transition-colors cursor-none">
+                                        Login
+                                    </Link>
+                                    <Link href="/signup" onClick={() => setIsMobileMenuOpen(false)} className="block text-center w-full py-2.5 bg-brand-teal text-white hover:bg-brand-teal/80 rounded-md text-sm font-semibold transition-all cursor-none">
+                                        Sign Up
+                                    </Link>
+                                </div>
                             )}
                         </div>
-                        {session && (
-                            <div className="pt-4 pb-4 border-t border-gray-200 dark:border-gray-800 px-4">
-                                <SignOutButton />
-                            </div>
-                        )}
-                        {!session && (
-                            <div className="mt-3 space-y-3 px-4">
-                                <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="block text-center w-full px-4 py-3 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
-                                    Login
-                                </Link>
-                                <Link href="/signup" onClick={() => setIsMobileMenuOpen(false)} className="block text-center w-full px-4 py-3 border border-blue-200 shadow-sm text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-gray-50">
-                                    Sign up
-                                </Link>
-                            </div>
-                        )}
                     </div>
                 )}
             </nav>

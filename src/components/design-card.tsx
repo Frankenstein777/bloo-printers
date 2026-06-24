@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
+import DesignImage from '@/components/DesignImage'
 import Link from 'next/link'
 import { SocialActions } from './social-actions'
 import { getCommentsAction, postCommentAction } from '@/app/actions'
@@ -71,33 +71,30 @@ export default function DesignCard({ design, initialLikes, isLiked, isSaved, use
     }
 
     return (
-        <div className="group relative bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-[#00f2ff] hover:shadow-[0_0_15px_rgba(0,242,255,0.3)] transition-all duration-300 overflow-hidden flex flex-col">
+        <div className="group relative bg-card border border-slate-200 dark:border-slate-800 hover:border-brand-teal hover:shadow-[0_0_15px_rgba(14,154,167,0.15)] transition-all duration-300 overflow-hidden flex flex-col rounded-xl">
             <div
-                className="w-full min-h-60 bg-gray-200 relative aspect-w-1 aspect-h-1 group-hover:opacity-90 transition-opacity"
+                className="w-full min-h-60 bg-slate-100 dark:bg-slate-850 relative aspect-w-1 aspect-h-1 group-hover:opacity-90 transition-opacity"
                 onContextMenu={(e) => e.preventDefault()}
             >
                 <WatermarkOverlay />
-                <Image
+                <DesignImage
                     src={design.previewImages[0]}
                     alt={design.title}
                     fill
-                    unoptimized
-                    className="object-cover object-center w-full h-full pointer-events-none select-none"
-                    draggable={false}
                 />
                 {/* Tier badge */}
-                <div className="absolute top-2 right-2 z-30">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 text-xs font-medium uppercase tracking-wider ${design.tier === 'FREE' ? 'bg-green-100 text-green-800' :
-                        design.tier === 'PREMIUM' ? 'bg-purple-100 text-purple-800' :
-                            'bg-yellow-100 text-yellow-800'
+                <div className="absolute top-3 right-3 z-30">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 text-[10px] font-bold rounded uppercase tracking-wider ${design.tier === 'FREE' ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300' :
+                        design.tier === 'PREMIUM' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300' :
+                            'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300'
                         }`}>
                         {design.tier}
                     </span>
                 </div>
                 {/* Discount badge */}
                 {hasDiscount && (
-                    <div className="absolute top-2 left-2 z-30">
-                        <span className="inline-flex items-center gap-1 bg-[#00f2ff] text-black text-xs font-black px-2 py-0.5 rounded shadow-[0_0_8px_rgba(0,242,255,0.6)] uppercase tracking-widest">
+                    <div className="absolute top-3 left-3 z-30">
+                        <span className="inline-flex items-center gap-1 bg-brand-teal text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-[0_0_8px_rgba(14,154,167,0.4)] uppercase tracking-wider">
                             🏷️ {discountPct}% OFF
                         </span>
                     </div>

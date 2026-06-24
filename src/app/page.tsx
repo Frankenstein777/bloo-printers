@@ -1,204 +1,410 @@
 import Link from 'next/link'
-import { FeaturedDesign } from '@/components/FeaturedDesign'
-import { TestimonialList } from '@/components/TestimonialList'
+import Image from 'next/image'
+import { prisma } from '@/lib/prisma'
+import { getSession } from '@/lib/auth'
+import { getActiveDiscount } from '@/app/actions'
+import { getSeededDiscountPct } from '@/lib/discount'
+import DesignImage from '@/components/DesignImage'
+import HeroClient from '@/components/HeroClient'
 
 const WA_NUMBER = '2347068095681'
 const WA_MSG = encodeURIComponent("Hello! I'm reaching out from the Octoplans website and I'd like to inquire about your architectural services.")
 
-export default function Home() {
+async function getFeaturedDesigns() {
+  // Fetch up to 4 featured designs
+  const designs = await prisma.design.findMany({
+    where: {
+      OR: [
+        { isFeatured: true },
+        { tier: 'PREMIUM' }
+      ]
+    },
+    take: 4,
+    orderBy: { createdAt: 'desc' }
+  })
+  
+  // Fallback to any designs if none matching
+  if (designs.length === 0) {
+    return await prisma.design.findMany({
+      take: 4,
+      orderBy: { createdAt: 'desc' }
+    })
+  }
+  return designs
+}
+
+export default async function Home() {
+  const session = await getSession()
+  const featuredPlans = await getFeaturedDesigns()
+  const activeDiscount = await getActiveDiscount()
+
   return (
-    <div className="relative min-h-screen text-gray-900 dark:text-white selection:bg-[#00f2ff] selection:text-black">
+    <div className="relative min-h-screen bg-background text-foreground font-sans">
+      
+      {/* 1. HERO SECTION */}
+      <HeroClient />
 
-      {/* HERO SECTION */}
-      <section className="relative z-10 flex flex-col items-center justify-center min-h-screen text-center px-4">
-        <div className="space-y-6">
-          <h1 className="text-6xl md:text-8xl font-black font-mono tracking-tighter text-[#00a3ad] dark:text-[#00f2ff] drop-shadow-[0_0_15px_rgba(0,242,255,0.4)]">
-            OCTOPLANS
-          </h1>
-          <p className="max-w-2xl mx-auto text-xl md:text-2xl font-mono text-gray-700 dark:text-gray-300">
-            Precision Architectural Blueprints
-            <br />
-            <span className="text-sm opacity-75">Est. 2026</span>
-          </p>
+      {/* 2. TRUST/FEATURES BANNER */}
+      <section className="bg-brand-grey dark:bg-[#111a36]/30 border-y border-slate-200 dark:border-slate-800 py-3.5 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-screen-2xl 2xl:max-w-[95rem] mx-auto flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-xs text-slate-500 dark:text-slate-400 font-medium">
+          <div className="flex items-center gap-1.5">
+            <svg className="w-4 h-4 text-brand-teal" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            <span>Instant Download</span>
+          </div>
+          <span className="hidden sm:inline text-slate-350 dark:text-slate-800">|</span>
+          <div className="flex items-center gap-1.5">
+            <svg className="w-4 h-4 text-brand-teal" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            <span>Verified Architects</span>
+          </div>
+          <span className="hidden sm:inline text-slate-350 dark:text-slate-800">|</span>
+          <div className="flex items-center gap-1.5">
+            <svg className="w-4 h-4 text-brand-teal" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+            <span>Secure Payments</span>
+          </div>
+        </div>
+      </section>
 
-          <div className="pt-8">
-            <Link href="/catalog">
-              <button className="px-10 py-4 text-xl font-bold font-mono tracking-widest text-black bg-[#00f2ff] hover:bg-white hover:shadow-[0_0_30px_rgba(0,242,255,0.8)] transition-all duration-300 border-2 border-transparent hover:border-[#00f2ff] uppercase">
-                Browse Catalog &gt;&gt;
+      {/* 3. DARK SEARCH & FILTER PANEL */}
+      <section className="px-4 sm:px-6 lg:px-8 -mt-6 max-w-screen-2xl 2xl:max-w-[95rem] mx-auto relative z-20">
+        <div className="bg-brand-navy text-white p-6 sm:p-8 rounded-2xl shadow-xl border border-slate-800">
+          <form action="/catalog" method="GET" className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+            
+            {/* Search Input (5 cols) */}
+            <div className="lg:col-span-5 relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <input
+                name="q"
+                type="text"
+                placeholder="Search for plans, styles or keywords..."
+                className="w-full bg-slate-900 border border-slate-800 rounded-lg pl-10 pr-4 py-3 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brand-teal"
+              />
+            </div>
+
+            {/* Category Filter (2 cols) */}
+            <div className="lg:col-span-2">
+              <select
+                name="category"
+                className="w-full bg-slate-900 border border-slate-800 rounded-lg px-4 py-3 text-sm text-slate-300 focus:outline-none focus:border-brand-teal"
+              >
+                <option value="">All Categories</option>
+                <option value="Bungalow">Bungalows</option>
+                <option value="Duplex">Duplexes</option>
+                <option value="Apartment">Apartments</option>
+                <option value="Villa">Villas</option>
+                <option value="Commercial">Commercial</option>
+              </select>
+            </div>
+
+            {/* Bedrooms Filter (2 cols) */}
+            <div className="lg:col-span-2">
+              <select
+                name="minBedrooms"
+                className="w-full bg-slate-900 border border-slate-800 rounded-lg px-4 py-3 text-sm text-slate-300 focus:outline-none focus:border-brand-teal"
+              >
+                <option value="0">Bedrooms</option>
+                <option value="3">3 Bedrooms</option>
+                <option value="4">4 Bedrooms</option>
+                <option value="5">5+ Bedrooms</option>
+              </select>
+            </div>
+
+            {/* Price Range Filter (2 cols) */}
+            <div className="lg:col-span-2">
+              <select
+                name="priceRange"
+                className="w-full bg-slate-900 border border-slate-800 rounded-lg px-4 py-3 text-sm text-slate-300 focus:outline-none focus:border-brand-teal"
+              >
+                <option value="">Price Range</option>
+                <option value="free">Free Plans</option>
+                <option value="under50k">Under ₦50,000</option>
+                <option value="50k-100k">₦50,000 - ₦100,000</option>
+                <option value="over100k">Over ₦100,000</option>
+              </select>
+            </div>
+
+            {/* Search Button (1 col) */}
+            <div className="lg:col-span-1">
+              <button
+                type="submit"
+                className="w-full bg-brand-teal hover:bg-brand-teal/90 text-white font-semibold py-3 rounded-lg flex items-center justify-center gap-1 transition-all cursor-none"
+              >
+                <span className="lg:hidden">Search</span>
+                <svg className="w-5 h-5 hidden lg:block" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
               </button>
-            </Link>
-          </div>
-        </div>
-
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-10 animate-bounce">
-          <span className="font-mono text-xs opacity-50 uppercase">Scroll Down</span>
-          <div className="w-[1px] h-12 bg-[#00f2ff]/50 mx-auto mt-2"></div>
-        </div>
-      </section>
-
-      {/* FEATURED DESIGN SECTION */}
-      <FeaturedDesign />
-
-      {/* ABOUT SECTION */}
-      <section id="about" className="relative z-10 py-24 px-6 md:px-20 bg-white/50 dark:bg-black/40 backdrop-blur-sm border-t border-[#00f2ff]/20">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-4xl font-bold font-mono text-[#00a3ad] dark:text-[#00f2ff] mb-6 uppercase">
-                Who We Are
-              </h2>
-              <div className="space-y-4 text-lg font-light leading-relaxed">
-                <p>
-                  Octoplans is the vanguard of digital architectural distribution.
-                  We don&apos;t just sell plans; we provide the foundation for your next project.
-                </p>
-                <p>
-                  Our database hosts verified, high-precision blueprints ready for immediate deployment.
-                  From modern apartments to commercial complexes, if you can dream it, we have the schematics.
-                </p>
-              </div>
-              <div className="mt-8 grid grid-cols-2 gap-4 font-mono text-sm">
-                <div className="p-4 border border-[#00f2ff]/30 bg-[#00f2ff]/5">
-                  <span className="block text-2xl font-bold text-[#00a3ad] dark:text-[#00f2ff]">100+</span>
-                  <span className="opacity-70 text-gray-600 dark:text-gray-400">Blueprints</span>
-                </div>
-                <div className="p-4 border border-[#00f2ff]/30 bg-[#00f2ff]/5">
-                  <span className="block text-2xl font-bold text-[#00a3ad] dark:text-[#00f2ff]">Instant</span>
-                  <span className="opacity-70 text-gray-600 dark:text-gray-400">Access</span>
-                </div>
-              </div>
             </div>
-            <div className="hidden md:block h-full min-h-[400px] border border-[#00f2ff]/20 bg-[#00f2ff]/5 relative overflow-hidden">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-48 h-48 border-4 border-[#00f2ff] rotate-45 animate-pulse"></div>
-                <div className="w-32 h-32 border-2 border-[#00a3ad] absolute -rotate-12"></div>
-              </div>
-            </div>
+
+          </form>
+
+          {/* Quick Filters row */}
+          <div className="mt-4 flex flex-wrap gap-2 items-center text-xs text-slate-400">
+            <span className="font-semibold text-slate-300 mr-2">Quick Tags:</span>
+            {[
+              { label: '3 Bedroom', link: '/catalog?minBedrooms=3' },
+              { label: 'Duplex', link: '/catalog?category=Duplex' },
+              { label: 'Bungalow', link: '/catalog?category=Bungalow' },
+              { label: 'Modern', link: '/catalog?q=Modern' },
+              { label: 'Contemporary', link: '/catalog?q=Contemporary' },
+              { label: 'Tiny House', link: '/catalog?q=Tiny' },
+              { label: 'Luxury', link: '/catalog?q=Luxury' },
+              { label: 'Commercial', link: '/catalog?category=Commercial' },
+            ].map(tag => (
+              <Link
+                key={tag.label}
+                href={tag.link}
+                className="bg-slate-900 border border-slate-800 text-slate-300 px-3 py-1.5 rounded-full hover:border-brand-teal hover:text-white transition-colors cursor-none"
+              >
+                {tag.label}
+              </Link>
+            ))}
           </div>
+
         </div>
       </section>
 
-      {/* PARTNER AS ARCHITECT SECTION */}
-      <section id="partner" className="relative z-10 py-24 px-6 md:px-20 bg-slate-900/50 backdrop-blur-sm border-t border-[#00f2ff]/20">
-        <div className="max-w-4xl mx-auto text-center space-y-8">
-          <h2 className="text-4xl font-bold font-mono text-[#00a3ad] dark:text-[#00f2ff] uppercase">
-            Partner With Octoplans
-          </h2>
-          <p className="font-mono text-lg text-gray-700 dark:text-gray-300">
-            Are you a certified architect? Monetize your blueprints globally. Partner with Octoplans and sell your layouts on our platform seamlessly. Join the vanguard today!
-          </p>
-          <div className="bg-gradient-to-r from-[#00f2ff]/10 to-transparent p-6 border border-[#00f2ff]/30 rounded-xl inline-block text-left shadow-lg">
-            <h3 className="font-bold text-xl mb-4 text-[#00f2ff]">Benefits of partnership:</h3>
-            <ul className="list-inside list-disc space-y-2 mb-6 font-mono text-sm opacity-90 text-white">
-              <li>Keep 85% of every single sale from your catalog.</li>
-              <li>Global audience for your floor plans and models.</li>
-              <li>Robust AI and layout tools at your disposal.</li>
-            </ul>
-            <p className="text-xs bg-indigo-900/50 text-indigo-200 border border-indigo-700 px-4 py-2 uppercase tracking-widest font-black inline-block rounded">
-              🎉 Registration fee is WAIVED until July 1st, 2026!
-            </p>
+      {/* 4. BROWSE BY CATEGORY SECTION */}
+      <section id="categories" className="py-20 px-4 sm:px-6 lg:px-8 max-w-screen-2xl 2xl:max-w-[95rem] mx-auto">
+        <div className="flex justify-between items-end mb-10">
+          <div>
+            <h2 className="text-3xl font-extrabold text-brand-charcoal dark:text-white tracking-tight">
+              Browse by Category
+            </h2>
+            <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">Explore our curated collections of standard building designs</p>
           </div>
-          <div className="pt-4">
-            <Link href="/become-architect" className="bg-[#00f2ff] hover:bg-white text-black drop-shadow-[0_0_15px_rgba(0,242,255,0.4)] px-8 py-3 rounded uppercase tracking-widest font-bold transition-all">
-              Apply to Partner 
-            </Link>
-          </div>
+          <Link href="/catalog" className="text-brand-teal hover:text-brand-teal/80 font-semibold text-sm flex items-center gap-1 cursor-none">
+            View all categories
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
         </div>
-      </section>
 
-      {/* TESTIMONIALS SECTION */}
-      <section id="testimonials" className="relative z-10 py-24 px-6 md:px-20 border-t border-[#00f2ff]/20">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-bold font-mono text-center text-[#00a3ad] dark:text-[#00f2ff] mb-16 uppercase">
-            Testimonials
-          </h2>
-
-          <TestimonialList />
-        </div>
-      </section>
-
-      {/* CONTACT SECTION */}
-      <section id="contact" className="relative z-10 py-24 px-6 md:px-20 bg-white/50 dark:bg-black/40 backdrop-blur-sm border-t border-[#00f2ff]/20">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-4xl font-bold font-mono text-[#00a3ad] dark:text-[#00f2ff] mb-4 uppercase">
-            Contact Us
-          </h2>
-          <p className="font-mono text-gray-500 dark:text-gray-400 mb-10">
-            Reach out on WhatsApp or follow us on social media.
-          </p>
-
-          <div className="p-8 border-2 border-[#00f2ff] bg-black/50 backdrop-blur-xl relative space-y-4">
-            {/* Corner accents */}
-            <div className="absolute top-0 left-0 w-2 h-2 bg-[#00f2ff]"></div>
-            <div className="absolute top-0 right-0 w-2 h-2 bg-[#00f2ff]"></div>
-            <div className="absolute bottom-0 left-0 w-2 h-2 bg-[#00f2ff]"></div>
-            <div className="absolute bottom-0 right-0 w-2 h-2 bg-[#00f2ff]"></div>
-
-            {/* WhatsApp */}
-            <a
-              href={`https://wa.me/${WA_NUMBER}?text=${WA_MSG}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group flex items-center justify-center gap-3 w-full py-4 bg-green-500/10 border-2 border-green-500 text-green-400 font-mono hover:bg-green-500 hover:text-black transition-all duration-300 font-bold tracking-[0.2em] uppercase shadow-[0_0_15px_rgba(34,197,94,0.2)] hover:shadow-[0_0_25px_rgba(34,197,94,0.5)]"
+        {/* Category Cards Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
+          {[
+            { name: 'Bungalows', count: '245+ Plans', img: '/cat-bungalow.png', badgeBg: 'bg-green-500', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6', link: '/catalog?category=Bungalow' },
+            { name: 'Duplexes', count: '180+ Plans', img: '/cat-duplex.png', badgeBg: 'bg-cyan-500', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4', link: '/catalog?category=Duplex' },
+            { name: 'Apartments', count: '120+ Plans', img: '/cat-apartment.png', badgeBg: 'bg-teal-600', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1', link: '/catalog?category=Apartment' },
+            { name: 'Villas', count: '95+ Plans', img: '/cat-villa.png', badgeBg: 'bg-orange-500', icon: 'M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728m-9.9-2.829a5 5 0 010-7.07m7.07 0a5 5 0 010 7.07M13 12a1 1 0 11-2 0 1 1 0 012 0z', link: '/catalog?q=Villa' },
+            { name: 'Commercial', count: '60+ Plans', img: '/cat-commercial.png', badgeBg: 'bg-blue-600', icon: 'M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', link: '/catalog?category=Commercial' },
+          ].map(cat => (
+            <Link
+              key={cat.name}
+              href={cat.link}
+              className="group bg-card rounded-xl overflow-hidden shadow border border-slate-200 dark:border-slate-800 flex flex-col hover:border-brand-teal transition-all relative cursor-none"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" /></svg>
-              Chat on WhatsApp
-            </a>
+              {/* Photo Area */}
+              <div className="relative aspect-square w-full bg-slate-100 dark:bg-slate-850">
+                <Image
+                  src={cat.img}
+                  alt={cat.name}
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                {/* Circular Overlapping Badge */}
+                <div className={`absolute -bottom-5 left-4 w-10 h-10 rounded-full flex items-center justify-center text-white ${cat.badgeBg} border-2 border-white dark:border-slate-900 shadow-md z-10`}>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d={cat.icon} />
+                  </svg>
+                </div>
+              </div>
 
-            <div className="flex items-center gap-3 text-[10px] font-mono opacity-40 uppercase tracking-widest text-[#00f2ff]">
-              <div className="h-[1px] flex-grow bg-[#00f2ff]/30" />
-              <span>or follow us</span>
-              <div className="h-[1px] flex-grow bg-[#00f2ff]/30" />
+              {/* Title Area */}
+              <div className="p-4 pt-6 flex-1 flex flex-col justify-end">
+                <h3 className="font-bold text-brand-charcoal dark:text-white text-base leading-none">
+                  {cat.name}
+                </h3>
+                <p className="text-slate-400 text-xs font-mono mt-1">{cat.count}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* 5. FEATURED PLANS SECTION */}
+      <section className="py-20 bg-brand-grey dark:bg-[#111a36]/30 border-y border-slate-200 dark:border-slate-850 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-screen-2xl 2xl:max-w-[95rem] mx-auto">
+          
+          <div className="flex justify-between items-end mb-10">
+            <div>
+              <h2 className="text-3xl font-extrabold text-brand-charcoal dark:text-white tracking-tight">
+                Featured Plans
+              </h2>
+              <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">Our top verified models ready for immediate deployment</p>
+            </div>
+            <Link href="/catalog" className="text-brand-teal hover:text-brand-teal/80 font-semibold text-sm flex items-center gap-1 cursor-none">
+              View all plans
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
+
+          {/* Grid Layout of Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {featuredPlans.map(design => {
+              const basePrice = Number(design.priceRender || design.price || 0)
+              const discountPct = activeDiscount
+                ? getSeededDiscountPct(activeDiscount.id, design.id, activeDiscount.percentageMin, activeDiscount.percentageMax)
+                : 0
+              const discountedPrice = discountPct > 0 ? Math.round(basePrice * (1 - discountPct / 100)) : basePrice
+
+              return (
+                <div
+                  key={design.id}
+                  className="group bg-card rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow hover:border-brand-teal transition-all flex flex-col relative"
+                >
+                  {/* Card Thumbnail */}
+                  <div className="relative aspect-video w-full bg-slate-100 dark:bg-slate-800">
+                    <DesignImage
+                      src={design.previewImages?.[0]}
+                      alt={design.title}
+                      fill
+                    />
+                    {/* Favorite Heart (absolute top right) */}
+                    <button className="absolute top-3 right-3 bg-white dark:bg-slate-800 text-slate-400 hover:text-red-500 p-2 rounded-full shadow-md z-10 transition-colors cursor-none">
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                    {/* Tier Tag (absolute top left) */}
+                    <div className="absolute top-3 left-3 z-10">
+                      <span className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded shadow-sm tracking-wider ${
+                        design.tier === 'FREE' ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300' :
+                        design.tier === 'PREMIUM' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300' :
+                        'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300'
+                      }`}>
+                        {design.tier}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Card Info */}
+                  <div className="p-4 flex-1 flex flex-col justify-between">
+                    <div>
+                      <Link href={`/designs/${design.id}`} className="cursor-none">
+                        <h3 className="font-bold text-brand-charcoal dark:text-white text-base hover:text-brand-teal transition-colors line-clamp-1">
+                          {design.title}
+                        </h3>
+                      </Link>
+                      <p className="text-slate-500 dark:text-slate-400 text-xs font-mono mt-1">
+                        {design.bedrooms} Beds • {design.floors} Floors • {design.plotSize}
+                      </p>
+                    </div>
+
+                    {/* Price and Rating row */}
+                    <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between">
+                      <div>
+                        {discountPct > 0 ? (
+                          <div className="flex flex-col">
+                            <span className="text-[10px] line-through text-slate-400">₦{basePrice.toLocaleString()}</span>
+                            <span className="font-extrabold text-brand-teal text-base leading-none">₦{discountedPrice.toLocaleString()}</span>
+                          </div>
+                        ) : (
+                          <span className="font-extrabold text-brand-charcoal dark:text-white text-base">
+                            {design.tier === 'FREE' ? 'FREE' : `₦${basePrice.toLocaleString()}`}
+                          </span>
+                        )}
+                      </div>
+                      
+                      {/* Rating Mock */}
+                      <div className="flex items-center gap-1 text-xs">
+                        <svg className="w-3.5 h-3.5 text-yellow-500 fill-current" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <span className="text-yellow-600 dark:text-yellow-500 font-bold">4.8</span>
+                        <span className="text-slate-400 text-[10px]">(18)</span>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+        </div>
+      </section>
+
+      {/* 6. WHY CHOOSE OCTOPLANS SECTION */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-screen-2xl 2xl:max-w-[95rem] mx-auto font-sans">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          
+          {/* Left Column: Core benefits */}
+          <div className="lg:col-span-7 space-y-8">
+            <div>
+              <h2 className="text-3xl font-extrabold text-brand-charcoal dark:text-white tracking-tight">
+                Why Choose Octoplans?
+              </h2>
+              <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">We provide high precision blueprints that streamline your construction project</p>
             </div>
 
-            {/* Social Media row */}
-            <div className="flex flex-wrap justify-center gap-4">
-              {/* Facebook */}
-              <a
-                href="https://facebook.com/octoplans"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-5 py-3 border border-blue-600/50 text-blue-500 hover:bg-blue-600/10 hover:border-blue-500 transition-all font-mono text-sm uppercase tracking-wider"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.04c-5.5 0-9.96 4.46-9.96 9.96 0 4.96 3.63 9.08 8.4 9.83v-6.95h-2.53v-2.88h2.53v-2.19c0-2.5 1.49-3.89 3.77-3.89 1.1 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.86h2.78l-.44 2.88h-2.34v6.95c4.78-.75 8.4-4.87 8.4-9.83 0-5.5-4.46-9.96-9.96-9.96z" /></svg>
-                Facebook
-              </a>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="flex gap-3">
+                <svg className="w-5 h-5 text-brand-teal shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                  <h4 className="font-bold text-brand-charcoal dark:text-white text-sm">High Quality Plans</h4>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs mt-1">Professionally structured layout blueprints designed by experienced architects.</p>
+                </div>
+              </div>
 
-              {/* TikTok */}
-              <a
-                href="https://tiktok.com/@octoplans"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-5 py-3 border border-gray-400/50 text-gray-200 hover:bg-gray-400/10 hover:border-gray-200 transition-all font-mono text-sm uppercase tracking-wider"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.53.02C13.84 0 15.14.01 16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" /></svg>
-                TikTok
-              </a>
+              <div className="flex gap-3">
+                <svg className="w-5 h-5 text-brand-teal shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                  <h4 className="font-bold text-brand-charcoal dark:text-white text-sm">Instant Downloads</h4>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs mt-1">Get immediate download keys to your purchased blueprints right in your account dashboard.</p>
+                </div>
+              </div>
 
-              {/* Instagram */}
-              <a
-                href="https://instagram.com/octoplans"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-5 py-3 border border-pink-500/50 text-pink-400 hover:bg-pink-500/10 hover:border-pink-400 transition-all font-mono text-sm uppercase tracking-wider"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" /></svg>
-                Instagram
-              </a>
+              <div className="flex gap-3">
+                <svg className="w-5 h-5 text-brand-teal shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                  <h4 className="font-bold text-brand-charcoal dark:text-white text-sm">Customization Support</h4>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs mt-1">Direct support on WhatsApp to customize layouts to fit your specific plot sizing.</p>
+                </div>
+              </div>
 
-              {/* X / Twitter */}
-              <a
-                href="https://x.com/octoplans"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-5 py-3 border border-gray-500/50 text-gray-300 hover:bg-gray-500/10 hover:border-gray-300 transition-all font-mono text-sm uppercase tracking-wider"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.259 5.631L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
-                X (Twitter)
-              </a>
+              <div className="flex gap-3">
+                <svg className="w-5 h-5 text-brand-teal shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                  <h4 className="font-bold text-brand-charcoal dark:text-white text-sm">Secure & Reliable</h4>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs mt-1">Secure payment processing with 100% money-back guarantee policy protection.</p>
+                </div>
+              </div>
             </div>
           </div>
+
+          {/* Right Column: Statistics */}
+          <div className="lg:col-span-5 bg-brand-grey dark:bg-[#111a36]/50 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 flex flex-col justify-center divide-y divide-slate-200 dark:divide-slate-800">
+            <div className="pb-6">
+              <span className="text-5xl font-black text-brand-teal block">10,000+</span>
+              <span className="text-slate-600 dark:text-slate-400 text-sm font-medium mt-1 block">Happy Customers Globally</span>
+            </div>
+            <div className="pt-6">
+              <span className="text-5xl font-black text-brand-teal block">2,500+</span>
+              <span className="text-slate-600 dark:text-slate-400 text-sm font-medium mt-1 block">Blueprints Sold Online</span>
+            </div>
+          </div>
+
         </div>
       </section>
 

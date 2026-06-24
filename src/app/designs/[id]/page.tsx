@@ -167,7 +167,7 @@ export default async function DesignDetailPage({ params, searchParams }: { param
 
     return (
         <div className="min-h-screen bg-transparent py-12 transition-colors">
-            <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-screen-2xl 2xl:max-w-[95rem] w-full mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="lg:grid lg:grid-cols-2 lg:gap-x-8 lg:items-start">
                     {/* Image Gallery */}
                     <div className="flex flex-col">
@@ -205,7 +205,7 @@ export default async function DesignDetailPage({ params, searchParams }: { param
                                             <div className="text-center bg-white dark:bg-slate-900 p-6 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-800">
                                                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">Subscriber Exclusive</h3>
                                                 <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">Upgrade to Premium to view floor plans.</p>
-                                                <Link href="/subscribe" className="mt-4 inline-block bg-[#00a3ad] dark:bg-[#00f2ff] text-black font-semibold py-2 px-6 rounded transition">
+                                                <Link href="/subscribe" className="mt-4 inline-block bg-brand-teal text-white hover:bg-brand-teal/90 font-semibold py-2.5 px-6 rounded-md transition cursor-none">
                                                     Subscribe Now
                                                 </Link>
                                             </div>
@@ -242,9 +242,9 @@ export default async function DesignDetailPage({ params, searchParams }: { param
                         <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">{design.title}</h1>
 
                         {hasDiscount && (
-                            <div className="mt-3 inline-flex items-center gap-2 bg-[#00f2ff]/10 border border-[#00f2ff]/40 rounded-lg px-3 py-1.5">
-                                <span className="text-[#00f2ff] font-black text-sm font-mono">🏷️ {discountPct}% OFF</span>
-                                <span className="text-white/50 text-xs font-mono">limited offer</span>
+                            <div className="mt-3 inline-flex items-center gap-2 bg-brand-teal/10 border border-brand-teal/30 rounded-lg px-3 py-1.5">
+                                <span className="text-brand-teal font-black text-sm">🏷️ {discountPct}% OFF</span>
+                                <span className="text-slate-400 text-xs">limited offer</span>
                             </div>
                         )}
 
@@ -333,7 +333,7 @@ export default async function DesignDetailPage({ params, searchParams }: { param
                                                 <span className="flex-shrink-0 mx-4 text-gray-400 text-xs uppercase">Or</span>
                                                 <div className="flex-grow border-t border-gray-400"></div>
                                             </div>
-                                            <Link href={`/checkout/${design.id}`} className="w-full bg-[#00a3ad] dark:bg-[#00f2ff] text-black font-bold py-3 px-8 rounded-md flex items-center justify-center hover:shadow-[0_0_20px_rgba(0,242,255,0.5)] transition-all uppercase tracking-widest">
+                                            <Link href={`/checkout/${design.id}`} className="w-full bg-brand-teal hover:bg-brand-teal/90 text-white font-bold py-3 px-8 rounded-md flex items-center justify-center hover:shadow-[0_0_20px_rgba(14,154,167,0.3)] transition-all uppercase tracking-widest cursor-none">
                                                 Buy One-Off
                                             </Link>
                                             <p className="text-center text-xs text-gray-500">Buy just this design</p>
@@ -342,7 +342,7 @@ export default async function DesignDetailPage({ params, searchParams }: { param
                                     {design.tier === 'EXCLUSIVE' && (
                                         <div className="space-y-2">
                                             <p className="text-xs text-gray-500 text-center uppercase">Secure Access</p>
-                                            <Link href={`/checkout/${design.id}`} className="w-full bg-[#00a3ad] dark:bg-[#00f2ff] text-black font-bold py-3 px-8 rounded-md flex items-center justify-center hover:shadow-[0_0_20px_rgba(0,242,255,0.5)] transition-all uppercase tracking-widest">
+                                            <Link href={`/checkout/${design.id}`} className="w-full bg-brand-teal hover:bg-brand-teal/90 text-white font-bold py-3 px-8 rounded-md flex items-center justify-center hover:shadow-[0_0_20px_rgba(14,154,167,0.3)] transition-all uppercase tracking-widest cursor-none">
                                                 Purchase Access
                                             </Link>
                                         </div>
@@ -362,7 +362,7 @@ export default async function DesignDetailPage({ params, searchParams }: { param
                                     href={`https://wa.me/2347068095681?text=${encodeURIComponent(`Hello, I wish to request some alterations to ${design.title} found on Octoplans`)}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="w-full bg-[#00a3ad] dark:bg-[#00f2ff] text-black font-bold py-3 px-8 rounded-md flex items-center justify-center hover:shadow-[0_0_20px_rgba(0,242,255,0.5)] transition-all uppercase tracking-widest gap-2"
+                                    className="w-full bg-brand-navy hover:bg-slate-900 border border-slate-700 text-white font-bold py-3 px-8 rounded-md flex items-center justify-center hover:shadow-[0_0_20px_rgba(11,19,43,0.3)] transition-all uppercase tracking-widest gap-2 cursor-none"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" /></svg>
                                     Request Alterations / Custom Changes

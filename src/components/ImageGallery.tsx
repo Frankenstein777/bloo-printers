@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
+import DesignImage from './DesignImage'
 import { ProtectedImage } from './ProtectedImage'
 import { WatermarkOverlay } from './WatermarkOverlay'
 import { X, Maximize2 } from 'lucide-react'
@@ -52,7 +52,7 @@ export function ImageGallery({ images, title, showBlur = false }: ImageGalleryPr
                             `}
                         >
                             <WatermarkOverlay />
-                            <Image
+                            <DesignImage
                                 src={img}
                                 alt={`${title} view ${idx + 1}`}
                                 fill

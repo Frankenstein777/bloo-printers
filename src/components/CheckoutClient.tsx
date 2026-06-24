@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
+import DesignImage from './DesignImage'
 import Link from 'next/link'
 import PaystackCheckout from './PaystackCheckout'
 import DesignConfigurator from './DesignConfigurator'
@@ -70,12 +70,12 @@ export default function CheckoutClient({ design, prices, userEmail, isSubscriber
 
     return (
         <div className="min-h-screen bg-neutral-900 text-white pt-24 pb-12 px-4 sm:px-6 lg:px-8 font-mono">
-            <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-start">
+            <div className="max-w-screen-2xl 2xl:max-w-[95rem] w-full mx-auto grid lg:grid-cols-2 gap-12 items-start">
 
                 {/* Visuals & Config */}
                 <div className="space-y-8">
                     <div className="relative aspect-video w-full rounded-xl overflow-hidden border-2 border-[#00f2ff]/30 shadow-[0_0_30px_rgba(0,242,255,0.1)]">
-                        <Image
+                        <DesignImage
                             src={design.previewImages[0]}
                             alt={design.title}
                             fill

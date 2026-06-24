@@ -34,7 +34,7 @@ export default function DummyPaymentForm({ amount, onSuccess }: DummyPaymentForm
     return (
         <form onSubmit={handleSubmit} className="space-y-4 p-6 bg-gray-900 border border-gray-800 rounded-xl relative overflow-hidden">
             {/* Glossy Overlay */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-[#00f2ff]/5 rounded-full blur-3xl pointer-events-none -mr-32 -mt-32"></div>
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none -mr-32 -mt-32"></div>
 
             <h3 className="text-xl font-mono text-[#00f2ff] mb-4 uppercase flex items-center gap-2">
                 <span className="w-2 h-2 bg-[#00f2ff] rounded-full animate-pulse"></span>

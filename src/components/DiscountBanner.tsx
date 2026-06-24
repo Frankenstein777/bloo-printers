@@ -46,26 +46,26 @@ export default function DiscountBanner({ label, percentageMin, percentageMax, ex
         : `UP TO ${percentageMax}% OFF`
 
     return (
-        <div className="w-full bg-gradient-to-r from-[#003d40] via-[#005e63] to-[#003d40] border-b border-[#00f2ff]/30 py-2 px-4 flex items-center justify-center gap-3 text-sm font-mono relative overflow-hidden z-[60]">
+        <div className="w-full bg-gradient-to-r from-brand-navy via-brand-teal/80 to-brand-navy border-b border-brand-teal/20 py-2.5 px-4 flex items-center justify-center gap-3 text-sm font-sans relative overflow-hidden z-[60] text-white">
             {/* Animated shimmer */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#00f2ff]/10 to-transparent animate-[shimmer_2.5s_infinite] pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-brand-teal/15 to-transparent animate-[shimmer_2.5s_infinite] pointer-events-none" />
 
             <span className="relative flex items-center gap-2">
-                <span className="text-[#00f2ff] animate-pulse text-base">🏷️</span>
-                <span className="font-bold text-[#00f2ff] uppercase tracking-widest">{label}</span>
+                <span className="text-brand-teal animate-pulse text-base">🏷️</span>
+                <span className="font-bold uppercase tracking-wider">{label}</span>
                 <span className="text-white/60">—</span>
-                <span className="bg-[#00f2ff] text-black font-black px-2 py-0.5 rounded text-xs tracking-widest uppercase">
+                <span className="bg-brand-teal text-white font-extrabold px-2.5 py-0.5 rounded text-xs tracking-wider uppercase shadow-sm">
                     Massive Discounts • {rangeLabel}
                 </span>
-                <span className="text-white/60 text-xs">on select designs</span>
+                <span className="text-white/80 text-xs">on select designs</span>
             </span>
 
             {expiresAt && timeLeft && (
-                <span className="relative flex items-center gap-1.5 ml-2 border border-[#00f2ff]/50 bg-black/30 rounded px-2.5 py-0.5">
-                    <svg className="w-3 h-3 text-[#00f2ff] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <span className="relative flex items-center gap-1.5 ml-2 border border-brand-teal/30 bg-black/40 rounded px-2.5 py-0.5">
+                    <svg className="w-3 h-3 text-brand-teal shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span className="text-[#00f2ff] font-black tabular-nums text-xs">{timeLeft}</span>
+                    <span className="text-brand-teal font-extrabold tabular-nums text-xs">{timeLeft}</span>
                 </span>
             )}
         </div>

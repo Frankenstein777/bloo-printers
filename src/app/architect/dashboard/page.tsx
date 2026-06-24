@@ -38,41 +38,58 @@ export default async function ArchitectDashboardPage({ searchParams }: { searchP
   })
 
   return (
-    <div className="min-h-screen py-12 px-4 bg-transparent transition-colors">
-      <div className="max-w-6xl mx-auto space-y-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Architect Dashboard</h1>
+    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 bg-transparent transition-colors font-sans">
+      <div className="max-w-screen-2xl 2xl:max-w-[95rem] w-full mx-auto space-y-8">
+        
+        {/* Header Block (Midnight Navy bg) */}
+        <div className="bg-brand-navy text-white rounded-2xl p-6 sm:p-8 shadow-lg border border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="text-center md:text-left">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white">Architect Partner Portal</h1>
+            <p className="text-slate-400 text-sm mt-1">Manage blueprint catalog portfolio uploads and approved earnings.</p>
+          </div>
+          {hasPaid && (
+            <Link href="/architect/upload" className="bg-brand-teal hover:bg-brand-teal/90 text-white font-bold py-2.5 px-6 rounded-lg text-sm inline-flex items-center gap-2 shadow-sm transition-all cursor-none">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Upload Design
+            </Link>
+          )}
+        </div>
 
         {!hasPaid ? (
-          <div className="p-8 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl max-w-2xl mx-auto text-center">
-            <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Unlock Architect Portal</h2>
-            <p className="text-gray-600 dark:text-gray-300 mb-8 border border-indigo-100 dark:border-indigo-900 bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-lg">
+          <div className="p-8 bg-card rounded-2xl border border-border shadow-sm max-w-2xl mx-auto text-center space-y-6">
+            <h2 className="text-2xl font-bold text-brand-charcoal dark:text-white">Unlock Architect Portal</h2>
+            <p className="text-slate-600 dark:text-slate-300 text-sm border border-brand-teal/20 bg-brand-teal/5 p-4 rounded-xl leading-relaxed">
               To start uploading designs to the <span className="font-bold">Octoplans Configurator</span>, an initial registration fee of ₦25,000 is required.
               <br/><br/>
-              <span className="font-bold text-[#00a3ad] dark:text-[#00f2ff]">🎉 PROMO ALERT:</span> As an early adopter, this fee is strictly waived until <strong className="text-blue-500">July 1st, 2026</strong>!
+              <span className="font-bold text-brand-teal">🎉 PROMO ALERT:</span> As an early adopter, this fee is strictly waived until <strong className="text-brand-teal font-extrabold">July 1st, 2026</strong>!
             </p>
             <ArchitectDashboardClient email={session.user.email!} />
           </div>
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="p-8 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow flex flex-col justify-center">
-                <h3 className="text-sm uppercase tracking-widest font-bold text-gray-500 dark:text-gray-400">Total Approved Earnings</h3>
-                <p className="text-5xl font-black text-[#00a3ad] dark:text-[#00f2ff] mt-4 font-mono">
+              {/* Earnings (Revenue Green) */}
+              <div className="p-8 bg-card rounded-2xl border border-border shadow-sm flex flex-col justify-center">
+                <h3 className="text-xs uppercase tracking-wider font-bold text-slate-400 dark:text-slate-500">Total Approved Earnings</h3>
+                <p className="text-5xl font-black text-brand-success mt-4 font-mono">
                   ₦{totalEarnings.toLocaleString()}
                 </p>
-                <p className="text-xs font-mono text-gray-400 mt-2">octoplans platform fee (15%) deducted</p>
+                <p className="text-xs text-slate-400 dark:text-slate-500 mt-2 font-medium">octoplans platform fee (15%) deducted</p>
               </div>
-              <div className="p-8 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow flex flex-col justify-center items-center text-center">
-                <p className="text-gray-600 dark:text-gray-300 mb-6 font-medium">
+
+              {/* Upload CTA block */}
+              <div className="p-8 bg-card rounded-2xl border border-border shadow-sm flex flex-col justify-center items-center text-center">
+                <p className="text-slate-600 dark:text-slate-300 mb-6 font-medium">
                   Ready to add a new design to the catalog?
                 </p>
-                <Link href="/architect/upload" className="bg-[#00a3ad] hover:bg-[#00f2ff] hover:text-black hover:shadow-[0_0_20px_rgba(0,242,255,0.5)] transition-all text-black font-bold py-3 px-8 rounded-md uppercase tracking-widest text-sm inline-flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <Link href="/architect/upload" className="bg-brand-teal hover:bg-brand-teal/90 text-white font-bold py-3 px-8 rounded-lg text-sm inline-flex items-center gap-2 shadow-sm transition-all cursor-none">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                   Upload New Design
                 </Link>
               </div>
             </div>
 
+            {/* Payout forms */}
             <div className="mt-8">
                <PayoutFlowClient 
                  defaultBankName={userPostVerify?.bankName || ''}
@@ -83,41 +100,42 @@ export default async function ArchitectDashboardPage({ searchParams }: { searchP
                />
             </div>
 
-            <div className="mt-12 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-lg">
-              <div className="px-6 py-5 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">My Active Designs</h2>
+            {/* Portfolio listing */}
+            <div className="mt-12 bg-card rounded-2xl border border-border overflow-hidden shadow-sm">
+              <div className="px-6 py-5 border-b border-border bg-slate-50 dark:bg-slate-900/50">
+                <h2 className="text-lg font-bold text-brand-charcoal dark:text-white">My Active Designs</h2>
               </div>
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                  <thead className="bg-gray-50 dark:bg-gray-900/50">
+                <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
+                  <thead className="bg-slate-50 dark:bg-slate-900/30">
                     <tr>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Design Title</th>
-                      <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Sales Count</th>
-                      <th className="px-6 py-4 text-right text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Action</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Design Title</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Sales Count</th>
+                      <th className="px-6 py-4 text-right text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
                     {designs.map(d => (
-                      <tr key={d.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                         <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-900 dark:text-white font-medium">{d.title}</td>
-                         <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300 font-mono">
-                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                      <tr key={d.id} className="hover:bg-slate-50 dark:hover:bg-slate-900/25 transition-colors">
+                         <td className="px-6 py-5 whitespace-nowrap text-sm text-brand-charcoal dark:text-white font-semibold">{d.title}</td>
+                         <td className="px-6 py-5 whitespace-nowrap text-sm text-slate-600 dark:text-slate-400 font-mono">
+                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-teal/10 text-brand-teal">
                              {d.purchases.length} Sales
                            </span>
                          </td>
                          <td className="px-6 py-5 whitespace-nowrap text-right text-sm">
-                           <Link href={`/designs/${d.id}`} className="text-[#00a3ad] dark:text-[#00f2ff] hover:underline font-medium">View Portfolio &rarr;</Link>
+                           <Link href={`/designs/${d.id}`} className="text-brand-teal hover:underline font-semibold cursor-none">View Portfolio &rarr;</Link>
                          </td>
                       </tr>
                     ))}
                     {designs.length === 0 && (
                       <tr>
-                        <td colSpan={3} className="px-6 py-12 text-center text-sm text-gray-500">
-                          <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <td colSpan={3} className="px-6 py-12 text-center text-sm text-slate-400">
+                          <svg className="mx-auto h-12 w-12 text-slate-300 dark:text-slate-700 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path vectorEffect="non-scaling-stroke" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
                           </svg>
-                          <span className="block font-medium text-gray-900 dark:text-white mb-1">No designs yet</span>
-                          <span className="block text-gray-500">Get started by uploading your first blueprint.</span>
+                          <span className="block font-semibold text-brand-charcoal dark:text-white mb-1">No designs uploaded yet</span>
+                          <span className="block text-slate-500 dark:text-slate-400">Get started by uploading your first blueprint.</span>
                         </td>
                       </tr>
                     )}

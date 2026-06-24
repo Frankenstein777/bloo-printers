@@ -85,17 +85,17 @@ export default function SearchBar() {
     ].filter(Boolean).length
 
     return (
-        <div ref={panelRef} className="w-full max-w-3xl mx-auto relative">
+        <div ref={panelRef} className="w-full max-w-3xl mx-auto relative font-sans">
             {/* Search + Filter toggle row */}
             <div className="flex gap-2 items-stretch">
                 {/* Search */}
                 <div className="relative flex-1">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <MagnifyingGlassIcon className="h-5 w-5 text-[#00f2ff]" />
+                        <MagnifyingGlassIcon className="h-5 w-5 text-brand-teal" />
                     </div>
                     <input
-                        className="block w-full h-full pl-10 pr-3 py-3 border-2 border-transparent border-b-[#00a3ad] dark:border-b-[#00f2ff] bg-gray-50 dark:bg-gray-900/50 backdrop-blur-md placeholder-gray-500 focus:outline-none focus:border-[#00f2ff] focus:shadow-[0_0_15px_rgba(0,242,255,0.2)] transition-all duration-300 font-mono text-sm text-gray-900 dark:text-[#f8fafc]"
-                        placeholder="SEARCH_DESIGNS..."
+                        className="block w-full h-full pl-10 pr-3 py-3 border border-slate-200 dark:border-slate-800 border-b-brand-teal dark:border-b-brand-teal bg-slate-50 dark:bg-slate-900/50 placeholder-slate-400 focus:outline-none focus:border-brand-teal focus:shadow-[0_0_15px_rgba(14,154,167,0.15)] transition-all duration-300 text-sm text-slate-800 dark:text-slate-200 rounded-lg cursor-none"
+                        placeholder="Search blueprints..."
                         onChange={(e) => handleSearch(e.target.value)}
                         defaultValue={searchParams.get('q')?.toString()}
                     />
@@ -104,17 +104,17 @@ export default function SearchBar() {
                 {/* Filter button */}
                 <button
                     onClick={() => setFiltersOpen(o => !o)}
-                    className={`relative flex items-center gap-2 px-4 py-3 border-2 font-mono text-sm uppercase tracking-widest transition-all duration-200
+                    className={`relative flex items-center gap-2 px-4 py-3 border rounded-lg text-sm font-semibold transition-all duration-200 cursor-none
                         ${filtersOpen || activeCount > 0
-                            ? 'border-[#00f2ff] text-[#00f2ff] bg-[#00f2ff]/10 shadow-[0_0_12px_rgba(0,242,255,0.25)]'
-                            : 'border-gray-600 dark:border-gray-700 text-gray-400 hover:border-[#00f2ff]/50 hover:text-[#00f2ff]'
+                            ? 'border-brand-teal text-brand-teal bg-brand-teal/10 shadow-[0_0_12px_rgba(14,154,167,0.2)]'
+                            : 'border-slate-300 dark:border-slate-800 text-slate-500 hover:border-brand-teal hover:text-brand-teal'
                         }`}
                     aria-label="Toggle filters"
                 >
                     <AdjustmentsHorizontalIcon className="h-4 w-4 flex-none" />
-                    <span className="hidden sm:inline">Filter</span>
+                    <span className="hidden sm:inline">Filters</span>
                     {activeCount > 0 && (
-                        <span className="w-5 h-5 rounded-full bg-[#00f2ff] text-black text-[10px] font-bold flex items-center justify-center">
+                        <span className="w-5 h-5 rounded-full bg-brand-teal text-white text-[10px] font-bold flex items-center justify-center">
                             {activeCount}
                         </span>
                     )}
@@ -123,16 +123,16 @@ export default function SearchBar() {
 
             {/* Collapsible filter panel */}
             {filtersOpen && (
-                <div className="absolute top-full left-0 right-0 z-50 mt-1 border border-[#00f2ff]/30 bg-neutral-950/95 backdrop-blur-xl shadow-[0_0_40px_rgba(0,242,255,0.12)] p-5 animate-in slide-in-from-top-2 fade-in duration-200">
+                <div className="absolute top-full left-0 right-0 z-50 mt-2 border border-slate-200 dark:border-slate-800 bg-white dark:bg-brand-navy shadow-2xl p-6 rounded-xl animate-in slide-in-from-top-2 fade-in duration-200">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
                         {/* Match mode */}
                         <div className="sm:col-span-2 lg:col-span-1">
-                            <label className="block text-xs font-mono text-[#00f2ff]/60 mb-2 uppercase tracking-widest">Match Mode</label>
+                            <label className="block text-xs font-bold text-slate-400 dark:text-slate-450 mb-2 uppercase tracking-wider">Match Mode</label>
                             <div className="flex gap-2">
                                 {['min', 'exact'].map(mode => (
                                     <button key={mode} onClick={() => set('matchMode', mode)}
-                                        className={`flex-1 py-1.5 text-xs font-mono uppercase border transition-all ${filters.matchMode === mode ? 'border-[#00f2ff] text-[#00f2ff] bg-[#00f2ff]/10' : 'border-gray-700 text-gray-400 hover:border-gray-500'}`}>
+                                        className={`flex-1 py-2 text-xs font-medium uppercase border rounded-md transition-all cursor-none ${filters.matchMode === mode ? 'border-brand-teal text-brand-teal bg-brand-teal/10 font-bold' : 'border-slate-300 dark:border-slate-800 text-slate-500 hover:border-brand-teal hover:text-brand-teal'}`}>
                                         {mode}
                                     </button>
                                 ))}
@@ -141,42 +141,42 @@ export default function SearchBar() {
 
                         {/* Bedrooms */}
                         <div>
-                            <label className="block text-xs font-mono text-[#00f2ff]/60 mb-2 uppercase tracking-widest">
-                                {filters.matchMode === 'exact' ? 'Exact' : 'Min'} Bedrooms: <span className="text-[#00f2ff]">{filters.minBedrooms}</span>
+                            <label className="block text-xs font-bold text-slate-400 dark:text-slate-450 mb-2 uppercase tracking-wider">
+                                {filters.matchMode === 'exact' ? 'Exact' : 'Min'} Bedrooms: <span className="text-brand-teal font-extrabold">{filters.minBedrooms}</span>
                             </label>
                             <input type="range" min="0" max="10" value={filters.minBedrooms}
                                 onChange={e => set('minBedrooms', e.target.value)}
-                                className="w-full h-1 bg-gray-700 rounded appearance-none cursor-pointer accent-[#00f2ff]" />
+                                className="w-full h-1 bg-slate-200 dark:bg-slate-800 rounded appearance-none cursor-none accent-brand-teal" />
                         </div>
 
                         {/* Floors */}
                         <div>
-                            <label className="block text-xs font-mono text-[#00f2ff]/60 mb-2 uppercase tracking-widest">
-                                {filters.matchMode === 'exact' ? 'Exact' : 'Min'} Floors: <span className="text-[#00f2ff]">{filters.minFloors}</span>
+                            <label className="block text-xs font-bold text-slate-400 dark:text-slate-450 mb-2 uppercase tracking-wider">
+                                {filters.matchMode === 'exact' ? 'Exact' : 'Min'} Floors: <span className="text-brand-teal font-extrabold">{filters.minFloors}</span>
                             </label>
                             <input type="range" min="0" max="5" value={filters.minFloors}
                                 onChange={e => set('minFloors', e.target.value)}
-                                className="w-full h-1 bg-gray-700 rounded appearance-none cursor-pointer accent-[#00f2ff]" />
+                                className="w-full h-1 bg-slate-200 dark:bg-slate-800 rounded appearance-none cursor-none accent-brand-teal" />
                         </div>
 
                         {/* Area */}
                         <div>
-                            <label className="block text-xs font-mono text-[#00f2ff]/60 mb-2 uppercase tracking-widest">Land Area (sqm)</label>
+                            <label className="block text-xs font-bold text-slate-400 dark:text-slate-450 mb-2 uppercase tracking-wider">Land Area (sqm)</label>
                             <div className="flex gap-2">
                                 <input type="number" placeholder="Min" value={filters.minArea} onChange={e => set('minArea', e.target.value)}
-                                    className="w-full bg-gray-900 border border-gray-700 focus:border-[#00f2ff] outline-none p-2 text-xs font-mono text-gray-200" />
+                                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 focus:border-brand-teal outline-none p-2 text-xs text-slate-800 dark:text-slate-200 rounded" />
                                 <input type="number" placeholder="Max" value={filters.maxArea} onChange={e => set('maxArea', e.target.value)}
-                                    className="w-full bg-gray-900 border border-gray-700 focus:border-[#00f2ff] outline-none p-2 text-xs font-mono text-gray-200" />
+                                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 focus:border-brand-teal outline-none p-2 text-xs text-slate-800 dark:text-slate-200 rounded" />
                             </div>
                         </div>
 
                         {/* Features */}
                         <div>
-                            <label className="block text-xs font-mono text-[#00f2ff]/60 mb-2 uppercase tracking-widest">Must Have</label>
+                            <label className="block text-xs font-bold text-slate-400 dark:text-slate-450 mb-2 uppercase tracking-wider">Must Have</label>
                             <div className="flex flex-wrap gap-2">
                                 {[{ key: 'hasPenthouse', label: 'Penthouse' }, { key: 'hasBQ', label: 'Boys Quarters' }].map(f => (
                                     <button key={f.key} onClick={() => set(f.key, !(filters as any)[f.key])}
-                                        className={`px-3 py-1 text-xs font-mono border transition-all ${(filters as any)[f.key] ? 'border-[#00f2ff] text-[#00f2ff] bg-[#00f2ff]/10' : 'border-gray-700 text-gray-400'}`}>
+                                        className={`px-3 py-1.5 text-xs border rounded-full transition-all cursor-none ${(filters as any)[f.key] ? 'border-brand-teal text-brand-teal bg-brand-teal/10 font-semibold' : 'border-slate-300 dark:border-slate-800 text-slate-500 hover:border-brand-teal'}`}>
                                         {f.label}
                                     </button>
                                 ))}
@@ -185,11 +185,11 @@ export default function SearchBar() {
 
                         {/* Software */}
                         <div>
-                            <label className="block text-xs font-mono text-[#00f2ff]/60 mb-2 uppercase tracking-widest">Software Format</label>
+                            <label className="block text-xs font-bold text-slate-400 dark:text-slate-450 mb-2 uppercase tracking-wider">Software Format</label>
                             <div className="flex flex-wrap gap-2">
                                 {['REVIT', 'ARCHICAD', 'SKETCHUP', 'AUTOCAD', 'PDF'].map(sw => (
                                     <button key={sw} onClick={() => set(`sw_${sw}`, !(filters as any)[`sw_${sw}`])}
-                                        className={`px-3 py-1 text-xs font-mono border transition-all ${(filters as any)[`sw_${sw}`] ? 'border-[#00f2ff] text-[#00f2ff] bg-[#00f2ff]/10' : 'border-gray-700 text-gray-400'}`}>
+                                        className={`px-2.5 py-1 text-xs border rounded transition-all cursor-none ${(filters as any)[`sw_${sw}`] ? 'border-brand-teal text-brand-teal bg-brand-teal/10 font-semibold' : 'border-slate-300 dark:border-slate-800 text-slate-500 hover:border-brand-teal'}`}>
                                         {sw}
                                     </button>
                                 ))}
@@ -198,18 +198,18 @@ export default function SearchBar() {
                     </div>
 
                     {/* Action row */}
-                    <div className="flex gap-3 mt-5 pt-4 border-t border-[#00f2ff]/10">
+                    <div className="flex gap-3 mt-6 pt-4 border-t border-slate-200 dark:border-slate-800">
                         <button onClick={applyFilters}
-                            className="flex-1 py-2 text-xs font-mono uppercase tracking-widest border-2 border-[#00f2ff] text-[#00f2ff] hover:bg-[#00f2ff] hover:text-black transition-all duration-200">
+                            className="flex-1 py-2.5 text-xs font-bold uppercase tracking-wider bg-brand-teal hover:bg-brand-teal/90 text-white rounded transition-all duration-200 cursor-none">
                             Apply Filters
                         </button>
                         <button onClick={clearFilters}
-                            className="px-4 py-2 text-xs font-mono uppercase tracking-widest border border-gray-700 text-gray-400 hover:border-red-500 hover:text-red-400 transition-all duration-200">
+                            className="px-5 py-2.5 text-xs font-bold uppercase tracking-wider border border-slate-300 dark:border-slate-800 text-slate-500 hover:border-red-500 hover:text-red-500 rounded transition-all duration-200 cursor-none">
                             Clear
                         </button>
                         <button onClick={() => setFiltersOpen(false)}
-                            className="px-3 py-2 text-gray-600 hover:text-gray-300 transition-colors" aria-label="Close">
-                            <XMarkIcon className="h-4 w-4" />
+                            className="px-3 py-2 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors cursor-none" aria-label="Close">
+                            <XMarkIcon className="h-5 w-5" />
                         </button>
                     </div>
                 </div>

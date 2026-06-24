@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import Image from 'next/image'
+import DesignImage from '@/components/DesignImage'
 import { WatermarkOverlay } from './WatermarkOverlay'
 
 interface ProtectedImageProps {
@@ -14,18 +14,16 @@ interface ProtectedImageProps {
 export function ProtectedImage({ src, alt, showBlur, objectFit = 'cover' }: ProtectedImageProps) {
     return (
         <div
-            className="w-full h-full relative select-none"
+            className="w-full h-full relative select-none animate-in fade-in duration-300"
             onContextMenu={(e) => e.preventDefault()}
         >
             <WatermarkOverlay />
-            <Image
+            <DesignImage
                 src={src}
                 alt={alt}
                 fill
-                unoptimized
                 className={`pointer-events-none select-none ${showBlur ? 'blur-md' : ''}`}
                 style={{ objectFit }}
-                draggable={false}
             />
             {showBlur && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-30">

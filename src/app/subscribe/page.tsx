@@ -51,7 +51,7 @@ export default async function SubscribePage() {
                     {/* PREMIUM TIER */}
                     <div className="bg-black border-2 border-[#00f2ff] p-8 rounded-2xl shadow-[0_0_30px_rgba(0,242,255,0.2)] relative overflow-hidden">
                         {/* Glow effect */}
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-[#00f2ff] blur-[100px] opacity-30 rounded-full" />
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-white blur-[100px] opacity-30 rounded-full" />
                         
                         <div className="bg-[#00f2ff] text-black text-xs font-black uppercase tracking-widest px-3 py-1 inline-block rounded mb-4">Recommended</div>
                         <h2 className="text-2xl font-black font-mono text-white uppercase mb-2">Premium Member</h2>

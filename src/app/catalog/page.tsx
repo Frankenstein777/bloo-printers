@@ -140,14 +140,14 @@ export default async function CatalogPage({
     const activeDiscount = await getActiveDiscount()
 
     return (
-        <div className="min-h-screen pt-20 pb-20 px-4 sm:px-6 lg:px-8 relative z-10 pointer-events-auto">
-            <div className="max-w-screen-2xl mx-auto">
+        <div className="min-h-screen pt-24 pb-24 px-4 sm:px-6 lg:px-8 relative z-10 pointer-events-auto font-sans">
+            <div className="max-w-screen-2xl 2xl:max-w-[95rem] w-full mx-auto">
                 <div className="text-center mb-10">
-                    <h1 className="text-4xl font-bold font-mono tracking-tight text-gray-900 dark:text-white sm:text-5xl md:text-6xl mb-4">
-                        <span className="text-[#00a3ad] dark:text-[#00f2ff]">CATALOG</span>_BROWSER
+                    <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-brand-charcoal dark:text-white mb-3">
+                        Catalog <span className="text-brand-teal">Browser</span>
                     </h1>
-                    <p className="mt-3 max-w-md mx-auto text-base text-gray-500 dark:text-gray-300 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl font-mono">
-                        Explore our repository of futuristic blueprints.
+                    <p className="mt-2 max-w-md mx-auto text-sm sm:text-base text-slate-500 dark:text-slate-400 font-light">
+                        Explore our repository of verified architectural blueprint models.
                     </p>
                 </div>
 
@@ -158,21 +158,21 @@ export default async function CatalogPage({
 
                 {/* Results count */}
                 {totalDesigns > 0 && (
-                    <div className="flex items-center justify-between mb-4">
-                        <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">
-                            SHOWING <span className="text-[#00f2ff]">{(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, totalDesigns)}</span> OF <span className="text-[#00f2ff]">{totalDesigns}</span> DESIGNS
+                    <div className="flex items-center justify-between mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                            SHOWING <span className="text-brand-teal font-semibold">{(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, totalDesigns)}</span> OF <span className="text-brand-teal font-semibold">{totalDesigns}</span> DESIGNS
                         </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">
-                            PAGE <span className="text-[#00f2ff]">{safePage}</span> / {totalPages}
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                            PAGE <span className="text-brand-teal font-semibold">{safePage}</span> / {totalPages}
                         </p>
                     </div>
                 )}
 
                 {/* Results Grid */}
                 {designs.length === 0 ? (
-                    <div className="text-center py-20 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">
-                        <p className="text-xl text-gray-500 font-mono">NO_DATA_FOUND</p>
-                        <p className="text-sm text-gray-400 mt-2">Try adjusting your filters or search terms.</p>
+                    <div className="text-center py-20 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-300 dark:border-slate-800">
+                        <p className="text-xl text-slate-400 font-medium">No Blueprints Found</p>
+                        <p className="text-sm text-slate-500 mt-2">Try adjusting your filters or search terms.</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 xl:gap-4">
@@ -215,13 +215,13 @@ export default async function CatalogPage({
                         {safePage > 1 ? (
                             <Link
                                 href={buildPageUrl(safePage - 1)}
-                                className="flex items-center gap-2 px-5 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-mono text-sm uppercase tracking-wide hover:bg-[#00f2ff]/10 hover:text-[#00f2ff] border border-gray-200 dark:border-gray-700 hover:border-[#00f2ff] transition-all"
+                                className="flex items-center gap-2 px-5 py-2.5 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-sm uppercase tracking-wide hover:bg-brand-teal/10 hover:text-brand-teal border border-slate-200 dark:border-slate-800 hover:border-brand-teal transition-all cursor-none"
                             >
                                 <ChevronLeftIcon className="h-4 w-4" />
                                 Prev
                             </Link>
                         ) : (
-                            <span className="flex items-center gap-2 px-5 py-2.5 font-mono text-sm uppercase tracking-wide opacity-30 cursor-not-allowed border border-gray-200 dark:border-gray-700">
+                            <span className="flex items-center gap-2 px-5 py-2.5 text-sm uppercase tracking-wide opacity-30 cursor-not-allowed border border-slate-200 dark:border-slate-800">
                                 <ChevronLeftIcon className="h-4 w-4" />
                                 Prev
                             </span>
@@ -237,15 +237,15 @@ export default async function CatalogPage({
                                 }, [])
                                 .map((p, idx) =>
                                     p === '...' ? (
-                                        <span key={`ellipsis-${idx}`} className="px-2 text-gray-400 font-mono text-sm">…</span>
+                                        <span key={`ellipsis-${idx}`} className="px-2 text-slate-400 text-sm">…</span>
                                     ) : (
                                         <Link
                                             key={p}
                                             href={buildPageUrl(p as number)}
-                                            className={`w-9 h-9 flex items-center justify-center font-mono text-sm border transition-all ${
+                                            className={`w-9 h-9 flex items-center justify-center text-sm border transition-all cursor-none ${
                                                 p === safePage
-                                                    ? 'bg-[#00f2ff] text-black border-[#00f2ff] font-bold shadow-[0_0_12px_rgba(0,242,255,0.4)]'
-                                                    : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-[#00f2ff] hover:text-[#00f2ff]'
+                                                    ? 'bg-brand-teal text-white border-brand-teal font-bold shadow-[0_0_12px_rgba(14,154,167,0.4)]'
+                                                    : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-brand-teal hover:text-brand-teal'
                                             }`}
                                         >
                                             {p}
@@ -257,13 +257,13 @@ export default async function CatalogPage({
                         {safePage < totalPages ? (
                             <Link
                                 href={buildPageUrl(safePage + 1)}
-                                className="flex items-center gap-2 px-5 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-mono text-sm uppercase tracking-wide hover:bg-[#00f2ff]/10 hover:text-[#00f2ff] border border-gray-200 dark:border-gray-700 hover:border-[#00f2ff] transition-all"
+                                className="flex items-center gap-2 px-5 py-2.5 bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-sm uppercase tracking-wide hover:bg-brand-teal/10 hover:text-brand-teal border border-slate-200 dark:border-slate-800 hover:border-brand-teal transition-all cursor-none"
                             >
                                 Next
                                 <ChevronRightIcon className="h-4 w-4" />
                             </Link>
                         ) : (
-                            <span className="flex items-center gap-2 px-5 py-2.5 font-mono text-sm uppercase tracking-wide opacity-30 cursor-not-allowed border border-gray-200 dark:border-gray-700">
+                            <span className="flex items-center gap-2 px-5 py-2.5 text-sm uppercase tracking-wide opacity-30 cursor-not-allowed border border-slate-200 dark:border-slate-800">
                                 Next
                                 <ChevronRightIcon className="h-4 w-4" />
                             </span>

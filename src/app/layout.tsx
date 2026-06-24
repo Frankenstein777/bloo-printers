@@ -1,9 +1,8 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Poppins, Lora } from 'next/font/google'
 import './globals.css'
 import Navbar from '@/components/Navbar'
 import { ThemeProvider } from "@/components/theme-provider"
-import { AquariumBackground } from "@/components/aquarium-background"
 import CustomCursor from "@/components/CustomCursor"
 import { GlobalProtection } from "@/components/GlobalProtection"
 import AmbientAudio from '@/components/AmbientAudio'
@@ -11,7 +10,18 @@ import AnnouncementBar from '@/components/AnnouncementBar'
 import { getActiveAnnouncements } from '@/app/actions'
 import { getSession } from '@/lib/auth'
 
-const inter = Inter({ subsets: ['latin'] })
+const poppins = Poppins({
+    subsets: ['latin'],
+    weight: ['300', '400', '500', '600', '700', '800', '900'],
+    variable: '--font-poppins',
+})
+
+const lora = Lora({
+    subsets: ['latin'],
+    weight: ['400', '500', '600', '700'],
+    style: ['normal', 'italic'],
+    variable: '--font-lora',
+})
 
 export const metadata: Metadata = {
     title: 'Octoplans - Architectural Design Marketplace',
@@ -19,10 +29,10 @@ export const metadata: Metadata = {
 }
 
 import { Providers } from "@/components/providers"
-
 import GuidedChatbot from "@/components/GuidedChatbot"
 import { PushNotificationProvider } from '@/components/PushNotificationProvider'
 import Footer from '@/components/Footer'
+import MobileBottomNav from '@/components/MobileBottomNav'
 
 export default async function RootLayout({
     children,
@@ -37,17 +47,15 @@ export default async function RootLayout({
 
     return (
         <html lang="en" suppressHydrationWarning>
-            <body className={`${inter.className} antialiased min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 overflow-x-hidden selection:bg-[#00f2ff]/30`}>
+            <body className={`${poppins.variable} ${lora.variable} font-sans antialiased min-h-screen flex flex-col bg-background text-foreground overflow-x-hidden selection:bg-[#00f2ff]/30`}>
                 <Providers>
                     <PushNotificationProvider>
                         <ThemeProvider
                             attribute="class"
-                            defaultTheme="dark"
-                            forcedTheme="dark"
-                            enableSystem={false}
+                            defaultTheme="light"
+                            enableSystem={true}
                             disableTransitionOnChange
                         >
-                            <AquariumBackground />
                             <CustomCursor />
                             <GlobalProtection />
                             <AmbientAudio />
@@ -59,6 +67,7 @@ export default async function RootLayout({
                             <main className="pt-16 flex-grow">
                                 {children}
                             </main>
+                            <MobileBottomNav />
                             <Footer />
                         </ThemeProvider>
                     </PushNotificationProvider>
@@ -67,3 +76,4 @@ export default async function RootLayout({
         </html>
     )
 }
+

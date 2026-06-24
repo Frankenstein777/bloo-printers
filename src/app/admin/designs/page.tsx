@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { getSession } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import SearchInput from '@/components/admin/SearchInput'
+import DesignImage from '@/components/DesignImage'
 
 interface PageProps {
     searchParams: Promise<{ q?: string }>
@@ -59,17 +60,12 @@ export default async function AdminDesignsPage({ searchParams }: PageProps) {
                         >
                             {/* Image Preview */}
                             <div className="aspect-[4/3] bg-slate-100 dark:bg-slate-800 relative overflow-hidden">
-                                {design.previewImages?.[0] ? (
-                                    <img
-                                        src={design.previewImages[0]}
-                                        alt={design.title}
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-slate-400">
-                                        No Image
-                                    </div>
-                                )}
+                                <DesignImage
+                                    src={design.previewImages?.[0]}
+                                    alt={design.title}
+                                    fill
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                />
 
                                 {design.isFeatured && (
                                     <div className="absolute top-2 right-2 bg-amber-400 text-amber-900 text-[10px] font-bold px-2 py-1 rounded-full shadow-sm">
